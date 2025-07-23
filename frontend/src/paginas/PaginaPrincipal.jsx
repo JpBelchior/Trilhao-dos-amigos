@@ -13,7 +13,7 @@ import {
   Users,
   UserPlus,
 } from "lucide-react";
-import TrilhaoMap from "../components/paginaPrincipal/mapa";
+import TrilhaoMap from "../componentes/paginaPrincipal/mapa";
 
 const TrilhaoHomepage = () => {
   const [currentPhoto, setCurrentPhoto] = useState(0);
