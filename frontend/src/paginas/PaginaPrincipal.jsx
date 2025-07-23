@@ -17,7 +17,6 @@ import TrilhaoMap from "../componentes/paginaPrincipal/mapa";
 
 const TrilhaoHomepage = () => {
   const [currentPhoto, setCurrentPhoto] = useState(0);
-  const [currentPage, setCurrentPage] = useState("inicio");
   const navigate = useNavigate();
 
   // Fotos das edições anteriores (placeholder - você substituirá pelas reais)
@@ -70,11 +69,7 @@ const TrilhaoHomepage = () => {
             <div className="flex space-x-8">
               <button
                 onClick={() => navigate("/")}
-                className={`flex items-center px-4 py-2 rounded-lg transition-all font-medium ${
-                  currentPage === "inicio"
-                    ? "bg-green-900 text-white"
-                    : "text-green-900 hover:bg-green-100"
-                }`}
+                className="flex items-center px-4 py-2 rounded-lg transition-all font-medium text-green-900 hover:bg-green-100"
               >
                 <Mountain className="mr-2" size={20} />
                 Início
@@ -82,11 +77,7 @@ const TrilhaoHomepage = () => {
 
               <button
                 onClick={() => navigate("/cadastro")}
-                className={`flex items-center px-4 py-2 rounded-lg transition-all font-medium ${
-                  currentPage === "cadastro"
-                    ? "bg-green-900 text-white"
-                    : "text-green-900 hover:bg-green-100"
-                }`}
+                className="flex items-center px-4 py-2 rounded-lg transition-all font-medium text-green-900 hover:bg-green-100"
               >
                 <UserPlus className="mr-2" size={20} />
                 Cadastro
@@ -94,11 +85,7 @@ const TrilhaoHomepage = () => {
 
               <button
                 onClick={() => navigate("/inscritos")}
-                className={`flex items-center px-4 py-2 rounded-lg transition-all font-medium ${
-                  currentPage === "inscritos"
-                    ? "bg-green-900 text-white"
-                    : "text-green-900 hover:bg-green-100"
-                }`}
+                className="flex items-center px-4 py-2 rounded-lg transition-all font-medium text-green-900 hover:bg-green-100"
               >
                 <Users className="mr-2" size={20} />
                 Inscritos
@@ -110,31 +97,35 @@ const TrilhaoHomepage = () => {
 
       {/* Spacer for fixed navbar */}
       <div className="h-16"></div>
+
       {/* Hero Section */}
       <div className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black/40 z-10"></div>
         <div className="absolute inset-0 bg-[url('/api/placeholder/1920/1080')] bg-cover bg-center"></div>
 
-        <div className="relative z-20 text-center text-white px-4">
+        <div className="relative z-20 text-center text-white px-4 max-w-4xl">
           <h1 className="text-6xl md:text-8xl font-bold mb-4 text-shadow-xl">
             TRILHÃO
           </h1>
           <h2 className="text-2xl md:text-4xl font-light mb-6">
             Itamonte - MG
           </h2>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            O maior evento de trilha off-road da Serra da Mantiqueira
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => setCurrentPage("cadastro")}
-              className="bg-orange-600 hover:bg-orange-700 px-8 py-4 rounded-full text-lg font-semibold transition-all transform hover:scale-105"
-            >
-              Inscreva-se Agora
-            </button>
-            <button className="border-2 border-white hover:bg-white hover:text-green-900 px-8 py-4 rounded-full text-lg font-semibold transition-all">
-              Ver Trajetos
-            </button>
+
+          {/* Texto instigante */}
+          <div className="text-lg md:text-xl mb-8 leading-relaxed space-y-4">
+            <p className="font-medium">
+              🏍️ Você tem coragem de enfrentar a Serra da Mantiqueira?
+            </p>
+            <p>
+              25km de trilha off-road pelos cenários mais selvagens de Minas
+              Gerais. Cachoeiras, mata atlântica, subidas técnicas e o lendário{" "}
+              <strong>Barranco dos Campeões</strong>
+              onde apenas os mais corajosos chegam ao topo.
+            </p>
+            <p className="text-orange-300 font-semibold">
+              Mais de 15 edições. Centenas de aventureiros. Uma só pergunta:
+              você está pronto?
+            </p>
           </div>
         </div>
       </div>
@@ -166,13 +157,13 @@ const TrilhaoHomepage = () => {
             {/* Controles da Galeria */}
             <button
               onClick={prevPhoto}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-green-900/80 hover:bg-green-700 text-white p-3 rounded-full transition-all"
             >
               <ChevronLeft size={24} />
             </button>
             <button
               onClick={nextPhoto}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-green-900/80 hover:bg-green-700 text-white p-3 rounded-full transition-all"
             >
               <ChevronRight size={24} />
             </button>
@@ -200,13 +191,15 @@ const TrilhaoHomepage = () => {
             Como Funcionam as Provas
           </h2>
 
-          {/* Mapa dos Trajetos */}
+          {/* Mapa dos Trajetos - Corrigido */}
           <div className="mb-16">
             <h3 className="text-2xl font-bold text-center text-green-900 mb-6">
               Trajeto das Provas
             </h3>
             <div className="max-w-4xl mx-auto">
-              <TrilhaoMap />
+              <div className="w-full h-96 rounded-xl overflow-hidden shadow-lg">
+                <TrilhaoMap />
+              </div>
             </div>
             <p className="text-center text-gray-600 mt-4 max-w-2xl mx-auto">
               Clique nos marcadores no mapa para ver detalhes de cada ponto do
@@ -214,91 +207,123 @@ const TrilhaoHomepage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            `{/* Prova 1 - Trilha */}
+          {/* Cards das Provas em Coluna */}
+          <div className="max-w-3xl mx-auto space-y-8">
+            {/* Prova 1 - Trilha */}
             <div className="bg-white rounded-xl shadow-lg p-8 transform hover:scale-105 transition-all">
               <div className="flex items-center mb-6">
-                <div className="bg-orange-600 text-white rounded-full p-3 mr-4">
-                  <Bike size={32} />
+                <div className="bg-orange-600 text-white rounded-full p-4 mr-6">
+                  <Bike size={36} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-green-900">
+                  <h3 className="text-3xl font-bold text-green-900">
                     1ª Prova - Trilha
                   </h3>
-                  <p className="text-gray-600">Percurso Técnico</p>
+                  <p className="text-gray-600 text-lg">
+                    Percurso Técnico de 25km
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center text-gray-700">
-                  <MapPin className="mr-3 text-orange-600" size={20} />
-                  <span>
-                    <strong>Largada:</strong> Praça da Matriz - Centro de
-                    Itamonte
-                  </span>
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-700">
+                    <MapPin className="mr-3 text-orange-600" size={24} />
+                    <span>
+                      <strong>Largada:</strong> Praça da Matriz - Centro de
+                      Itamonte
+                    </span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <MapPin className="mr-3 text-green-600" size={24} />
+                    <span>
+                      <strong>Chegada:</strong> Mirante da Pedra do Baú
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center text-gray-700">
-                  <MapPin className="mr-3 text-green-600" size={20} />
-                  <span>
-                    <strong>Chegada:</strong> Mirante da Pedra do Baú
-                  </span>
-                </div>
-                <div className="flex items-center text-gray-700">
-                  <Clock className="mr-3 text-blue-600" size={20} />
-                  <span>
-                    <strong>Distância:</strong> 25km de trilha off-road
-                  </span>
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="mr-3 text-blue-600" size={24} />
+                    <span>
+                      <strong>Distância:</strong> 25km de trilha off-road
+                    </span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="mr-3 text-purple-600" size={24} />
+                    <span>
+                      <strong>Largada:</strong> 10:30h
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <p className="mt-6 text-gray-600 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed text-lg">
                 Percurso desafiador pela Serra da Mantiqueira, passando por
                 cachoeiras, mata atlântica e trechos técnicos que testam a
-                habilidade do piloto.
+                habilidade e resistência do piloto em terrenos variados.
               </p>
             </div>
+
             {/* Prova 2 - Subida */}
             <div className="bg-white rounded-xl shadow-lg p-8 transform hover:scale-105 transition-all">
               <div className="flex items-center mb-6">
-                <div className="bg-red-600 text-white rounded-full p-3 mr-4">
-                  <Mountain size={32} />
+                <div className="bg-red-600 text-white rounded-full p-4 mr-6">
+                  <Mountain size={36} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-green-900">
+                  <h3 className="text-3xl font-bold text-green-900">
                     2ª Prova - Subida
                   </h3>
-                  <p className="text-gray-600">Barranco dos Campeões</p>
+                  <p className="text-gray-600 text-lg">Barranco dos Campeões</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-700">
+                    <Trophy className="mr-3 text-yellow-500" size={24} />
+                    <span>
+                      <strong>Prêmio Máximo:</strong> R$ 1.000,00
+                    </span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <Mountain className="mr-3 text-red-600" size={24} />
+                    <span>
+                      <strong>Desafio:</strong> Subir o mais alto possível
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="mr-3 text-purple-600" size={24} />
+                    <span>
+                      <strong>Horário:</strong> 15:30h
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center text-gray-700">
-                  <Trophy className="mr-3 text-yellow-500" size={20} />
-                  <span>
-                    <strong>Prêmio Máximo:</strong> R$ 1.000,00
-                  </span>
-                </div>
-                <div className="flex items-center text-gray-700">
-                  <Mountain className="mr-3 text-red-600" size={20} />
-                  <span>
-                    <strong>Desafio:</strong> Subir o mais alto possível
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-3">
-                <h4 className="font-bold text-green-900">Classificações:</h4>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <strong className="text-blue-800">🏍️ Motos Importadas</strong>
-                  <p className="text-sm text-gray-600">
-                    Honda, Yamaha, KTM, etc.
-                  </p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <strong className="text-green-800">🏍️ Motos Nacionais</strong>
-                  <p className="text-sm text-gray-600">
-                    Bros, Lander, Crosser, etc.
-                  </p>
+                <h4 className="font-bold text-green-900 text-lg">
+                  Categorias:
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <strong className="text-blue-800 text-lg">
+                      🏍️ Motos Importadas
+                    </strong>
+                    <p className="text-gray-600 mt-1">
+                      Honda, Yamaha, KTM, Husqvarna, etc.
+                    </p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <strong className="text-green-800 text-lg">
+                      🏍️ Motos Nacionais
+                    </strong>
+                    <p className="text-gray-600 mt-1">
+                      Bros, Lander, Crosser, XTZ, etc.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -467,7 +492,7 @@ const TrilhaoHomepage = () => {
           </p>
           <button
             className="bg-white text-orange-600 hover:bg-gray-100 px-10 py-4 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-lg"
-            onClick={() => setCurrentPage("cadastro")}
+            onClick={() => navigate("/cadastro")}
           >
             Fazer Inscrição
           </button>
