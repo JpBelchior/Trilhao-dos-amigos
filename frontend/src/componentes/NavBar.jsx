@@ -57,7 +57,7 @@ const Navbar = () => {
               }`}
             >
               <UserPlus className="mr-2" size={20} />
-              Cadastro
+              Cadastre-se
             </button>
 
             <button
