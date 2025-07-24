@@ -141,7 +141,7 @@ Participante.init(
     valorInscricao: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 100.0, // R$ 100,00 fixo
+      // Não tem defaultValue - será calculado dinamicamente
     },
 
     statusPagamento: {
@@ -176,6 +176,11 @@ Participante.init(
           3,
           "0"
         )}`;
+
+        // Calcular valor da inscrição dinamicamente
+        // Valor base: R$ 100 (inscrição + 1 camiseta grátis)
+        // Camisetas extras: R$ 50 cada (será adicionado quando criar as extras)
+        participante.valorInscricao = 100.0;
       },
     },
   }

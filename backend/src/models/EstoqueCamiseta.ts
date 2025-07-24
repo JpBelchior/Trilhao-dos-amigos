@@ -35,7 +35,8 @@ class EstoqueCamiseta
     tamanho: TamanhoCamiseta,
     tipo: TipoCamiseta
   ): Promise<number> {
-    const { Participante, CamisetaExtra } = require("./index"); // Import aqui para evitar circular
+    const Participante = (await import("./Participante")).default;
+    const CamisetaExtra = (await import("./CamisasExtras")).default;
 
     // Contar camisetas grátis (1 por participante)
     const camisetasGratis = await Participante.count({
