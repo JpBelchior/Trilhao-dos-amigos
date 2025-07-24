@@ -1,0 +1,38 @@
+services:
+  # Banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: trilhao_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: trilhao123
+      MYSQL_DATABASE: trilhao_db
+      MYSQL_USER: trilhao_user
+      MYSQL_PASSWORD: trilhao123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - trilhao_network
+
+  # phpMyAdmin (opcional, para visualizar o banco)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: trilhao_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: trilhao123
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - trilhao_network
+
+volumes:
+  mysql_data:
+
+networks:
+  trilhao_network:

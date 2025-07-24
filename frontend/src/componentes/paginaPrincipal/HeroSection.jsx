@@ -1,7 +1,7 @@
 // src/componentes/paginaPrincipal/HeroSection.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy } from "lucide-react";
+import { Flashlight, Signpost, Trophy, Zap } from "lucide-react";
 
 const HeroSection = ({ isVisible, scrollY }) => {
   const navigate = useNavigate();
@@ -34,11 +34,11 @@ const HeroSection = ({ isVisible, scrollY }) => {
         {/* Stats em Cards Flutuantes */}
         <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
           <div className="bg-black/40 backdrop-blur-lg border border-yellow-400/30 rounded-2xl p-4">
-            <div className="text-3xl font-black text-yellow-400">25KM</div>
+            <div className="text-3xl font-black text-yellow-400">43KM</div>
             <div className="text-sm text-gray-300">Trilha Off-Road</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg border border-green-400/30 rounded-2xl p-4">
-            <div className="text-3xl font-black text-green-400">3º</div>
+            <div className="text-3xl font-black text-green-400">9º</div>
             <div className="text-sm text-gray-300">Edição</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg border border-yellow-400/30 rounded-2xl p-4">
@@ -53,14 +53,16 @@ const HeroSection = ({ isVisible, scrollY }) => {
             VOCÊ TEM CORAGEM DE ENFRENTAR A ESSE DESAFIO?
           </p>
           <p className="text-gray-300">
-            25km de trilha pelos montes de Itamonte. Estradas de terra, e
-            vegetação que testam sua capacidade de pilotar! Além disso para os
-            mais corajosos ainda há um desafio:{" "}
-            <span className="text-green-400 font-bold">O Barranco</span> - o
-            qual ninguem alcançou o topo.
+            40km de trilha pelos montes de Itamonte. Estradas de terra, e
+            vegetação que testam sua capacidade de pilotar! Além disso, para os
+            mais corajosos, ainda há um desafio:{" "}
+            <span className="text-green-400 font-bold">O Morro do Desafio</span>{" "}
+            - o qual ninguem alcançou o topo.
           </p>
           <p className="text-yellow-300 font-bold text-xl">
-            ⚡ MAIS DE 3 EDIÇÕES • DEZENAS DE PILOTOS • NOVOS DESAFIOS TODO ANO
+            <Signpost className="inline mr-2" size={24} />8 EDIÇÕES • DEZENAS DE
+            PILOTOS • NOVOS DESAFIOS TODO ANO
+            <Signpost className="inline ml-2" size={24} />
           </p>
         </div>
       </div>

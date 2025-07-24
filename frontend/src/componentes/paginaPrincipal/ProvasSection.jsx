@@ -131,7 +131,9 @@ const ProvasSection = () => {
                     15:30H
                   </span>
                 </div>
-                <h3 className="text-4xl font-black text-white">O BARRANCO</h3>
+                <h3 className="text-4xl font-black text-white">
+                  MORRO DO DESAFIO
+                </h3>
                 <p className="text-yellow-400 text-xl font-semibold">
                   A Subida Impossível
                 </p>

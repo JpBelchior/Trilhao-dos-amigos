@@ -9,25 +9,25 @@ const GallerySection = () => {
   const editionPhotos = [
     {
       src: "/api/placeholder/800/500",
-      title: "15ª Edição - 2024",
+      title: "8ª Edição - 2024",
       description: "Mais de 100 participantes enfrentaram o desafio",
       stats: "100+ Pilotos • 25km • 4h de Duração",
     },
     {
       src: "/api/placeholder/800/500",
-      title: "14ª Edição - 2023",
+      title: "7ª Edição - 2023",
       description: "Trilha desafiadora na Serra da Mantiqueira",
       stats: "180 Pilotos • Chuva • Lama Extrema",
     },
     {
       src: "/api/placeholder/800/500",
-      title: "13ª Edição - 2022",
+      title: "6ª Edição - 2022",
       description: "Subida no Barranco ",
       stats: "150 Pilotos • Recorde de Altura • R$ 1.000",
     },
     {
       src: "/api/placeholder/800/500",
-      title: "12ª Edição - 2021",
+      title: "5 ª Edição - 2021",
       description: "Primeiro evento pós-pandemia",
       stats: "120 Pilotos • Subidas Ingrimes • Emoção Pura",
     },
@@ -73,7 +73,7 @@ const GallerySection = () => {
                   <h3 className="text-white text-4xl font-black mb-2">
                     {editionPhotos[currentPhoto].title}
                   </h3>
-                  <p className="text-gray-300 text-xl">
+                  <p className="text-yellow-200/40 text-xl">
                     {editionPhotos[currentPhoto].description}
                   </p>
                 </div>
