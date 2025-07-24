@@ -113,4 +113,25 @@ export interface IApiResponse<T = any> {
   dados?: T;
   mensagem?: string;
   erro?: string;
+  detalhes?: string;
+}
+
+// Interface para estoque organizado por tipo e tamanho
+export interface IEstoqueDisponivel {
+  [TipoCamiseta.MANGA_CURTA]: {
+    [key in TamanhoCamiseta]?: {
+      quantidadeTotal: number;
+      quantidadeReservada: number;
+      quantidadeDisponivel: number;
+      preco: number;
+    };
+  };
+  [TipoCamiseta.MANGA_LONGA]: {
+    [key in TamanhoCamiseta]?: {
+      quantidadeTotal: number;
+      quantidadeReservada: number;
+      quantidadeDisponivel: number;
+      preco: number;
+    };
+  };
 }

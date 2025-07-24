@@ -50,7 +50,7 @@ Participante.init(
 
     numeroInscricao: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true, // Temporariamente permitir null para o hook funcionar
       unique: true,
     },
 
@@ -177,10 +177,17 @@ Participante.init(
           "0"
         )}`;
 
+        console.log(
+          "🎫 Número de inscrição gerado:",
+          participante.numeroInscricao
+        );
+
         // Calcular valor da inscrição dinamicamente
         // Valor base: R$ 100 (inscrição + 1 camiseta grátis)
         // Camisetas extras: R$ 50 cada (será adicionado quando criar as extras)
-        participante.valorInscricao = 100.0;
+        if (!participante.valorInscricao) {
+          participante.valorInscricao = 100.0;
+        }
       },
     },
   }

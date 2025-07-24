@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import { testConnection, syncDatabase } from "./config/db";
+import apiRoutes from "./routes";
 
 // Importar modelos para garantir que sejam carregados
 import "./models";
@@ -19,10 +20,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Rotas da API
+app.use("/api", apiRoutes);
+
 // Rota de teste
 app.get("/", (req, res) => {
   res.json({
     message: "Backend Trilhão dos Amigos funcionando!",
+    api: "/api",
     timestamp: new Date().toISOString(),
   });
 });
