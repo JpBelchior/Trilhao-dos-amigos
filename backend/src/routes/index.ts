@@ -2,6 +2,7 @@
 import { Router } from "express";
 import estoqueRoutes from "./Estoque/estoque";
 import participanteRoutes from "./Participante/participantes";
+import pagamentoRoutes from "./Pagamento/pagamento";
 
 const router = Router();
 
@@ -26,4 +27,6 @@ router.use("/estoque", estoqueRoutes);
 // Rotas dos participantes
 router.use("/participantes", participanteRoutes);
 
+// Rotas de pagamento
+router.use("/pagamento", pagamentoRoutes);
 export default router;

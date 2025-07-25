@@ -18,17 +18,18 @@ const Navbar = () => {
             className="flex items-center group cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <div className="relative">
-              <Mountain
-                className="text-yellow-400 mr-3 transform transition-all group-hover:scale-110 group-hover:rotate-3"
-                size={40}
+            <div className="relative -top-1 -left-2 w-12 h-12 bg-yellow-500 rounded-full shadow-lg shadow-yellow-400/25 transition-transform transform group-hover:scale-110">
+              <img
+                src="/assets/moto.png"
+                alt="Logo"
+                className="w-12 h-12 object-contain"
               />
             </div>
             <div>
               <span className="text-3xl font-black text-white tracking-wider">
                 TRILHÃO DOS AMIGOS
               </span>
-              <div className="text-yellow-400 text-xs font-medium tracking-widest">
+              <div className="text-yellow-500 text-xs font-medium tracking-widest">
                 ITAMONTE • MG
               </div>
             </div>

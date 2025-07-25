@@ -1,8 +1,9 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./componentes/NavBar";
 import TrilhaoHomePage from "./paginas/PaginaPrincipal";
 import Cadastro from "./paginas/Cadastro";
+import Pagamento from "./paginas/Pagamento";
 import Inscritos from "./paginas/Inscritos";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Routes>
             <Route path="/" element={<TrilhaoHomePage />} />
             <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/pagamento" element={<Pagamento />} />
             <Route path="/inscritos" element={<Inscritos />} />
           </Routes>
         </div>

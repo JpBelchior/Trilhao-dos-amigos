@@ -14,7 +14,7 @@ import {
 import { Op } from "sequelize";
 
 export class ParticipanteController {
-  // POST /api/participantes - Criar novo participante
+  // POST /api/participantes - Criar participante PENDENTE (reserva camisetas)
   public static async criarParticipante(
     req: Request,
     res: Response
@@ -23,6 +23,11 @@ export class ParticipanteController {
 
     try {
       const dadosParticipante: ICriarParticipanteDTO = req.body;
+
+      console.log(
+        "🎯 [ParticipanteController] Criando participante PENDENTE:",
+        dadosParticipante.nome
+      );
 
       // Validação básica
       if (
@@ -40,7 +45,7 @@ export class ParticipanteController {
         return;
       }
 
-      // Verificar se email já existe
+      // ✅ Verificar se email já existe
       const emailExiste = await Participante.findOne({
         where: { email: dadosParticipante.email },
         transaction,
@@ -57,7 +62,7 @@ export class ParticipanteController {
         return;
       }
 
-      // Verificar se CPF já existe
+      // ✅ Verificar se CPF já existe
       const cpfExiste = await Participante.findOne({
         where: { cpf: dadosParticipante.cpf },
         transaction,
@@ -74,7 +79,7 @@ export class ParticipanteController {
         return;
       }
 
-      // Verificar disponibilidade da camiseta grátis
+      // ✅ Verificar disponibilidade da camiseta grátis
       const camisetaGratis = await EstoqueCamiseta.findOne({
         where: {
           tamanho: dadosParticipante.tamanhoCamiseta,
@@ -94,7 +99,7 @@ export class ParticipanteController {
         return;
       }
 
-      // Verificar disponibilidade das camisetas extras
+      // ✅ Verificar disponibilidade das camisetas extras
       if (
         dadosParticipante.camisetasExtras &&
         dadosParticipante.camisetasExtras.length > 0
@@ -127,7 +132,7 @@ export class ParticipanteController {
       const valorExtras = qtdExtras * 50.0;
       const valorTotal = valorBase + valorExtras;
 
-      // Criar participante
+      // ✅ Criar participante com status PENDENTE
       const novoParticipante = await Participante.create(
         {
           nome: dadosParticipante.nome,
@@ -140,13 +145,20 @@ export class ParticipanteController {
           tamanhoCamiseta: dadosParticipante.tamanhoCamiseta,
           tipoCamiseta: dadosParticipante.tipoCamiseta,
           valorInscricao: valorTotal,
-          statusPagamento: StatusPagamento.PENDENTE,
+          statusPagamento: StatusPagamento.PENDENTE, // ✅ PENDENTE
           observacoes: dadosParticipante.observacoes,
         },
         { transaction }
       );
 
-      // Criar camisetas extras
+      console.log("✅ Participante PENDENTE criado:", {
+        id: novoParticipante.id,
+        numeroInscricao: novoParticipante.numeroInscricao,
+        nome: novoParticipante.nome,
+        status: novoParticipante.statusPagamento,
+      });
+
+      // ✅ Criar camisetas extras (reserva automaticamente)
       if (
         dadosParticipante.camisetasExtras &&
         dadosParticipante.camisetasExtras.length > 0
@@ -161,11 +173,17 @@ export class ParticipanteController {
             },
             { transaction }
           );
+          console.log(
+            "👕 Camiseta extra reservada:",
+            extra.tamanho,
+            extra.tipo
+          );
         }
       }
 
-      // Atualizar estoque (recalcular quantidades reservadas)
+      // ✅ Atualizar estoque (recalcular quantidades reservadas)
       await camisetaGratis.atualizarReservadas();
+      console.log("📦 Estoque atualizado para camiseta principal");
 
       if (dadosParticipante.camisetasExtras) {
         for (const extra of dadosParticipante.camisetasExtras) {
@@ -174,11 +192,19 @@ export class ParticipanteController {
           });
           if (estoque) {
             await estoque.atualizarReservadas();
+            console.log(
+              "📦 Estoque atualizado para extra:",
+              extra.tamanho,
+              extra.tipo
+            );
           }
         }
       }
 
       await transaction.commit();
+
+      console.log(" Participante PENDENTE criado + camisetas reservadas!");
+      console.log(" Participante tem 10 minutos para pagar ou será excluído");
 
       const response: IApiResponse = {
         sucesso: true,
@@ -191,13 +217,14 @@ export class ParticipanteController {
           statusPagamento: novoParticipante.statusPagamento,
           camisetasExtras: qtdExtras,
         },
-        mensagem: "Inscrição realizada com sucesso!",
+        mensagem:
+          "Participante criado como PENDENTE. Prossiga para o pagamento.",
       };
 
       res.status(201).json(response);
     } catch (error) {
       await transaction.rollback();
-      console.error("Erro ao criar participante:", error);
+      console.error(" Erro ao criar participante:", error);
 
       const response: IApiResponse = {
         sucesso: false,
@@ -206,6 +233,142 @@ export class ParticipanteController {
       };
 
       res.status(500).json(response);
+    }
+  }
+
+  //  Confirmar participante Pagamento confirmado
+  public static async confirmarParticipante(
+    numeroInscricao: string,
+    pagamentoInfo: {
+      id: string;
+      external_reference: string;
+      date_approved?: string;
+    }
+  ): Promise<{ sucesso: boolean; dados?: any; erro?: string }> {
+    try {
+      console.log(
+        "✅ [ParticipanteController] Confirmando participante:",
+        numeroInscricao
+      );
+
+      // Buscar participante pelo número da inscrição
+      const participante = await Participante.findOne({
+        where: { numeroInscricao },
+      });
+
+      if (!participante) {
+        console.error("❌ Participante não encontrado:", numeroInscricao);
+        return {
+          sucesso: false,
+          erro: "Participante não encontrado",
+        };
+      }
+
+      if (participante.statusPagamento === StatusPagamento.CONFIRMADO) {
+        console.log("⚠️ Participante já confirmado:", numeroInscricao);
+        return {
+          sucesso: true,
+          dados: {
+            id: participante.id,
+            numeroInscricao: participante.numeroInscricao,
+            nome: participante.nome,
+            statusPagamento: participante.statusPagamento,
+          },
+        }; // Já está confirmado, sucesso
+      }
+
+      // ✅ Confirmar participante (mudar status)
+      participante.statusPagamento = StatusPagamento.CONFIRMADO;
+      participante.observacoes =
+        (participante.observacoes || "") +
+        `\nPagamento confirmado: ${pagamentoInfo.id} | Data: ${
+          pagamentoInfo.date_approved || new Date().toISOString()
+        }`;
+
+      await participante.save();
+
+      console.log(
+        "🎉 [ParticipanteController] Participante confirmado com sucesso:",
+        {
+          id: participante.id,
+          numeroInscricao: participante.numeroInscricao,
+          nome: participante.nome,
+          status: participante.statusPagamento,
+        }
+      );
+
+      return {
+        sucesso: true,
+        dados: {
+          id: participante.id,
+          numeroInscricao: participante.numeroInscricao,
+          nome: participante.nome,
+          email: participante.email,
+          valorInscricao: participante.valorInscricao,
+          statusPagamento: participante.statusPagamento,
+        },
+      };
+    } catch (error) {
+      console.error(
+        "💥 [ParticipanteController] Erro ao confirmar participante:",
+        error
+      );
+
+      return {
+        sucesso: false,
+        erro: error instanceof Error ? error.message : "Erro desconhecido",
+      };
+    }
+  }
+
+  // ✅ Excluir participante pendente (libera camisetas)
+  public static async excluirParticipantePendente(
+    participanteId: number
+  ): Promise<boolean> {
+    try {
+      console.log(
+        "🗑️ [ParticipanteController] Excluindo participante pendente:",
+        participanteId
+      );
+
+      const participante = await Participante.findByPk(participanteId);
+
+      if (!participante) {
+        console.log("👻 Participante já foi excluído:", participanteId);
+        return false;
+      }
+
+      // Só excluir se ainda estiver pendente
+      if (participante.statusPagamento !== StatusPagamento.PENDENTE) {
+        console.log("⚠️ Participante não está mais pendente:", {
+          id: participante.id,
+          numeroInscricao: participante.numeroInscricao,
+          status: participante.statusPagamento,
+        });
+        return false;
+      }
+
+      console.log("🗑️ Excluindo participante pendente após timeout:", {
+        id: participante.id,
+        numeroInscricao: participante.numeroInscricao,
+        nome: participante.nome,
+      });
+
+      // ✅ Excluir participante (cascade vai excluir camisetas extras + liberar estoque automaticamente)
+      await participante.destroy();
+
+      console.log(
+        "✅ [ParticipanteController] Participante excluído e camisetas liberadas:",
+        participante.numeroInscricao
+      );
+
+      return true;
+    } catch (error) {
+      console.error(
+        "💥 [ParticipanteController] Erro ao excluir participante pendente:",
+        error
+      );
+      return false;
     }
   }
 
@@ -331,7 +494,7 @@ export class ParticipanteController {
     }
   }
 
-  // PUT /api/participantes/:id/pagamento - Confirmar pagamento
+  // PUT /api/participantes/:id/pagamento - Confirmar pagamento manualmente
   public static async confirmarPagamento(
     req: Request,
     res: Response
@@ -354,9 +517,9 @@ export class ParticipanteController {
       // Atualizar status
       participante.statusPagamento = status;
       if (comprovante) {
-        // Aqui você salvaria o comprovante (base64, URL, etc)
         participante.observacoes =
-          (participante.observacoes || "") + `\nComprovante: ${comprovante}`;
+          (participante.observacoes || "") +
+          `\nComprovante manual: ${comprovante}`;
       }
 
       await participante.save();
