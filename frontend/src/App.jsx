@@ -1,6 +1,8 @@
+// src/App.jsx - VERSÃO ATUALIZADA
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./componentes/NavBar";
+import ApiStatus from "./componentes/Pagamento/ApiStatus";
 import TrilhaoHomePage from "./paginas/PaginaPrincipal";
 import Cadastro from "./paginas/Cadastro";
 import Pagamento from "./paginas/Pagamento";
@@ -22,6 +24,9 @@ function App() {
             <Route path="/inscritos" element={<Inscritos />} />
           </Routes>
         </div>
+
+        {/* Status da API (só em desenvolvimento) */}
+        {process.env.NODE_ENV === "development" && <ApiStatus />}
       </div>
     </Router>
   );

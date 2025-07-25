@@ -1,4 +1,4 @@
-// src/paginas/Pagamento.jsx
+// src/paginas/Pagamento.jsx - VERSÃO COM MERCADO PAGO REAL
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -10,6 +10,7 @@ import {
   QrCode,
   Loader2,
   Clock,
+  RefreshCw,
 } from "lucide-react";
 
 const Pagamento = () => {
@@ -17,184 +18,286 @@ const Pagamento = () => {
   const navigate = useNavigate();
 
   // Estados
-  const [qrCodePix, setQrCodePix] = useState("");
+  const [dadosPix, setDadosPix] = useState(null);
+  const [loadingPix, setLoadingPix] = useState(true);
   const [chavePixCopiada, setChavePixCopiada] = useState(false);
   const [codigoPixCopiado, setCodigoPixCopiado] = useState(false);
   const [pagamentoConfirmado, setPagamentoConfirmado] = useState(false);
-  const [loadingConfirmacao, setLoadingConfirmacao] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [erro, setErro] = useState(null);
   const [inscricaoCompleta, setInscricaoCompleta] = useState(null);
+  const [tempoRestante, setTempoRestante] = useState(600); // 10 minutos em segundos
 
   // Dados vindos do cadastro
   const { dadosInscricao, valorTotal } = location.state || {};
 
-  // Se não tiver dados, redirecionar para cadastro
+  // Verificar se tem dados necessários
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (dadosInscricao && valorTotal) {
-        gerarQRCodePix();
-      } else {
-        alert("Dados não encontrados. Refaça o cadastro.");
-        navigate("/cadastro");
-      }
-    }, 1000); // espera 300ms
+    if (!dadosInscricao || !valorTotal) {
+      alert("Dados não encontrados. Refaça o cadastro.");
+      navigate("/cadastro");
+      return;
+    }
 
-    return () => clearTimeout(timeout);
+    // Gerar PIX real assim que a página carregar
+    gerarPixReal();
   }, [dadosInscricao, valorTotal, navigate]);
 
-  // Dados para o PIX
-  const dadosPix = {
-    chavePix: "trilhao@email.com", // Substitua pela chave real
-    beneficiario: "Trilhão dos Amigos",
-    valor: valorTotal,
-    identificador: `TRI${Date.now()}`, // ID único para identificar o pagamento
-    descricao: "Inscricao Trilhao dos Amigos",
+  // Timer de 10 minutos
+  useEffect(() => {
+    if (!dadosPix || pagamentoConfirmado) return;
+
+    const timer = setInterval(() => {
+      setTempoRestante((prev) => {
+        if (prev <= 1) {
+          alert(
+            "Tempo esgotado! O PIX expirou. Você será redirecionado para fazer uma nova inscrição."
+          );
+          navigate("/cadastro");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [dadosPix, pagamentoConfirmado, navigate]);
+
+  // Polling para verificar status do pagamento
+  useEffect(() => {
+    if (!dadosPix || pagamentoConfirmado) return;
+
+    const verificarPagamento = setInterval(async () => {
+      await consultarStatusPagamento();
+    }, 5000); // Verifica a cada 5 segundos
+
+    return () => clearInterval(verificarPagamento);
+  }, [dadosPix, pagamentoConfirmado]);
+
+  // ✅ FUNÇÃO REAL - Criar PIX via Mercado Pago
+  const gerarPixReal = async () => {
+    try {
+      setLoadingPix(true);
+      setErro(null);
+
+      console.log("🏦 Criando PIX real via Mercado Pago...");
+
+      const response = await fetch(
+        "http://localhost:8000/api/pagamento/criar-pix",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            participanteId: dadosInscricao.id, // ID do participante já criado como PENDENTE
+            valorTotal: valorTotal,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.sucesso) {
+        throw new Error(data.erro || "Erro ao criar PIX");
+      }
+
+      console.log("✅ PIX criado com sucesso:", data.dados);
+
+      setDadosPix(data.dados);
+
+      // Iniciar timer baseado na expiração real do MP
+      if (data.dados.expiraEm) {
+        const expiraEm = new Date(data.dados.expiraEm);
+        const agora = new Date();
+        const segundosRestantes = Math.floor((expiraEm - agora) / 1000);
+        setTempoRestante(Math.max(0, segundosRestantes));
+      }
+    } catch (error) {
+      console.error("❌ Erro ao gerar PIX:", error);
+      setErro(error.message);
+    } finally {
+      setLoadingPix(false);
+    }
   };
 
-  // Gerar QR Code PIX (simulado - você pode usar uma API real)
-  const gerarQRCodePix = async () => {
+  // Simular pagamento aprovado (para testes)
+  // Esta função deve ser removida em produção
+  const simularPagamentoAprovado = () => {
+    const participanteConfirmado = {
+      id: dadosPix.participante.id,
+      numeroInscricao: dadosPix.participante.numeroInscricao,
+      nome: dadosPix.participante.nome,
+      email: dadosPix.participante.email,
+      valorInscricao: valorTotal,
+      statusPagamento: "confirmado",
+    };
+
+    setInscricaoCompleta(participanteConfirmado);
+    setPagamentoConfirmado(true);
+  };
+  // ✅ FUNÇÃO REAL - Consultar status do pagamento
+  const consultarStatusPagamento = async () => {
+    if (!dadosPix?.pagamentoId || loadingStatus) return;
+
     try {
-      // AQUI você colocaria a integração com um gateway de pagamento
-      // Por exemplo: PagSeguro, Mercado Pago, Stripe, etc.
+      setLoadingStatus(true);
 
-      // Por enquanto, vamos simular um código PIX
-      const codigoPix = `00020126360014BR.GOV.BCB.PIX0114${
-        dadosPix.chavePix
-      }52040000530398654${dadosPix.valor.toFixed(2)}5802BR5925${
-        dadosPix.beneficiario
-      }6009SAO PAULO62070503***6304`;
+      const response = await fetch(
+        `http://localhost:8000/api/pagamento/status/${dadosPix.pagamentoId}`
+      );
 
-      setQrCodePix(codigoPix);
+      const data = await response.json();
 
-      // Em um cenário real, você geraria um QR Code visual aqui
-      // Exemplo com uma biblioteca: qrcode-generator, qrcode.js, etc.
+      if (data.sucesso && data.dados.status === "approved") {
+        console.log("🎉 Pagamento aprovado!");
+        setInscricaoCompleta(dadosPix.participante);
+        setPagamentoConfirmado(true);
+      }
     } catch (error) {
-      console.error("Erro ao gerar QR Code:", error);
-      alert("Erro ao gerar código PIX. Tente novamente.");
+      console.error("Erro ao consultar status:", error);
+    } finally {
+      setLoadingStatus(false);
     }
   };
 
   // Copiar chave PIX
-  const copiarChavePix = () => {
-    navigator.clipboard.writeText(dadosPix.chavePix);
-    setChavePixCopiada(true);
-    setTimeout(() => setChavePixCopiada(false), 2000);
+  const copiarChavePix = async () => {
+    if (!dadosPix?.qrCode) return;
+
+    try {
+      await navigator.clipboard.writeText(dadosPix.qrCode);
+      setChavePixCopiada(true);
+      setTimeout(() => setChavePixCopiada(false), 2000);
+    } catch (error) {
+      console.error("Erro ao copiar:", error);
+    }
   };
 
   // Copiar código PIX
-  const copiarCodigoPix = () => {
-    navigator.clipboard.writeText(qrCodePix);
-    setCodigoPixCopiado(true);
-    setTimeout(() => setCodigoPixCopiado(false), 2000);
-  };
-
-  // Confirmar pagamento e criar inscrição
-  const confirmarPagamento = async () => {
-    setLoadingConfirmacao(true);
+  const copiarCodigoPix = async () => {
+    if (!dadosPix?.qrCode) return;
 
     try {
-      // AQUI você faria a verificação real do pagamento
-      // Consultaria a API do gateway para ver se foi pago
-
-      // Por enquanto, vamos simular e pedir confirmação do usuário
-      const confirmacao = confirm(
-        "Você confirma que realizou o pagamento PIX?\n\n" +
-          "IMPORTANTE: Só confirme se você realmente fez o pagamento, " +
-          "pois sua inscrição será registrada no sistema."
-      );
-
-      if (!confirmacao) {
-        setLoadingConfirmacao(false);
-        return;
-      }
-
-      // Agora sim, criar a inscrição no banco após pagamento confirmado
-      const response = await fetch("http://localhost:8000/api/participantes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...dadosInscricao,
-          // Adicionar dados do pagamento
-          identificadorPagamento: dadosPix.identificador,
-          statusPagamento: "confirmado", // Já confirmado
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        setInscricaoCompleta(data.dados);
-        setPagamentoConfirmado(true);
-      } else {
-        alert("Erro ao processar inscrição: " + data.erro);
-      }
+      await navigator.clipboard.writeText(dadosPix.qrCode);
+      setCodigoPixCopiado(true);
+      setTimeout(() => setCodigoPixCopiado(false), 2000);
     } catch (error) {
-      console.error("Erro ao confirmar pagamento:", error);
-      alert("Erro de conexão. Tente novamente.");
-    } finally {
-      setLoadingConfirmacao(false);
+      console.error("Erro ao copiar:", error);
     }
   };
+
+  // Formato do tempo restante
+  const formatarTempo = (segundos) => {
+    const minutos = Math.floor(segundos / 60);
+    const segs = segundos % 60;
+    return `${minutos.toString().padStart(2, "0")}:${segs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  // Se pagamento foi confirmado, mostrar tela de sucesso
+  // Substitua a parte do "pagamento confirmado" no seu Pagamento.jsx por isso:
 
   // Se pagamento foi confirmado, mostrar tela de sucesso
   if (pagamentoConfirmado && inscricaoCompleta) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
         <div className="container mx-auto px-6">
-          <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
-            <div className="text-center">
-              <CheckCircle className="mx-auto text-green-400 mb-6" size={80} />
-              <h1 className="text-4xl font-black text-white mb-4">
-                🎉 INSCRIÇÃO CONFIRMADA!
-              </h1>
+          {/* Header de Sucesso */}
+          <div className="text-center mb-12">
+            <CheckCircle className="mx-auto text-green-400 mb-6" size={80} />
+            <h1 className="text-5xl font-black text-white mb-4">
+              🎉 PAGAMENTO <span className="text-yellow-400">CONFIRMADO!</span>
+            </h1>
+            <p className="text-xl text-gray-400">
+              Sua inscrição foi realizada com sucesso
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
+          </div>
 
-              <div className="bg-green-900/30 rounded-2xl p-6 mb-6">
-                <h2 className="text-2xl font-bold text-green-400 mb-4">
-                  Número da Inscrição
+          {/* Card Principal */}
+          <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
+            {/* Número da Inscrição */}
+            <div className="text-center mb-8">
+              <div className="bg-green-900/30 rounded-2xl p-6 mb-4">
+                <h2 className="text-xl font-bold text-green-400 mb-2">
+                  SEU NÚMERO DE INSCRIÇÃO
                 </h2>
                 <div className="text-6xl font-black text-yellow-400">
                   {inscricaoCompleta.numeroInscricao}
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-4 text-left bg-black/40 rounded-2xl p-6 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Nome:</span>
+            {/* Dados do Participante */}
+            <div className="space-y-4 text-left bg-black/40 rounded-2xl p-6 mb-8">
+              <div className="flex justify-between">
+                <span className="text-gray-300">Nome:</span>
+                <span className="text-white font-semibold">
+                  {inscricaoCompleta.nome}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-300">Email:</span>
+                <span className="text-white font-semibold">
+                  {inscricaoCompleta.email}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-300">Moto:</span>
+                <span className="text-white font-semibold">
+                  {dadosInscricao.modeloMoto}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-300">Valor Pago:</span>
+                <span className="text-green-400 font-bold text-xl">
+                  R$ {valorTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Informações do Evento */}
+            <div className="bg-yellow-900/30 rounded-2xl p-6 mb-8">
+              <h3 className="text-xl font-bold text-yellow-400 mb-4 text-center">
+                📍 INFORMAÇÕES DO EVENTO
+              </h3>
+              <div className="space-y-3 text-center">
+                <div>
+                  <span className="text-gray-300">Local: </span>
                   <span className="text-white font-semibold">
-                    {inscricaoCompleta.nome}
+                    Fazenda do Trilhão - Itamonte/MG
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Email:</span>
+                <div>
+                  <span className="text-gray-300">Data: </span>
                   <span className="text-white font-semibold">
-                    {inscricaoCompleta.email}
+                    Sábado - 10:30h
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Valor Pago:</span>
-                  <span className="text-green-400 font-bold text-xl">
-                    R$ {inscricaoCompleta.valorInscricao.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Status:</span>
-                  <span className="text-green-400 font-semibold">
-                    ✅ Confirmado
+                <div>
+                  <span className="text-gray-300">Distância: </span>
+                  <span className="text-white font-semibold">
+                    25km de trilha off-road
                   </span>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-blue-900/30 rounded-2xl p-6 mb-6">
-                <h3 className="text-xl font-bold text-blue-400 mb-3">
-                  📧 Próximos Passos
+            {/* Mensagem Final */}
+            <div className="text-center">
+              <div className="bg-gradient-to-r from-green-900/50 to-yellow-900/50 rounded-2xl p-6 mb-6">
+                <h3 className="text-2xl font-bold text-white mb-3">
+                  🏔️ A AVENTURA TE ESPERA!
                 </h3>
-                <p className="text-gray-300 text-sm">
-                  Você receberá um email com mais detalhes sobre o evento.
-                  Guarde seu número de inscrição:{" "}
-                  <strong className="text-yellow-400">
-                    {inscricaoCompleta.numeroInscricao}
-                  </strong>
+                <p className="text-gray-300 leading-relaxed">
+                  Prepare sua moto, ajuste o equipamento e venha viver uma
+                  experiência inesquecível na Serra da Mantiqueira.
+                  <span className="text-yellow-400 font-bold">
+                    {" "}
+                    Te esperamos lá, piloto!
+                  </span>
                 </p>
               </div>
 
@@ -210,15 +313,48 @@ const Pagamento = () => {
       </div>
     );
   }
+  // Se deu erro
+  if (erro) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-900 via-black to-red-900 py-20">
+        <div className="container mx-auto px-6">
+          <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-red-400/30 text-center">
+            <AlertCircle className="mx-auto text-red-400 mb-6" size={80} />
+            <h1 className="text-4xl font-black text-white mb-4">
+              ❌ ERRO NO PAGAMENTO
+            </h1>
+            <p className="text-red-300 mb-6">{erro}</p>
+            <div className="space-y-4">
+              <button
+                onClick={gerarPixReal}
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
+              >
+                <RefreshCw className="mr-2" size={20} />
+                Tentar Novamente
+              </button>
+              <button
+                onClick={() => navigate("/cadastro")}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
+              >
+                <ArrowLeft className="mr-2" size={20} />
+                Voltar ao Cadastro
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  // Se não tiver dados, mostrar loading ou erro
-  if (!dadosInscricao) {
+  // Se está carregando
+  if (loadingPix || !dadosPix) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
         <div className="container mx-auto px-6 text-center">
           <div className="text-white">
             <Loader2 className="animate-spin mx-auto mb-4" size={48} />
-            <p>Carregando dados do pagamento...</p>
+            <p className="text-xl">Gerando PIX via Mercado Pago...</p>
+            <p className="text-gray-400 mt-2">Aguarde alguns instantes</p>
           </div>
         </div>
       </div>
@@ -228,14 +364,23 @@ const Pagamento = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
       <div className="container mx-auto px-6">
-        {/* Header */}
+        {/* Header com Timer */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-white mb-4">
             💳 FINALIZE SEU <span className="text-yellow-400">PAGAMENTO</span>
           </h1>
           <p className="text-gray-400 text-xl">
-            Pague via PIX para confirmar sua inscrição
+            PIX gerado via Mercado Pago - Válido por 10 minutos
           </p>
+
+          {/* Timer de Expiração */}
+          <div className="mt-6 inline-flex items-center bg-red-900/40 border border-red-400/50 rounded-2xl px-6 py-3">
+            <Clock className="mr-2 text-red-400" size={24} />
+            <span className="text-red-300 font-bold text-xl">
+              Expira em: {formatarTempo(tempoRestante)}
+            </span>
+          </div>
+
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
 
@@ -260,6 +405,12 @@ const Pagamento = () => {
                 </span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-300">Inscrição:</span>
+                <span className="text-yellow-400 font-semibold">
+                  {dadosPix.participante.numeroInscricao}
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-300">Cidade:</span>
                 <span className="text-white font-semibold">
                   {dadosInscricao.cidade}
@@ -271,20 +422,6 @@ const Pagamento = () => {
                   {dadosInscricao.modeloMoto}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300">Categoria:</span>
-                <span
-                  className={`font-semibold ${
-                    dadosInscricao.categoriaMoto === "nacional"
-                      ? "text-green-400"
-                      : "text-yellow-400"
-                  }`}
-                >
-                  {dadosInscricao.categoriaMoto === "nacional"
-                    ? "🇧🇷 Nacional"
-                    : "🌍 Importada"}
-                </span>
-              </div>
 
               <hr className="border-gray-600" />
 
@@ -293,7 +430,7 @@ const Pagamento = () => {
                 <span className="text-white">R$ 100,00</span>
               </div>
 
-              {dadosInscricao.camisetasExtras.length > 0 && (
+              {dadosInscricao.camisetasExtras?.length > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-300">
                     {dadosInscricao.camisetasExtras.length} Camiseta(s) Extra:
@@ -315,48 +452,50 @@ const Pagamento = () => {
             </div>
           </div>
 
-          {/* Pagamento PIX */}
+          {/* PIX Real do Mercado Pago */}
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30">
             <h2 className="text-3xl font-bold text-white mb-6">
               <QrCode className="inline mr-3" size={32} />
-              Pagamento PIX
+              PIX - Mercado Pago
             </h2>
 
-            {/* QR Code (simulado) */}
-            <div className="bg-white rounded-2xl p-6 mb-6 text-center">
-              <div className="w-48 h-48 mx-auto bg-gray-200 rounded-xl flex items-center justify-center">
-                <div className="text-center">
-                  <QrCode className="mx-auto mb-2 text-gray-600" size={48} />
-                  <p className="text-gray-600 text-sm">QR Code PIX</p>
-                  <p className="text-gray-500 text-xs">
-                    R$ {valorTotal.toFixed(2)}
-                  </p>
-                </div>
+            {/* QR Code Real */}
+            {dadosPix.qrCodeBase64 && (
+              <div className="bg-white rounded-2xl p-4 mb-6 text-center">
+                <img
+                  src={`data:image/png;base64,${dadosPix.qrCodeBase64}`}
+                  alt="QR Code PIX"
+                  className="mx-auto max-w-full h-auto"
+                  style={{ maxHeight: "300px" }}
+                />
+                <p className="text-gray-600 text-sm mt-2">
+                  QR Code PIX - R$ {valorTotal.toFixed(2)}
+                </p>
               </div>
-            </div>
+            )}
 
-            {/* Dados do PIX */}
-            <div className="space-y-4 mb-6">
-              <div>
+            {/* Código PIX para Copia e Cola */}
+            {dadosPix.qrCode && (
+              <div className="mb-6">
                 <label className="block text-gray-300 text-sm mb-2">
-                  Chave PIX:
+                  Código PIX Copia e Cola:
                 </label>
                 <div className="flex">
-                  <input
-                    type="text"
-                    value={dadosPix.chavePix}
+                  <textarea
+                    value={dadosPix.qrCode}
                     readOnly
-                    className="flex-1 bg-black/50 border border-gray-600 rounded-l-xl px-4 py-3 text-white"
+                    rows="4"
+                    className="flex-1 bg-black/50 border border-gray-600 rounded-l-xl px-4 py-3 text-white text-xs resize-none"
                   />
                   <button
-                    onClick={copiarChavePix}
-                    className={`px-4 py-3 rounded-r-xl border border-l-0 transition-all ${
-                      chavePixCopiada
+                    onClick={copiarCodigoPix}
+                    className={`px-4 py-3 rounded-r-xl border border-l-0 transition-all self-start ${
+                      codigoPixCopiado
                         ? "bg-green-500 border-green-500 text-white"
                         : "bg-yellow-500 border-yellow-500 text-black hover:bg-yellow-600"
                     }`}
                   >
-                    {chavePixCopiada ? (
+                    {codigoPixCopiado ? (
                       <CheckCircle size={20} />
                     ) : (
                       <Copy size={20} />
@@ -364,37 +503,7 @@ const Pagamento = () => {
                   </button>
                 </div>
               </div>
-
-              {qrCodePix && (
-                <div>
-                  <label className="block text-gray-300 text-sm mb-2">
-                    Código PIX Copia e Cola:
-                  </label>
-                  <div className="flex">
-                    <textarea
-                      value={qrCodePix}
-                      readOnly
-                      rows="3"
-                      className="flex-1 bg-black/50 border border-gray-600 rounded-l-xl px-4 py-3 text-white text-xs resize-none"
-                    />
-                    <button
-                      onClick={copiarCodigoPix}
-                      className={`px-4 py-3 rounded-r-xl border border-l-0 transition-all self-start ${
-                        codigoPixCopiado
-                          ? "bg-green-500 border-green-500 text-white"
-                          : "bg-yellow-500 border-yellow-500 text-black hover:bg-yellow-600"
-                      }`}
-                    >
-                      {codigoPixCopiado ? (
-                        <CheckCircle size={20} />
-                      ) : (
-                        <Copy size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Instruções */}
             <div className="bg-blue-900/30 rounded-2xl p-4 mb-6">
@@ -403,34 +512,40 @@ const Pagamento = () => {
                 <li>1. Abra seu app do banco</li>
                 <li>2. Escaneie o QR Code ou cole o código PIX</li>
                 <li>3. Confirme o pagamento de R$ {valorTotal.toFixed(2)}</li>
-                <li>4. Clique em "Pagamento Realizado" abaixo</li>
+                <li>4. Aguarde a confirmação automática</li>
               </ol>
             </div>
 
-            {/* Botões de Ação */}
-            <div className="space-y-4">
+            {/* Status do Pagamento */}
+            <div className="space-y-4 mb-6">
               <button
-                onClick={confirmarPagamento}
-                disabled={loadingConfirmacao}
-                className={`w-full font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center ${
-                  loadingConfirmacao
+                onClick={consultarStatusPagamento}
+                disabled={loadingStatus}
+                className={`w-full font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center ${
+                  loadingStatus
                     ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white transform hover:scale-105"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
                 }`}
               >
-                {loadingConfirmacao ? (
+                {loadingStatus ? (
                   <>
                     <Loader2 className="animate-spin mr-2" size={20} />
-                    Confirmando...
+                    Verificando Pagamento...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="mr-2" size={20} />
-                    Pagamento Realizado
+                    <RefreshCw className="mr-2" size={20} />
+                    Verificar Status do Pagamento
                   </>
                 )}
               </button>
-
+              <button
+                onClick={simularPagamentoAprovado}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
+              >
+                <CheckCircle className="mr-2" size={20} />
+                🧪 SIMULAR PAGAMENTO APROVADO
+              </button>
               <button
                 onClick={() => navigate("/cadastro")}
                 className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
@@ -441,16 +556,16 @@ const Pagamento = () => {
             </div>
 
             {/* Aviso */}
-            <div className="bg-yellow-900/30 rounded-2xl p-4 mt-6">
+            <div className="bg-yellow-900/30 rounded-2xl p-4">
               <div className="flex items-start">
                 <AlertCircle
                   className="text-yellow-400 mr-3 mt-1 flex-shrink-0"
                   size={20}
                 />
                 <div className="text-yellow-200 text-sm">
-                  <strong>Importante:</strong> Sua inscrição será confirmada
-                  apenas após o pagamento ser processado. Guarde o comprovante
-                  do PIX.
+                  <strong>Importante:</strong> Este PIX foi gerado pelo Mercado
+                  Pago e tem validade de 10 minutos. Sua inscrição será
+                  confirmada automaticamente após o pagamento.
                 </div>
               </div>
             </div>

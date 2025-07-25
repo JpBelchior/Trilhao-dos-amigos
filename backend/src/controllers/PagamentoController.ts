@@ -87,7 +87,7 @@ export class PagamentoController {
         external_reference: externalReference,
 
         // URL de notificação (webhook)
-        notification_url: `${process.env.BACKEND_URL}/api/pagamento/webhook`,
+        // notification_url: `${process.env.BACKEND_URL}/api/pagamento/webhook`,
 
         // ✅ Configurações específicas do PIX - 10 minutos conforme solicitado
         date_of_expiration: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutos

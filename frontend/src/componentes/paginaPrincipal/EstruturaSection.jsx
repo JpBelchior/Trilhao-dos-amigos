@@ -47,7 +47,8 @@ const EstruturaSection = () => {
             BASE DE <span className="text-yellow-400">OPERAÇÕES</span>
           </h2>
           <p className="text-gray-400 text-xl max-w-2xl mx-auto">
-            Estrutura completa para uma experiência inesquecível
+            Estrutura completa para você e sua família aproveitarem o Trilhão
+            dos Amigos da melhor forma possível!
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
