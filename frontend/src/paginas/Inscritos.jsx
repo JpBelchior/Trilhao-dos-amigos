@@ -5,25 +5,21 @@ import {
   Filter,
   MapPin,
   Bike,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Trophy,
-  Shirt,
-  Calendar,
-  ChevronDown,
   RefreshCw,
-  Download,
+  XCircle,
+  ChevronDown,
+  BarChart3,
 } from "lucide-react";
+import GraficosParticipantes from "../componentes/inscritos/Graficos";
 
 const Inscritos = () => {
-  // Estados
+  // Estados principais
   const [participantes, setParticipantes] = useState([]);
   const [participantesFiltrados, setParticipantesFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
 
-  // Estados dos filtros (removendo status, pois só mostramos confirmados)
+  // Estados dos filtros
   const [filtros, setFiltros] = useState({
     nome: "",
     cidade: "",
@@ -32,17 +28,17 @@ const Inscritos = () => {
 
   // Estados para UI
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [mostrarGraficos, setMostrarGraficos] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 20;
 
   // Estatísticas
   const [estatisticas, setEstatisticas] = useState({
     total: 0,
-    confirmados: 0,
-    pendentes: 0,
     nacionais: 0,
     importadas: 0,
     cidades: [],
+    estados: [],
   });
 
   // Carregar participantes
@@ -60,7 +56,6 @@ const Inscritos = () => {
       setLoading(true);
       setErro(null);
 
-      // ✅ Carregar apenas participantes CONFIRMADOS
       const response = await fetch(
         "http://localhost:8000/api/participantes?status=confirmado"
       );
@@ -68,7 +63,6 @@ const Inscritos = () => {
 
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];
-        // ✅ Filtrar localmente também, para garantia extra
         const participantesConfirmados = participantesData.filter(
           (p) => p.statusPagamento === "confirmado"
         );
@@ -76,7 +70,7 @@ const Inscritos = () => {
         setParticipantes(participantesConfirmados);
         calcularEstatisticas(participantesConfirmados);
         console.log(
-          "✅ Participantes CONFIRMADOS carregados:",
+          "✅ Participantes carregados:",
           participantesConfirmados.length
         );
       } else {
@@ -92,56 +86,47 @@ const Inscritos = () => {
 
   const calcularEstatisticas = (dados) => {
     const total = dados.length;
-    // ✅ Como só mostramos confirmados, todos serão confirmados
-    const confirmados = dados.length; // todos são confirmados
-    const pendentes = 0; // não mostramos pendentes
     const nacionais = dados.filter(
       (p) => p.categoriaMoto === "nacional"
     ).length;
     const importadas = dados.filter(
       (p) => p.categoriaMoto === "importada"
     ).length;
-
     const cidadesUnicas = [...new Set(dados.map((p) => p.cidade))].sort();
+    const estadosUnicos = [...new Set(dados.map((p) => p.estado))].sort();
 
     setEstatisticas({
       total,
-      confirmados,
-      pendentes,
       nacionais,
       importadas,
       cidades: cidadesUnicas,
+      estados: estadosUnicos,
     });
   };
 
   const aplicarFiltros = () => {
     let resultado = [...participantes];
 
-    // Filtro por nome
     if (filtros.nome.trim()) {
       resultado = resultado.filter((p) =>
         p.nome.toLowerCase().includes(filtros.nome.toLowerCase())
       );
     }
 
-    // Filtro por cidade
     if (filtros.cidade.trim()) {
       resultado = resultado.filter((p) =>
         p.cidade.toLowerCase().includes(filtros.cidade.toLowerCase())
       );
     }
 
-    // Filtro por categoria da moto
     if (filtros.categoriaMoto !== "todos") {
       resultado = resultado.filter(
         (p) => p.categoriaMoto === filtros.categoriaMoto
       );
     }
 
-    // ✅ Não precisamos mais filtrar por status, pois só carregamos confirmados
-
     setParticipantesFiltrados(resultado);
-    setPaginaAtual(1); // Resetar para primeira página
+    setPaginaAtual(1);
   };
 
   const atualizarFiltro = (campo, valor) => {
@@ -156,17 +141,6 @@ const Inscritos = () => {
       nome: "",
       cidade: "",
       categoriaMoto: "todos",
-    });
-  };
-
-  const formatarData = (dataString) => {
-    const data = new Date(dataString);
-    return data.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -204,9 +178,7 @@ const Inscritos = () => {
           <div className="max-w-2xl mx-auto bg-red-900/40 backdrop-blur-lg rounded-3xl p-8 border border-red-400/30 text-center">
             <XCircle className="mx-auto text-red-400 mb-6" size={80} />
             <h1 className="text-4xl font-black text-white mb-4">Erro</h1>
-            <p className="text-red-300 mb-6">
-              Verifique sua conexão com a internet
-            </p>
+            <p className="text-red-300 mb-6">Erro ao carregar dados</p>
             <button
               onClick={carregarParticipantes}
               className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-all"
@@ -237,37 +209,65 @@ const Inscritos = () => {
         </div>
 
         {/* Estatísticas Simples */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-black text-white">
+            Dados Estastisticos
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto mb-8">
           <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
             <div className="text-3xl font-black text-green-400">
               {estatisticas.total}
             </div>
-            <div className="text-gray-300 text-sm">Total</div>
+            <div className="text-gray-300 text-sm">Total de Participantes</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
             <div className="text-3xl font-black text-green-400">
               {estatisticas.nacionais}
             </div>
-            <div className="text-gray-300 text-sm">Nacionais</div>
+            <div className="text-gray-300 text-sm"> Motos Nacionais</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-yellow-400/30 text-center">
             <div className="text-3xl font-black text-yellow-400">
               {estatisticas.importadas}
             </div>
-            <div className="text-gray-300 text-sm">Importadas</div>
+            <div className="text-gray-300 text-sm">Motos Importadas</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
             <div className="text-3xl font-black text-green-400">
               {estatisticas.cidades.length}
             </div>
-            <div className="text-gray-300 text-sm">Cidades</div>
+            <div className="text-gray-300 text-sm">Cidades Distintas</div>
+          </div>
+          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
+            <div className="text-3xl font-black text-green-400">
+              {estatisticas.estados.length}
+            </div>
+            <div className="text-gray-300 text-sm">Estados Distintos</div>
           </div>
         </div>
 
-        {/* Filtros Simples */}
+        {/* Botão para mostrar/ocultar gráficos */}
+        <div className="text-center mb-8">
+          <button
+            onClick={() => setMostrarGraficos(!mostrarGraficos)}
+            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-8 rounded-2xl transition-all transform hover:scale-105 flex items-center mx-auto"
+          >
+            <BarChart3 className="mr-3" size={24} />
+            {mostrarGraficos ? "Ocultar Gráficos" : "Ver Gráficos Estatísticos"}
+          </button>
+        </div>
+
+        {/* Gráficos Estatísticos */}
+        {mostrarGraficos && (
+          <div className="mb-12">
+            <GraficosParticipantes participantes={participantes} />
+          </div>
+        )}
+
+        {/* Filtros */}
         <div className="max-w-6xl mx-auto mb-8">
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
-            {/* Header dos Filtros */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <Filter className="text-yellow-400 mr-3" size={24} />
@@ -292,10 +292,8 @@ const Inscritos = () => {
               </div>
             </div>
 
-            {/* Filtros Expandidos - Removendo filtro de status */}
             {mostrarFiltros && (
               <div className="grid md:grid-cols-3 gap-4">
-                {/* Filtro por Nome */}
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
                     Nome
@@ -315,7 +313,6 @@ const Inscritos = () => {
                   </div>
                 </div>
 
-                {/* Filtro por Cidade */}
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
                     Cidade
@@ -337,7 +334,6 @@ const Inscritos = () => {
                   </div>
                 </div>
 
-                {/* Filtro por Categoria da Moto */}
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
                     Categoria da Moto
@@ -363,7 +359,6 @@ const Inscritos = () => {
               </div>
             )}
 
-            {/* Botão Limpar Filtros */}
             {mostrarFiltros &&
               (filtros.nome ||
                 filtros.cidade ||
@@ -400,7 +395,6 @@ const Inscritos = () => {
                   className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all"
                 >
                   <div className="grid md:grid-cols-3 gap-4 items-center">
-                    {/* Número e Nome */}
                     <div>
                       <div className="flex items-center">
                         <div className="bg-yellow-500 text-black font-black w-9 h-9 rounded-full flex items-center justify-center text-sm mr-3">
@@ -415,16 +409,14 @@ const Inscritos = () => {
                         </div>
                       </div>
                     </div>
-                    {/*Cidade*/}
+
                     <div>
-                      <p className="text-gray-400  flex items-center">
+                      <p className="text-gray-400 flex items-center">
                         <MapPin className="mr-1 text-yellow-400" size={14} />
-                        {participante.cidade}
-                        {"-"}
-                        {participante.estado}
+                        {participante.cidade}-{participante.estado}
                       </p>
                     </div>
-                    {/* Moto */}
+
                     <div>
                       <p className="text-white font-semibold">
                         {participante.modeloMoto}
@@ -442,8 +434,6 @@ const Inscritos = () => {
                           : "Importada"}
                       </div>
                     </div>
-
-                    {/* Data */}
                   </div>
                 </div>
               ))}
@@ -514,11 +504,10 @@ const Inscritos = () => {
             </div>
           )}
 
-          {/* Ações Adicionais */}
-          <div className="mt-8 text-center space-y-4">
+          <div className="mt-8 text-center">
             <button
               onClick={carregarParticipantes}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 mr-4"
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105"
             >
               <RefreshCw className="mr-2 inline" size={20} />
               Atualizar Lista

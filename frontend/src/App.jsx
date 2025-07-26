@@ -32,7 +32,7 @@ function App() {
         </div>
 
         {/* Status da API (só em desenvolvimento) */}
-        {process.env.NODE_ENV === "development" && <ApiStatus />}
+        {/* {process.env.NODE_ENV === "development" && <ApiStatus />} */}
       </div>
     </Router>
   );
