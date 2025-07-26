@@ -25,6 +25,7 @@ class Participante
   public email!: string;
   public telefone!: string;
   public cidade!: string;
+  public estado!: string;
   public modeloMoto!: string;
   public categoriaMoto!: CategoriaMoto;
   public tamanhoCamiseta!: TamanhoCamiseta;
@@ -94,6 +95,14 @@ Participante.init(
       allowNull: false,
       validate: {
         notEmpty: { msg: "Cidade é obrigatória" },
+      },
+    },
+
+    estado: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: "Estado é obrigatório" },
       },
     },
 

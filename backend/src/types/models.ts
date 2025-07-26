@@ -50,6 +50,7 @@ export interface IParticipante {
   email: string;
   telefone: string;
   cidade: string;
+  estado: string;
   modeloMoto: string;
   categoriaMoto: CategoriaMoto;
   tamanhoCamiseta: TamanhoCamiseta;
@@ -94,6 +95,7 @@ export interface ICriarParticipanteDTO {
   email: string;
   telefone: string;
   cidade: string;
+  estado: string;
   modeloMoto: string;
   categoriaMoto: CategoriaMoto;
   tamanhoCamiseta: TamanhoCamiseta; // Camiseta grátis obrigatória

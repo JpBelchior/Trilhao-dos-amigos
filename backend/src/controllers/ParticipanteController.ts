@@ -140,12 +140,13 @@ export class ParticipanteController {
           email: dadosParticipante.email,
           telefone: dadosParticipante.telefone,
           cidade: dadosParticipante.cidade,
+          estado: dadosParticipante.estado,
           modeloMoto: dadosParticipante.modeloMoto,
           categoriaMoto: dadosParticipante.categoriaMoto,
           tamanhoCamiseta: dadosParticipante.tamanhoCamiseta,
           tipoCamiseta: dadosParticipante.tipoCamiseta,
           valorInscricao: valorTotal,
-          statusPagamento: StatusPagamento.PENDENTE, // ✅ PENDENTE
+          statusPagamento: StatusPagamento.PENDENTE,
           observacoes: dadosParticipante.observacoes,
         },
         { transaction }
@@ -546,6 +547,159 @@ export class ParticipanteController {
       };
 
       res.status(500).json(response);
+    }
+  }
+  // ✅ NOVA FUNÇÃO - Excluir participantes com status CANCELADO do banco
+  public static async verificarEExcluirCancelados(): Promise<{
+    sucesso: boolean;
+    excluidos: number;
+    erro?: string;
+  }> {
+    const transaction = await sequelize.transaction();
+
+    try {
+      console.log(
+        "🔍 [ParticipanteController] Verificando participantes cancelados no banco..."
+      );
+
+      // Buscar TODOS os participantes com status CANCELADO
+      const participantesCancelados = await Participante.findAll({
+        where: {
+          statusPagamento: StatusPagamento.CANCELADO,
+        },
+        include: [
+          {
+            model: CamisetaExtra,
+            as: "camisetasExtras",
+          },
+        ],
+        transaction,
+      });
+
+      console.log(
+        `📋 Encontrados ${participantesCancelados.length} participantes cancelados no banco`
+      );
+
+      if (participantesCancelados.length === 0) {
+        await transaction.commit();
+        return {
+          sucesso: true,
+          excluidos: 0,
+        };
+      }
+
+      let totalExcluidos = 0;
+
+      // Excluir cada participante cancelado
+      for (const participante of participantesCancelados) {
+        console.log(
+          `🗑️ Excluindo participante cancelado: ${participante.numeroInscricao} - ${participante.nome}`
+        );
+
+        // Coletar informações das camisetas antes da exclusão
+        const camisetaGratis = {
+          tamanho: participante.tamanhoCamiseta,
+          tipo: participante.tipoCamiseta,
+        };
+
+        const camisetasExtras = (participante as any).camisetasExtras || [];
+
+        // EXCLUIR PARTICIPANTE (cascade vai excluir camisetas extras automaticamente)
+        await participante.destroy({ transaction });
+        totalExcluidos++;
+
+        // ATUALIZAR ESTOQUE - liberar camisetas
+        console.log(
+          `📦 Liberando camisetas no estoque para: ${participante.numeroInscricao}`
+        );
+
+        // Liberar camiseta grátis
+        const estoqueGratis = await EstoqueCamiseta.findOne({
+          where: {
+            tamanho: camisetaGratis.tamanho,
+            tipo: camisetaGratis.tipo,
+          },
+          transaction,
+        });
+
+        if (estoqueGratis) {
+          await estoqueGratis.atualizarReservadas();
+          console.log(
+            `✅ Camiseta grátis liberada: ${camisetaGratis.tamanho} ${camisetaGratis.tipo}`
+          );
+        }
+
+        // Liberar camisetas extras
+        for (const extra of camisetasExtras) {
+          const estoqueExtra = await EstoqueCamiseta.findOne({
+            where: {
+              tamanho: extra.tamanho,
+              tipo: extra.tipo,
+            },
+            transaction,
+          });
+
+          if (estoqueExtra) {
+            await estoqueExtra.atualizarReservadas();
+            console.log(
+              `✅ Camiseta extra liberada: ${extra.tamanho} ${extra.tipo}`
+            );
+          }
+        }
+
+        console.log(
+          `✅ Participante ${participante.numeroInscricao} excluído e camisetas liberadas`
+        );
+      }
+
+      await transaction.commit();
+
+      console.log(
+        `🎉 Limpeza concluída! ${totalExcluidos} participantes cancelados foram excluídos do banco`
+      );
+
+      return {
+        sucesso: true,
+        excluidos: totalExcluidos,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      console.error(
+        "💥 [ParticipanteController] Erro ao verificar/excluir cancelados:",
+        error
+      );
+
+      return {
+        sucesso: false,
+        excluidos: 0,
+        erro: error instanceof Error ? error.message : "Erro desconhecido",
+      };
+    }
+  }
+
+  // ✅ FUNÇÃO PARA EXECUTAR VERIFICAÇÃO AUTOMÁTICA A CADA 15 MINUTOS
+  public static async executarVerificacaoAutomatica(): Promise<void> {
+    try {
+      console.log(
+        "🔄 [VerificacaoAutomatica] Iniciando verificação de cancelados..."
+      );
+
+      const resultado =
+        await ParticipanteController.verificarEExcluirCancelados();
+
+      if (resultado.sucesso && resultado.excluidos > 0) {
+        console.log(
+          `✅ [VerificacaoAutomatica] ${resultado.excluidos} participantes cancelados excluídos`
+        );
+      } else if (resultado.sucesso && resultado.excluidos === 0) {
+        console.log(
+          "ℹ️ [VerificacaoAutomatica] Nenhum participante cancelado encontrado"
+        );
+      } else {
+        console.error("❌ [VerificacaoAutomatica] Erro:", resultado.erro);
+      }
+    } catch (error) {
+      console.error("💥 [VerificacaoAutomatica] Erro fatal:", error);
     }
   }
 }

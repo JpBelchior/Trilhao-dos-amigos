@@ -32,19 +32,29 @@ app.get("/", (req, res) => {
   });
 });
 
-// Rota para popular dados de exemplo
+// ✅ ROTA ATUALIZADA - Popula estoque, campeões E participantes
 app.get("/seed", async (req, res) => {
   try {
     const { popularEstoque, popularCampeoes } = await import(
       "./seeds/EstoqueSeed"
     );
+    const { popularParticipantes } = await import("./seeds/ParticipantesSeed");
 
     await popularEstoque();
     await popularCampeoes();
+    await popularParticipantes();
 
     res.json({
       success: true,
       message: "Dados de exemplo criados com sucesso!",
+      detalhes: {
+        estoque: "Camisetas populadas",
+        campeoes: "Hall da fama populado",
+        participantes:
+          "50 participantes criados (47 confirmados + 3 cancelados)",
+        observacao:
+          "Os 3 participantes cancelados serão excluídos automaticamente em 15 minutos",
+      },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -101,6 +111,41 @@ const startServer = async () => {
       console.log("🚀 Servidor rodando na porta", PORT);
       console.log("📍 Acesse: http://localhost:" + PORT);
       console.log("🧪 Teste do banco: http://localhost:" + PORT + "/test-db");
+      console.log("🌱 Popule dados: http://localhost:" + PORT + "/seed");
+
+      // ✅ CONFIGURAR VERIFICAÇÃO AUTOMÁTICA DE CANCELADOS
+      console.log(
+        "🔍 Configurando verificação automática de participantes cancelados..."
+      );
+
+      // Executar a primeira verificação após 1 minuto (para dar tempo do sistema inicializar)
+      setTimeout(async () => {
+        console.log("🔍 Executando primeira verificação de cancelados...");
+        try {
+          const { ParticipanteController } = await import(
+            "./controllers/ParticipanteController"
+          );
+          await ParticipanteController.executarVerificacaoAutomatica();
+        } catch (error) {
+          console.error("❌ Erro na primeira verificação:", error);
+        }
+      }, 60 * 1000); // 1 minuto
+
+      // Executar a cada 15 minutos
+      setInterval(async () => {
+        try {
+          const { ParticipanteController } = await import(
+            "./controllers/ParticipanteController"
+          );
+          await ParticipanteController.executarVerificacaoAutomatica();
+        } catch (error) {
+          console.error("❌ Erro na verificação automática:", error);
+        }
+      }, 15 * 60 * 1000); // 15 minutos
+
+      console.log(
+        "✅ Verificação automática configurada para executar a cada 15 minutos"
+      );
     });
   } catch (error) {
     console.error("❌ Erro ao iniciar servidor:", error);

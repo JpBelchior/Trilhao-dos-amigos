@@ -21,11 +21,8 @@ const CTASection = () => {
           </h2>
 
           <p className="text-2xl md:text-3xl mb-12 text-gray-300 leading-relaxed">
-            25km de trilha épica, desafios impossíveis e a chance de
-            <span className="text-yellow-400 font-bold">
-              {" "}
-              eternizar seu nome{" "}
-            </span>
+            40km de trilha épica, desafios formidáveis e a chance de
+            <span className="text-yellow-400 font-bold"> marcar seu nome </span>
             na Serra da Mantiqueira!
           </p>
 

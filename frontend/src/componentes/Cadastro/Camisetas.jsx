@@ -1,6 +1,12 @@
 // src/componentes/cadastro/StepCamisetas.jsx
 import React from "react";
-import { Shirt, AlertCircle } from "lucide-react";
+import {
+  Shirt,
+  AlertCircle,
+  Gift,
+  MedalIcon,
+  BadgeDollarSign,
+} from "lucide-react";
 
 const StepCamisetas = ({
   formData,
@@ -16,14 +22,15 @@ const StepCamisetas = ({
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-center text-white mb-8">
-        <Shirt className="inline mr-3" size={32} />
+        <Shirt className="inline mr-3 mb-1" size={32} />
         Camisetas
       </h2>
 
       {/* Camiseta Grátis */}
       <div className="bg-green-900/30 rounded-2xl p-6 border border-green-400/30">
         <h3 className="text-xl font-bold text-green-400 mb-4">
-          🎁 Camiseta Grátis (incluída na inscrição)
+          <Gift className="inline mr-2 mb-1" size={20} />
+          Camiseta Grátis (incluída na inscrição)
         </h3>
 
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -80,7 +87,7 @@ const StepCamisetas = ({
           formData.tipoCamiseta
         ) <= 0 && (
           <div className="bg-red-900/50 border border-red-400 rounded-xl p-4">
-            <AlertCircle className="inline mr-2 text-red-400" size={20} />
+            <AlertCircle className="inline mr-2 mb-1 text-red-400" size={20} />
             <span className="text-red-300">
               Esta camiseta não está disponível no estoque!
             </span>
@@ -91,7 +98,8 @@ const StepCamisetas = ({
       {/* Camisetas Extras */}
       <div className="bg-yellow-900/30 rounded-2xl p-6 border border-yellow-400/30">
         <h3 className="text-xl font-bold text-yellow-400 mb-4">
-          💰 Camisetas Extras (R$ 50,00 cada)
+          <BadgeDollarSign className="inline mr-2 mb-1" size={20} />
+          Camisetas Extras (R$ 50,00 cada)
         </h3>
 
         <div className="grid md:grid-cols-3 gap-4 mb-4">
