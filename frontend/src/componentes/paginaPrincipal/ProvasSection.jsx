@@ -17,16 +17,6 @@ const ProvasSection = () => {
   return (
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-black text-white mb-4">
-            <span className="text-yellow-400">PROVAS</span>
-          </h2>
-          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
-            Dois desafios que levam sua determinação ao limite
-          </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
-        </div>
-
         {/* Mapa Moderno */}
         <div className="mb-20">
           <div className="max-w-5xl mx-auto">
@@ -168,8 +158,8 @@ const ProvasSection = () => {
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
                   <Star className="mr-4 text-yellow-400" size={20} />
                   <span>
-                    <strong className="text-yellow-400">Status:</strong> 0
-                    conquistadores
+                    <strong className="text-yellow-400">Observação:</strong>{" "}
+                    Ninguém atingiu o topo
                   </span>
                 </div>
               </div>

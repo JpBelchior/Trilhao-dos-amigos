@@ -46,13 +46,6 @@ const GallerySection = () => {
   return (
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-black text-white mb-4">
-            <span className="text-yellow-400">EDIÇÕES PASSADAS</span>
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto"></div>
-        </div>
-
         <div className="relative max-w-6xl mx-auto">
           <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl">
             <img

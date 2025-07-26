@@ -12,6 +12,8 @@ import {
   StatusPagamento,
 } from "../types/models";
 import { Op } from "sequelize";
+import { IBGEService } from "../Service/IBGEService";
+import { escape } from "querystring";
 
 export class ParticipanteController {
   // POST /api/participantes - Criar participante PENDENTE (reserva camisetas)
@@ -33,12 +35,14 @@ export class ParticipanteController {
       if (
         !dadosParticipante.nome ||
         !dadosParticipante.email ||
-        !dadosParticipante.cpf
+        !dadosParticipante.cpf ||
+        !dadosParticipante.estado ||
+        !dadosParticipante.cidade
       ) {
         const response: IApiResponse = {
           sucesso: false,
           erro: "Dados obrigatórios não informados",
-          detalhes: "Nome, email e CPF são obrigatórios",
+          detalhes: "Nome, email, CPF, estado e cidade são obrigatórios",
         };
         res.status(400).json(response);
         await transaction.rollback();
@@ -51,6 +55,41 @@ export class ParticipanteController {
         transaction,
       });
 
+      const estadoValido = await IBGEService.validarEstado(
+        dadosParticipante.estado
+      );
+      if (!estadoValido) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Estado inválido",
+          detalhes: `"${dadosParticipante.estado}" não é um estado brasileiro válido`,
+        };
+        res.status(400).json(response);
+        await transaction.rollback();
+        return;
+      }
+
+      // ✅ Validar cidade brasileira via IBGE
+
+      const cidadeValida = await IBGEService.validarCidade(
+        dadosParticipante.cidade,
+        dadosParticipante.estado
+      );
+      if (!cidadeValida) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Cidade inválida",
+          detalhes: `"${dadosParticipante.cidade}" não existe no estado ${dadosParticipante.estado}`,
+        };
+        res.status(400).json(response);
+        await transaction.rollback();
+        return;
+      }
+
+      console.log(
+        `✅ Localização validada: ${dadosParticipante.cidade}/${dadosParticipante.estado}`
+      );
+
       if (emailExiste) {
         const response: IApiResponse = {
           sucesso: false,
@@ -62,7 +101,7 @@ export class ParticipanteController {
         return;
       }
 
-      // ✅ Verificar se CPF já existe
+      //  Verificar se CPF já existe
       const cpfExiste = await Participante.findOne({
         where: { cpf: dadosParticipante.cpf },
         transaction,
@@ -79,7 +118,7 @@ export class ParticipanteController {
         return;
       }
 
-      // ✅ Verificar disponibilidade da camiseta grátis
+      //  Verificar disponibilidade da camiseta grátis
       const camisetaGratis = await EstoqueCamiseta.findOne({
         where: {
           tamanho: dadosParticipante.tamanhoCamiseta,
@@ -99,7 +138,7 @@ export class ParticipanteController {
         return;
       }
 
-      // ✅ Verificar disponibilidade das camisetas extras
+      //  Verificar disponibilidade das camisetas extras
       if (
         dadosParticipante.camisetasExtras &&
         dadosParticipante.camisetasExtras.length > 0
@@ -132,7 +171,7 @@ export class ParticipanteController {
       const valorExtras = qtdExtras * 50.0;
       const valorTotal = valorBase + valorExtras;
 
-      // ✅ Criar participante com status PENDENTE
+      //  Criar participante com status PENDENTE
       const novoParticipante = await Participante.create(
         {
           nome: dadosParticipante.nome,
@@ -152,14 +191,14 @@ export class ParticipanteController {
         { transaction }
       );
 
-      console.log("✅ Participante PENDENTE criado:", {
+      console.log(" Participante PENDENTE criado:", {
         id: novoParticipante.id,
         numeroInscricao: novoParticipante.numeroInscricao,
         nome: novoParticipante.nome,
         status: novoParticipante.statusPagamento,
       });
 
-      // ✅ Criar camisetas extras (reserva automaticamente)
+      //  Criar camisetas extras (reserva automaticamente)
       if (
         dadosParticipante.camisetasExtras &&
         dadosParticipante.camisetasExtras.length > 0
@@ -182,7 +221,7 @@ export class ParticipanteController {
         }
       }
 
-      // ✅ Atualizar estoque (recalcular quantidades reservadas)
+      //  Atualizar estoque (recalcular quantidades reservadas)
       await camisetaGratis.atualizarReservadas();
       console.log("📦 Estoque atualizado para camiseta principal");
 
@@ -275,10 +314,10 @@ export class ParticipanteController {
             nome: participante.nome,
             statusPagamento: participante.statusPagamento,
           },
-        }; // Já está confirmado, sucesso
+        };
       }
 
-      // ✅ Confirmar participante (mudar status)
+      // Confirmar participante (mudar status)
       participante.statusPagamento = StatusPagamento.CONFIRMADO;
       participante.observacoes =
         (participante.observacoes || "") +
@@ -322,7 +361,7 @@ export class ParticipanteController {
     }
   }
 
-  // ✅ Excluir participante pendente (libera camisetas)
+  //  Excluir participante pendente (libera camisetas)
   public static async excluirParticipantePendente(
     participanteId: number
   ): Promise<boolean> {
@@ -382,6 +421,7 @@ export class ParticipanteController {
       const {
         cidade,
         nome,
+        estado,
         status = "todos",
         page = "1",
         limit = "50",
@@ -393,7 +433,9 @@ export class ParticipanteController {
 
       // Construir filtros
       const whereClause: any = {};
-
+      if (estado) {
+        whereClause.estado = { [Op.iLike]: `%${estado}}%` };
+      }
       if (cidade) {
         whereClause.cidade = { [Op.iLike]: `%${cidade}%` };
       }
@@ -549,7 +591,7 @@ export class ParticipanteController {
       res.status(500).json(response);
     }
   }
-  // ✅ NOVA FUNÇÃO - Excluir participantes com status CANCELADO do banco
+  //  Excluir participantes com status CANCELADO do banco
   public static async verificarEExcluirCancelados(): Promise<{
     sucesso: boolean;
     excluidos: number;
@@ -677,7 +719,7 @@ export class ParticipanteController {
     }
   }
 
-  // ✅ FUNÇÃO PARA EXECUTAR VERIFICAÇÃO AUTOMÁTICA A CADA 15 MINUTOS
+  //  FUNÇÃO PARA EXECUTAR VERIFICAÇÃO AUTOMÁTICA A CADA 15 MINUTOS
   public static async executarVerificacaoAutomatica(): Promise<void> {
     try {
       console.log(

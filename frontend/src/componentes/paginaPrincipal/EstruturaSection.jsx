@@ -42,17 +42,6 @@ const EstruturaSection = () => {
   return (
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-black text-white mb-4">
-            BASE DE <span className="text-yellow-400">OPERAÇÕES</span>
-          </h2>
-          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
-            Estrutura completa para você e sua família aproveitarem o Trilhão
-            dos Amigos da melhor forma possível!
-          </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
-        </div>
-
         <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
           {/* Localização */}
           <div className="group bg-gradient-to-br from-green-900/40 to-black/60 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all transform hover:scale-105">

@@ -69,12 +69,12 @@ const Pagamento = () => {
 
     const verificarPagamento = setInterval(async () => {
       await consultarStatusPagamento();
-    }, 5000); // Verifica a cada 5 segundos
+    }, 10000);
 
     return () => clearInterval(verificarPagamento);
   }, [dadosPix, pagamentoConfirmado]);
 
-  // ✅ FUNÇÃO REAL - Criar PIX via Mercado Pago
+  // Criar PIX via Mercado Pago
   const gerarPixReal = async () => {
     try {
       setLoadingPix(true);
@@ -136,7 +136,7 @@ const Pagamento = () => {
     setInscricaoCompleta(participanteConfirmado);
     setPagamentoConfirmado(true);
   };
-  // ✅ FUNÇÃO REAL - Consultar status do pagamento
+  // Consultar status do pagamento
   const consultarStatusPagamento = async () => {
     if (!dadosPix?.pagamentoId || loadingStatus) return;
 
@@ -208,7 +208,7 @@ const Pagamento = () => {
           <div className="text-center mb-12">
             <CheckCircle className="mx-auto text-green-400 mb-6" size={80} />
             <h1 className="text-5xl font-black text-white mb-4">
-              🎉 PAGAMENTO <span className="text-yellow-400">CONFIRMADO!</span>
+              PAGAMENTO <span className="text-yellow-400">CONFIRMADO!</span>
             </h1>
             <p className="text-xl text-gray-400">
               Sua inscrição foi realizada com sucesso
@@ -279,7 +279,7 @@ const Pagamento = () => {
                 <div>
                   <span className="text-gray-300">Distância: </span>
                   <span className="text-white font-semibold">
-                    25km de trilha off-road
+                    40km de trilha off-road
                   </span>
                 </div>
               </div>
@@ -353,7 +353,7 @@ const Pagamento = () => {
         <div className="container mx-auto px-6 text-center">
           <div className="text-white">
             <Loader2 className="animate-spin mx-auto mb-4" size={48} />
-            <p className="text-xl">Gerando PIX via Mercado Pago...</p>
+            <p className="text-xl">Gerando PIX...</p>
             <p className="text-gray-400 mt-2">Aguarde alguns instantes</p>
           </div>
         </div>
@@ -367,7 +367,7 @@ const Pagamento = () => {
         {/* Header com Timer */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-white mb-4">
-            💳 FINALIZE SEU <span className="text-yellow-400">PAGAMENTO</span>
+            FINALIZE SEU <span className="text-yellow-400">PAGAMENTO</span>
           </h1>
           <p className="text-gray-400 text-xl">
             PIX gerado via Mercado Pago - Válido por 10 minutos
@@ -388,7 +388,7 @@ const Pagamento = () => {
           {/* Resumo da Inscrição */}
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
             <h2 className="text-3xl font-bold text-white mb-6">
-              📋 Resumo da Inscrição
+              Resumo da Inscrição
             </h2>
 
             <div className="space-y-4">
@@ -413,7 +413,7 @@ const Pagamento = () => {
               <div className="flex justify-between">
                 <span className="text-gray-300">Cidade:</span>
                 <span className="text-white font-semibold">
-                  {dadosInscricao.cidade}
+                  {dadosInscricao.cidade}-{dadosInscricao.estado}
                 </span>
               </div>
               <div className="flex justify-between">

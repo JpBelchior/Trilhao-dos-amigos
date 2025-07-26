@@ -7,6 +7,9 @@ import TrilhaoHomePage from "./paginas/PaginaPrincipal";
 import Cadastro from "./paginas/Cadastro";
 import Pagamento from "./paginas/Pagamento";
 import Inscritos from "./paginas/Inscritos";
+import EdicoesAnteriores from "./paginas/EdicoesAnteriores";
+import Provas from "./paginas/Provas";
+import InformacoesLocal from "./paginas/InformacoesLocal";
 
 function App() {
   return (
@@ -22,6 +25,9 @@ function App() {
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/pagamento" element={<Pagamento />} />
             <Route path="/inscritos" element={<Inscritos />} />
+            <Route path="/edicoes-anteriores" element={<EdicoesAnteriores />} />
+            <Route path="/provas" element={<Provas />} />
+            <Route path="/informacoes-local" element={<InformacoesLocal />} />
           </Routes>
         </div>
 

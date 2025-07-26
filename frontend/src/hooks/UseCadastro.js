@@ -33,6 +33,7 @@ const useCadastro = () => {
     email: "",
     telefone: "",
     cidade: "",
+    estado: "",
 
     // Dados da moto
     modeloMoto: "",
@@ -149,7 +150,8 @@ const useCadastro = () => {
           formData.cpf.trim() &&
           formData.email.trim() &&
           formData.telefone.trim() &&
-          formData.cidade.trim()
+          formData.cidade.trim() &&
+          formData.estado.trim()
         );
 
       case 2:
@@ -208,6 +210,7 @@ const useCadastro = () => {
         email: formData.email.trim(),
         telefone: formData.telefone.trim(),
         cidade: formData.cidade.trim(),
+        estado: formData.estado.trim(),
 
         // Dados da moto
         modeloMoto: formData.modeloMoto.trim(),
@@ -257,6 +260,7 @@ const useCadastro = () => {
           nome: formData.nome,
           email: formData.email,
           cidade: formData.cidade,
+          estado: formData.estado,
           modeloMoto: formData.modeloMoto,
           categoriaMoto: formData.categoriaMoto,
           camisetasExtras: formData.camisetasExtras,

@@ -1,13 +1,9 @@
-// src/paginas/PaginaPrincipal.jsx - Versão Refatorada
+// frontend/src/paginas/PaginaPrincipal.jsx - Versão Atualizada
 import React, { useState, useEffect } from "react";
 
-// Importando todos os componentes
+// Importando componentes que ficam na página principal
 import HeroSection from "../componentes/paginaPrincipal/HeroSection";
 import StatsSection from "../componentes/paginaPrincipal/StatsSection";
-import GallerySection from "../componentes/paginaPrincipal/GallerySection";
-import ProvasSection from "../componentes/paginaPrincipal/ProvasSection";
-import EstruturaSection from "../componentes/paginaPrincipal/EstruturaSection";
-import HallFamaSection from "../componentes/paginaPrincipal/HallFamaSection";
 import CTASection from "../componentes/paginaPrincipal/CTASection";
 import Footer from "../componentes/paginaPrincipal/Footer";
 
@@ -25,40 +21,16 @@ const TrilhaoHomepage = () => {
 
   return (
     <div className="min-h-screen bg-black overflow-x-hidden">
-      {/* Hero Section */}
+      {/* Hero Section - Apresentação principal */}
       <HeroSection isVisible={isVisible} scrollY={scrollY} />
 
       {/* Divisor */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
 
-      {/* Stats Section */}
+      {/* Stats Section - Estatísticas gerais */}
       <StatsSection />
 
-      {/* Divisor */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent my-8"></div>
-
-      {/* Gallery Section */}
-      <GallerySection />
-
-      {/* Divisor */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent my-8"></div>
-
-      {/* Provas Section */}
-      <ProvasSection />
-
-      {/* Divisor */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent my-8"></div>
-
-      {/* Estrutura Section */}
-      <EstruturaSection />
-
-      {/* Divisor */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent my-8"></div>
-
-      {/* Hall da Fama Section */}
-      <HallFamaSection />
-
-      {/* CTA Section */}
+      {/* CTA Section - Call to Action */}
       <CTASection />
 
       {/* Footer */}
