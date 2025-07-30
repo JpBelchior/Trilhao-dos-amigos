@@ -9,7 +9,7 @@ const Provas = () => {
       <div className="pt-32 pb-16 bg-gradient-to-br from-green-900/30 to-black">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-5xl md:text-6xl font-black text-white mb-4">
-            🏁 PROVAS & <span className="text-yellow-400">TRAJETOS</span>
+            PROVAS & <span className="text-yellow-400">TRAJETOS</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Conheça os desafios que esperam por você: a trilha e o Morro do

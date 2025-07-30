@@ -11,6 +11,8 @@ import {
   BarChart3,
 } from "lucide-react";
 import GraficosParticipantes from "../componentes/inscritos/Graficos";
+import ErroComponent from "../componentes/Erro";
+import LoadingComponent from "../componentes/Loading";
 
 const Inscritos = () => {
   // Estados principais
@@ -159,36 +161,12 @@ const Inscritos = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black py-20">
-        <div className="container mx-auto px-6 text-center">
-          <div className="text-white">
-            <RefreshCw className="animate-spin mx-auto mb-4" size={48} />
-            <p className="text-xl">Carregando participantes...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingComponent loading="Carregando participantes..." />;
   }
 
   if (erro) {
     return (
-      <div className="min-h-screen bg-black py-20">
-        <div className="container mx-auto px-6">
-          <div className="max-w-2xl mx-auto bg-red-900/40 backdrop-blur-lg rounded-3xl p-8 border border-red-400/30 text-center">
-            <XCircle className="mx-auto text-red-400 mb-6" size={80} />
-            <h1 className="text-4xl font-black text-white mb-4">Erro</h1>
-            <p className="text-red-300 mb-6">Erro ao carregar dados</p>
-            <button
-              onClick={carregarParticipantes}
-              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-all"
-            >
-              <RefreshCw className="mr-2 inline" size={20} />
-              Tentar Novamente
-            </button>
-          </div>
-        </div>
-      </div>
+      <ErroComponent erro={erro} onTentarNovamente={carregarParticipantes} />
     );
   }
 

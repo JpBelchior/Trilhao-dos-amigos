@@ -23,8 +23,6 @@ const TrilhaoHomepage = () => {
     <div className="min-h-screen bg-black overflow-x-hidden">
       {/* Hero Section - Apresentação principal */}
       <HeroSection isVisible={isVisible} scrollY={scrollY} />
-
-      {/* Divisor */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
 
       {/* Stats Section - Estatísticas gerais */}
@@ -33,7 +31,6 @@ const TrilhaoHomepage = () => {
       {/* CTA Section - Call to Action */}
       <CTASection />
 
-      {/* Footer */}
       <Footer />
     </div>
   );

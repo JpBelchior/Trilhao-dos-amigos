@@ -12,7 +12,8 @@ import {
   Clock,
   RefreshCw,
 } from "lucide-react";
-
+import ErroComponent from "../componentes/Erro";
+import LoadingComponent from "../componentes/Loading";
 const Pagamento = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -289,7 +290,7 @@ const Pagamento = () => {
             <div className="text-center">
               <div className="bg-gradient-to-r from-green-900/50 to-yellow-900/50 rounded-2xl p-6 mb-6">
                 <h3 className="text-2xl font-bold text-white mb-3">
-                  🏔️ A AVENTURA TE ESPERA!
+                  A AVENTURA TE ESPERA!
                 </h3>
                 <p className="text-gray-300 leading-relaxed">
                   Prepare sua moto, ajuste o equipamento e venha viver uma
@@ -315,50 +316,12 @@ const Pagamento = () => {
   }
   // Se deu erro
   if (erro) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-900 via-black to-red-900 py-20">
-        <div className="container mx-auto px-6">
-          <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-red-400/30 text-center">
-            <AlertCircle className="mx-auto text-red-400 mb-6" size={80} />
-            <h1 className="text-4xl font-black text-white mb-4">
-              ❌ ERRO NO PAGAMENTO
-            </h1>
-            <p className="text-red-300 mb-6">{erro}</p>
-            <div className="space-y-4">
-              <button
-                onClick={gerarPixReal}
-                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
-              >
-                <RefreshCw className="mr-2" size={20} />
-                Tentar Novamente
-              </button>
-              <button
-                onClick={() => navigate("/cadastro")}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
-              >
-                <ArrowLeft className="mr-2" size={20} />
-                Voltar ao Cadastro
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErroComponent erro={erro} onTentarNovamente={gerarPixReal} />;
   }
 
   // Se está carregando
   if (loadingPix || !dadosPix) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
-        <div className="container mx-auto px-6 text-center">
-          <div className="text-white">
-            <Loader2 className="animate-spin mx-auto mb-4" size={48} />
-            <p className="text-xl">Gerando PIX...</p>
-            <p className="text-gray-400 mt-2">Aguarde alguns instantes</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingComponent loading="Gerando PIX..." />;
   }
 
   return (
