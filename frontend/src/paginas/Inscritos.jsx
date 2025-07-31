@@ -217,7 +217,7 @@ const Inscritos = () => {
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
-                    🔍 Buscar por Nome
+                    Buscar por Nome
                   </label>
                   <div className="relative">
                     <Search
@@ -236,7 +236,7 @@ const Inscritos = () => {
 
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
-                    📍 Buscar por Cidade
+                    Buscar por Cidade
                   </label>
                   <div className="relative">
                     <MapPin
@@ -257,7 +257,7 @@ const Inscritos = () => {
 
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
-                    🏍️ Categoria da Moto
+                    Categoria da Moto
                   </label>
                   <div className="relative">
                     <Bike

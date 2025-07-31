@@ -124,19 +124,109 @@ const Pagamento = () => {
 
   // Simular pagamento aprovado (para testes)
   // Esta função deve ser removida em produção
-  const simularPagamentoAprovado = () => {
-    const participanteConfirmado = {
-      id: dadosPix.participante.id,
-      numeroInscricao: dadosPix.participante.numeroInscricao,
-      nome: dadosPix.participante.nome,
-      email: dadosPix.participante.email,
-      valorInscricao: valorTotal,
-      statusPagamento: "confirmado",
-    };
+  const simularPagamentoAprovado = async () => {
+    try {
+      console.log(
+        "🧪 [SIMULAÇÃO] Iniciando simulação de pagamento aprovado..."
+      );
+      console.log("🧪 [SIMULAÇÃO] Dados do PIX:", dadosPix);
 
-    setInscricaoCompleta(participanteConfirmado);
-    setPagamentoConfirmado(true);
+      setLoadingStatus(true);
+
+      // Dados do participante confirmado (estrutura completa)
+      const participanteConfirmado = {
+        id: dadosPix.participante.id,
+        numeroInscricao: dadosPix.participante.numeroInscricao,
+        nome: dadosPix.participante.nome,
+        email: dadosPix.participante.email,
+        valorInscricao: valorTotal,
+        statusPagamento: "confirmado",
+        // Adicionar dados do dadosInscricao se necessário
+        cidade: dadosInscricao.cidade,
+        estado: dadosInscricao.estado,
+        modeloMoto: dadosInscricao.modeloMoto,
+        categoriaMoto: dadosInscricao.categoriaMoto,
+      };
+
+      console.log(
+        "🧪 [SIMULAÇÃO] Participante que será confirmado:",
+        participanteConfirmado
+      );
+
+      // MÉTODO 1: Tentar confirmar via API do participante diretamente
+      try {
+        const confirmResponse = await fetch(
+          `http://localhost:8000/api/participantes/${dadosPix.participante.id}/pagamento`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: "confirmado",
+              comprovante: `Pagamento simulado - ${new Date().toISOString()}`,
+            }),
+          }
+        );
+
+        if (confirmResponse.ok) {
+          const confirmData = await confirmResponse.json();
+          console.log(
+            "✅ [SIMULAÇÃO] Participante confirmado via API:",
+            confirmData
+          );
+
+          // Definir estados de sucesso
+          setInscricaoCompleta(participanteConfirmado);
+          setPagamentoConfirmado(true);
+          setLoadingStatus(false);
+
+          console.log(
+            "✅ [SIMULAÇÃO] Estados definidos - pagamento confirmado!"
+          );
+          console.log(
+            "✅ [SIMULAÇÃO] inscricaoCompleta:",
+            participanteConfirmado
+          );
+          console.log("✅ [SIMULAÇÃO] pagamentoConfirmado:", true);
+
+          return;
+        }
+      } catch (apiError) {
+        console.warn(
+          "⚠️ [SIMULAÇÃO] Falha na API, tentando método direto:",
+          apiError
+        );
+      }
+
+      // MÉTODO 2: Confirmar diretamente (fallback)
+      console.log("🔄 [SIMULAÇÃO] Usando método direto de confirmação...");
+
+      // Definir estados de sucesso diretamente
+      setInscricaoCompleta(participanteConfirmado);
+      setPagamentoConfirmado(true);
+      setLoadingStatus(false);
+
+      console.log("✅ [SIMULAÇÃO] Confirmação direta realizada!");
+      console.log(
+        "✅ [SIMULAÇÃO] inscricaoCompleta final:",
+        participanteConfirmado
+      );
+      console.log("✅ [SIMULAÇÃO] pagamentoConfirmado final:", true);
+
+      // Forçar re-render (opcional)
+      setTimeout(() => {
+        console.log("🔄 [SIMULAÇÃO] Verificação após timeout:");
+        console.log("- pagamentoConfirmado:", pagamentoConfirmado);
+        console.log("- inscricaoCompleta:", inscricaoCompleta);
+      }, 100);
+    } catch (error) {
+      console.error("❌ [SIMULAÇÃO] Erro ao simular pagamento:", error);
+      setLoadingStatus(false);
+      alert("Erro ao simular pagamento. Verifique o console.");
+    }
   };
+
   // Consultar status do pagamento
   const consultarStatusPagamento = async () => {
     if (!dadosPix?.pagamentoId || loadingStatus) return;

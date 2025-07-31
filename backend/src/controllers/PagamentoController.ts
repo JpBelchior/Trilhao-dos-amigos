@@ -16,6 +16,91 @@ const client = new MercadoPagoConfig({
 const payment = new Payment(client);
 
 export class PagamentoController {
+  public static async simularStatusPagamento(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { status, external_reference, date_approved, simulado } = req.body;
+
+      console.log("🧪 [PagamentoController] Simulando status de pagamento:", {
+        id,
+        status,
+        simulado,
+      });
+
+      // Se for simulação de aprovação
+      if (status === "approved" && external_reference) {
+        console.log(
+          "💳 Pagamento simulado como aprovado! Confirmando participante..."
+        );
+
+        // Extrair número da inscrição do external_reference
+        const match = external_reference.match(/trilhao_([^_]+)_/);
+        if (match) {
+          const numeroInscricao = match[1];
+          const resultado = await ParticipanteController.confirmarParticipante(
+            numeroInscricao,
+            {
+              id: String(id),
+              external_reference: external_reference,
+              date_approved: date_approved || new Date().toISOString(),
+            }
+          );
+
+          if (resultado.sucesso) {
+            console.log(
+              "✅ Participante confirmado com sucesso via simulação!"
+            );
+
+            const response: IApiResponse = {
+              sucesso: true,
+              dados: {
+                pagamentoId: id,
+                status: "approved",
+                statusDetail: "approved",
+                participante: resultado.dados,
+                simulado: true,
+              },
+              mensagem: "Pagamento simulado como aprovado",
+            };
+
+            res.json(response);
+            return;
+          } else {
+            throw new Error(resultado.erro);
+          }
+        } else {
+          throw new Error("Formato de external_reference inválido");
+        }
+      }
+
+      // Para outros status, apenas retornar
+      const response: IApiResponse = {
+        sucesso: true,
+        dados: {
+          pagamentoId: id,
+          status: status,
+          statusDetail: status,
+          simulado: true,
+        },
+        mensagem: `Status simulado: ${status}`,
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("💥 [PagamentoController] Erro ao simular status:", error);
+
+      const response: IApiResponse = {
+        sucesso: false,
+        erro: "Erro ao simular status do pagamento",
+        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      };
+
+      res.status(500).json(response);
+    }
+  }
   // POST /api/pagamento/criar-pix - Criar PIX para participante já existente (PENDENTE)
   public static async criarPagamentoPix(
     req: Request,

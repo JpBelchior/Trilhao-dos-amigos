@@ -13,4 +13,6 @@ router.get("/status/:id", PagamentoController.consultarStatusPagamento);
 // POST /api/pagamento/webhook - Receber notificações do Mercado Pago
 router.post("/webhook", PagamentoController.receberWebhook);
 
+router.put("/status/:id", PagamentoController.simularStatusPagamento);
+
 export default router;
