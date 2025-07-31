@@ -7,9 +7,11 @@ import TrilhaoHomePage from "./paginas/PaginaPrincipal";
 import Cadastro from "./paginas/Cadastro";
 import Pagamento from "./paginas/Pagamento";
 import Inscritos from "./paginas/Inscritos";
+import Estatisticas from "./paginas/Estatisticas";
 import EdicoesAnteriores from "./paginas/EdicoesAnteriores";
 import Provas from "./paginas/Provas";
 import InformacoesLocal from "./paginas/InformacoesLocal";
+import Footer from "./componentes/paginaPrincipal/Footer";
 
 function App() {
   return (
@@ -25,12 +27,13 @@ function App() {
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/pagamento" element={<Pagamento />} />
             <Route path="/inscritos" element={<Inscritos />} />
+            <Route path="/estatisticas" element={<Estatisticas />} />
             <Route path="/edicoes-anteriores" element={<EdicoesAnteriores />} />
             <Route path="/provas" element={<Provas />} />
             <Route path="/informacoes-local" element={<InformacoesLocal />} />
           </Routes>
         </div>
-
+        <Footer />
         {/* Status da API (só em desenvolvimento) */}
         {/* {process.env.NODE_ENV === "development" && <ApiStatus />} */}
       </div>

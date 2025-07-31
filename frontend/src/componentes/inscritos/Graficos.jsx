@@ -196,20 +196,6 @@ const GraficosParticipantes = ({ participantes = [] }) => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h2 className="text-4xl font-black text-white mb-4">
-          <BarChart3 className="inline mr-3 text-yellow-400" size={40} />
-          ESTATÍSTICAS DOS{" "}
-          <span className="text-yellow-400">PARTICIPANTES</span>
-        </h2>
-        <p className="text-gray-400 text-lg">
-          Análise da distribuição de {participantes.length} participantes
-          confirmados
-        </p>
-        <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-4"></div>
-      </div>
-
       {/* Grid de Gráficos */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Gráfico de Motos */}
@@ -359,38 +345,6 @@ const GraficosParticipantes = ({ participantes = [] }) => {
       </div>
 
       {/* Resumo Estatístico */}
-      <div className="bg-gradient-to-r from-green-900/40 to-yellow-900/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
-        <h3 className="text-2xl font-bold text-center text-white mb-6">
-          Resumo Estatístico
-        </h3>
-        <div className="grid md:grid-cols-3 gap-6 text-center">
-          <div className="bg-black/40 rounded-2xl p-4">
-            <div className="text-3xl font-black text-green-400">
-              {participantes.length}
-            </div>
-            <div className="text-gray-300">Total de Participantes</div>
-          </div>
-          <div className="bg-black/40 rounded-2xl p-4">
-            <div className="text-3xl font-black text-yellow-400">
-              {dadosEstados.length}
-            </div>
-            <div className="text-gray-300">Estados Representados</div>
-          </div>
-
-          <div className="bg-black/40 rounded-2xl p-4">
-            <div className="text-3xl font-black text-yellow-400">
-              {(() => {
-                const nacionais = dadosMotos.find(
-                  (m) => m.categoria === "nacional"
-                );
-                return nacionais ? nacionais.percentage : "0";
-              })()}
-              %
-            </div>
-            <div className="text-gray-300">Motos Nacionais</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

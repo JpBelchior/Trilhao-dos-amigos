@@ -6,6 +6,7 @@ import Participante from "./Participante";
 import EstoqueCamiseta from "./EstoqueCamiseta";
 import CamisetaExtra from "./CamisasExtras";
 import CampeaoBarranco from "./CampeoesMorro";
+import Gerente from "./Gerente";
 
 // ============ DEFINIR RELACIONAMENTOS ============
 
@@ -30,6 +31,7 @@ export {
   EstoqueCamiseta,
   CamisetaExtra,
   CampeaoBarranco,
+  Gerente,
 };
 
 // Export default com todos os modelos organizados
@@ -39,4 +41,5 @@ export default {
   EstoqueCamiseta,
   CamisetaExtra,
   CampeaoBarranco,
+  Gerente,
 };

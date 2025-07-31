@@ -27,11 +27,9 @@ const TrilhaoHomepage = () => {
 
       {/* Stats Section - Estatísticas gerais */}
       <StatsSection />
-
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
       {/* CTA Section - Call to Action */}
       <CTASection />
-
-      <Footer />
     </div>
   );
 };

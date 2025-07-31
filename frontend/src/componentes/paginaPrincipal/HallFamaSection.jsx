@@ -55,7 +55,6 @@ const HallFamaSection = () => {
         <div className="max-w-4xl mx-auto mb-12">
           <div className="bg-gradient-to-r from-green-900/40 to-black/60 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30">
             <h3 className="text-2xl font-black text-center text-white mb-4">
-              <Mountain className="inline mr-3 text-yellow-400" size={28} />
               MORRO DO DESAFIO
             </h3>
             <p className="text-center text-gray-300 leading-relaxed">

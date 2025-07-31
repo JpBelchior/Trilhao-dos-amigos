@@ -1,11 +1,65 @@
 // frontend/src/componentes/NavBar.jsx
 import React from "react";
-import { Mountain, UserPlus, Users, ChevronDown } from "lucide-react";
+import { Mountain, UserPlus, Users, BarChart3 } from "lucide-react";
 import { useNavbarFunctions } from "../hooks/useNavbarFunctions";
+import NavDropdown from "./DropDown";
 
 const Navbar = () => {
-  const { menuAberto, menuRef, toggleMenu, irPara, isActiveInicio, isActive } =
-    useNavbarFunctions();
+  const {
+    menuAberto,
+    menuRef,
+    inscritoAberto,
+    inscritoRef,
+    toggleMenu,
+    toggleInscrito,
+    irPara,
+    isActiveInicio,
+    isActiveInscritos,
+    isActive,
+  } = useNavbarFunctions();
+
+  // Configuração das opções do dropdown "Início"
+  const inicioOptions = [
+    {
+      path: "/",
+      label: "Página Principal",
+      icon: Mountain,
+      isActive: isActive("/"),
+      dividerAfter: true,
+    },
+    {
+      path: "/edicoes-anteriores",
+      label: "Edições Anteriores",
+      isActive: isActive("/edicoes-anteriores"),
+    },
+    {
+      path: "/provas",
+      label: "Provas e Trajetos",
+      isActive: isActive("/provas"),
+    },
+    {
+      path: "/informacoes-local",
+      label: "Informações do Local",
+      isActive: isActive("/informacoes-local"),
+    },
+  ];
+
+  // Configuração das opções do dropdown "Inscritos"
+  const inscritosOptions = [
+    {
+      path: "/inscritos",
+      label: "Lista de Inscritos",
+      icon: Users,
+      isActive: isActive("/inscritos"),
+      dividerAfter: true,
+    },
+    {
+      path: "/estatisticas",
+      label: "Estatísticas",
+      icon: BarChart3,
+      isActive: isActive("/estatisticas"),
+    },
+  ];
 
   return (
     <nav className="bg-black/95 backdrop-blur-md shadow-2xl fixed top-0 left-0 right-0 z-50 border-b border-yellow-400/20">
@@ -44,85 +98,16 @@ const Navbar = () => {
           {/* Menu Navigation Moderno */}
           <div className="flex space-x-2">
             {/* Dropdown Menu - Início */}
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={toggleMenu}
-                className={`group flex items-center px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105 ${
-                  isActiveInicio()
-                    ? "bg-yellow-500 text-black shadow-lg shadow-yellow-400/25"
-                    : "text-white hover:bg-yellow-500 hover:text-black hover:shadow-lg hover:shadow-yellow-400/25"
-                }`}
-              >
-                <Mountain
-                  className="mr-2 group-hover:animate-bounce"
-                  size={20}
-                />
-                Início
-                <ChevronDown
-                  className={`ml-2 transition-transform duration-200 ${
-                    menuAberto ? "rotate-180" : ""
-                  }`}
-                  size={16}
-                />
-              </button>
-
-              {/* Dropdown Menu */}
-              {menuAberto && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-black/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-yellow-400/20 overflow-hidden z-50">
-                  <div className="py-2">
-                    {/* Opção Padrão - Página Principal */}
-                    <button
-                      onClick={() => irPara("/")}
-                      className={`w-full px-6 py-3 text-left transition-all hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center ${
-                        isActive("/")
-                          ? "bg-yellow-500/30 text-yellow-400 border-r-2 border-yellow-400"
-                          : "text-white"
-                      }`}
-                    >
-                      <Mountain className="mr-3" size={18} />
-                      Página Principal
-                    </button>
-
-                    {/* Divider */}
-                    <div className="h-px bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent my-2"></div>
-
-                    {/* Outras Opções */}
-                    <button
-                      onClick={() => irPara("/edicoes-anteriores")}
-                      className={`w-full px-6 py-3 text-left transition-all hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center ${
-                        isActive("/edicoes-anteriores")
-                          ? "bg-yellow-500/30 text-yellow-400 border-r-2 border-yellow-400"
-                          : "text-white"
-                      }`}
-                    >
-                      Edições Anteriores
-                    </button>
-
-                    <button
-                      onClick={() => irPara("/provas")}
-                      className={`w-full px-6 py-3 text-left transition-all hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center ${
-                        isActive("/provas")
-                          ? "bg-yellow-500/30 text-yellow-400 border-r-2 border-yellow-400"
-                          : "text-white"
-                      }`}
-                    >
-                      Provas e Trajetos
-                    </button>
-
-                    <button
-                      onClick={() => irPara("/informacoes-local")}
-                      className={`w-full px-6 py-3 text-left transition-all hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center ${
-                        isActive("/informacoes-local")
-                          ? "bg-yellow-500/30 text-yellow-400 border-r-2 border-yellow-400"
-                          : "text-white"
-                      }`}
-                    >
-                      Informações do Local
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <NavDropdown
+              isOpen={menuAberto}
+              toggle={toggleMenu}
+              isActive={isActiveInicio}
+              icon={Mountain}
+              label="Início"
+              options={inicioOptions}
+              onOptionClick={irPara}
+              dropdownRef={menuRef}
+            />
 
             {/* Cadastre-se */}
             <button
@@ -137,18 +122,17 @@ const Navbar = () => {
               Cadastre-se
             </button>
 
-            {/* Veja os Inscritos */}
-            <button
-              onClick={() => irPara("/inscritos")}
-              className={`group flex items-center px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105 ${
-                isActive("/inscritos")
-                  ? "bg-yellow-500 text-black shadow-lg shadow-yellow-400/25"
-                  : "text-white hover:bg-yellow-500 hover:text-black hover:shadow-lg hover:shadow-yellow-400/25"
-              }`}
-            >
-              <Users className="mr-2" size={20} />
-              Veja os Inscritos
-            </button>
+            {/* Dropdown Menu - Inscritos */}
+            <NavDropdown
+              isOpen={inscritoAberto}
+              toggle={toggleInscrito}
+              isActive={isActiveInscritos}
+              icon={Users}
+              label="Inscritos"
+              options={inscritosOptions}
+              onOptionClick={irPara}
+              dropdownRef={inscritoRef}
+            />
           </div>
         </div>
       </div>

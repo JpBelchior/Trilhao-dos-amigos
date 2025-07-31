@@ -1,3 +1,4 @@
+// frontend/src/paginas/Inscritos.jsx
 import React, { useState, useEffect } from "react";
 import {
   Users,
@@ -6,11 +7,9 @@ import {
   MapPin,
   Bike,
   RefreshCw,
-  XCircle,
   ChevronDown,
   BarChart3,
 } from "lucide-react";
-import GraficosParticipantes from "../componentes/inscritos/Graficos";
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
 
@@ -30,11 +29,10 @@ const Inscritos = () => {
 
   // Estados para UI
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
-  const [mostrarGraficos, setMostrarGraficos] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 20;
 
-  // Estatísticas
+  // Estatísticas básicas
   const [estatisticas, setEstatisticas] = useState({
     total: 0,
     nacionais: 0,
@@ -177,7 +175,7 @@ const Inscritos = () => {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-white mb-4">
             <Users className="inline mr-4" size={48} />
-            INSCRITOS NO <span className="text-yellow-400">TRILHÃO</span>
+            LISTA DE <span className="text-yellow-400">INSCRITOS</span>
           </h1>
           <p className="text-gray-400 text-xl">
             Veja quem vai participar da maior aventura off-road da Serra da
@@ -186,74 +184,19 @@ const Inscritos = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
 
-        {/* Estatísticas Simples */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-black text-white">
-            Dados Estastisticos
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto mb-8">
-          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
-            <div className="text-3xl font-black text-green-400">
-              {estatisticas.total}
-            </div>
-            <div className="text-gray-300 text-sm">Total de Participantes</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
-            <div className="text-3xl font-black text-green-400">
-              {estatisticas.nacionais}
-            </div>
-            <div className="text-gray-300 text-sm"> Motos Nacionais</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-yellow-400/30 text-center">
-            <div className="text-3xl font-black text-yellow-400">
-              {estatisticas.importadas}
-            </div>
-            <div className="text-gray-300 text-sm">Motos Importadas</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
-            <div className="text-3xl font-black text-green-400">
-              {estatisticas.cidades.length}
-            </div>
-            <div className="text-gray-300 text-sm">Cidades Distintas</div>
-          </div>
-          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 border border-green-400/30 text-center">
-            <div className="text-3xl font-black text-green-400">
-              {estatisticas.estados.length}
-            </div>
-            <div className="text-gray-300 text-sm">Estados Distintos</div>
-          </div>
-        </div>
-
-        {/* Botão para mostrar/ocultar gráficos */}
-        <div className="text-center mb-8">
-          <button
-            onClick={() => setMostrarGraficos(!mostrarGraficos)}
-            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-8 rounded-2xl transition-all transform hover:scale-105 flex items-center mx-auto"
-          >
-            <BarChart3 className="mr-3" size={24} />
-            {mostrarGraficos ? "Ocultar Gráficos" : "Ver Gráficos Estatísticos"}
-          </button>
-        </div>
-
-        {/* Gráficos Estatísticos */}
-        {mostrarGraficos && (
-          <div className="mb-12">
-            <GraficosParticipantes participantes={participantes} />
-          </div>
-        )}
-
         {/* Filtros */}
         <div className="max-w-6xl mx-auto mb-8">
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <Filter className="text-yellow-400 mr-3" size={24} />
-                <h3 className="text-xl font-bold text-white">Filtros</h3>
+                <h3 className="text-xl font-bold text-white">
+                  Filtros de Busca
+                </h3>
               </div>
               <div className="flex items-center space-x-4">
                 <span className="text-gray-400">
-                  {participantesFiltrados.length} participantes
+                  {participantesFiltrados.length} encontrados
                 </span>
                 <button
                   onClick={() => setMostrarFiltros(!mostrarFiltros)}
@@ -265,7 +208,7 @@ const Inscritos = () => {
                     }`}
                     size={16}
                   />
-                  {mostrarFiltros ? "Ocultar" : "Mostrar"}
+                  {mostrarFiltros ? "Ocultar" : "Mostrar"} Filtros
                 </button>
               </div>
             </div>
@@ -274,7 +217,7 @@ const Inscritos = () => {
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
-                    Nome
+                    🔍 Buscar por Nome
                   </label>
                   <div className="relative">
                     <Search
@@ -285,7 +228,7 @@ const Inscritos = () => {
                       type="text"
                       value={filtros.nome}
                       onChange={(e) => atualizarFiltro("nome", e.target.value)}
-                      placeholder="Buscar por nome..."
+                      placeholder="Digite o nome do piloto..."
                       className="w-full bg-black/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white focus:border-green-400 focus:outline-none"
                     />
                   </div>
@@ -293,7 +236,7 @@ const Inscritos = () => {
 
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
-                    Cidade
+                    📍 Buscar por Cidade
                   </label>
                   <div className="relative">
                     <MapPin
@@ -306,7 +249,7 @@ const Inscritos = () => {
                       onChange={(e) =>
                         atualizarFiltro("cidade", e.target.value)
                       }
-                      placeholder="Buscar por cidade..."
+                      placeholder="Digite o nome da cidade..."
                       className="w-full bg-black/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white focus:border-green-400 focus:outline-none"
                     />
                   </div>
@@ -314,7 +257,7 @@ const Inscritos = () => {
 
                 <div>
                   <label className="block text-gray-300 text-sm mb-2">
-                    Categoria da Moto
+                    🏍️ Categoria da Moto
                   </label>
                   <div className="relative">
                     <Bike
@@ -329,8 +272,8 @@ const Inscritos = () => {
                       className="w-full bg-black/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white focus:border-green-400 focus:outline-none appearance-none"
                     >
                       <option value="todos">Todas as categorias</option>
-                      <option value="nacional">Motos Nacionais</option>
-                      <option value="importada">Motos Importadas</option>
+                      <option value="nacional">🇧🇷 Motos Nacionais</option>
+                      <option value="importada">🌍 Motos Importadas</option>
                     </select>
                   </div>
                 </div>
@@ -346,7 +289,7 @@ const Inscritos = () => {
                     onClick={limparFiltros}
                     className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-xl transition-all"
                   >
-                    Limpar Filtros
+                    🗑️ Limpar Todos os Filtros
                   </button>
                 </div>
               )}
@@ -370,46 +313,47 @@ const Inscritos = () => {
               {participantesPagina.map((participante, index) => (
                 <div
                   key={participante.id}
-                  className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all"
+                  className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all hover:scale-102"
                 >
                   <div className="grid md:grid-cols-3 gap-4 items-center">
                     <div>
                       <div className="flex items-center">
-                        <div className="bg-yellow-500 text-black font-black w-9 h-9 rounded-full flex items-center justify-center text-sm mr-3">
-                          #
-                          {participante.numeroInscricao?.split("TRI2025")[1] ||
-                            indiceInicio + index + 1}
+                        <div className="bg-yellow-500 text-black font-black w-10 h-10 rounded-full flex items-center justify-center text-sm mr-4">
+                          #{indiceInicio + index + 1}
                         </div>
                         <div>
-                          <h4 className="text-white font-bold">
+                          <h4 className="text-white font-bold text-lg">
                             {participante.nome}
                           </h4>
+                          <p className="text-gray-400 text-sm">
+                            {participante.numeroInscricao}
+                          </p>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-gray-400 flex items-center">
-                        <MapPin className="mr-1 text-yellow-400" size={14} />
-                        {participante.cidade}-{participante.estado}
+                      <p className="text-gray-400 flex items-center mb-1">
+                        <MapPin className="mr-2 text-yellow-400" size={16} />
+                        {participante.cidade} - {participante.estado}
                       </p>
-                    </div>
-
-                    <div>
                       <p className="text-white font-semibold">
                         {participante.modeloMoto}
                       </p>
+                    </div>
+
+                    <div className="text-right">
                       <div
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${
+                        className={`inline-flex items-center px-3 py-2 rounded-full text-sm font-bold border-2 ${
                           participante.categoriaMoto === "nacional"
-                            ? "bg-green-900/50 text-green-400 border border-green-400/30"
-                            : "bg-yellow-900/50 text-yellow-400 border border-yellow-400/30"
+                            ? "bg-green-900/50 text-green-400 border-green-400/50"
+                            : "bg-yellow-900/50 text-yellow-400 border-yellow-400/50"
                         }`}
                       >
-                        <Bike className="mr-1" size={12} />
+                        <Bike className="mr-2" size={14} />
                         {participante.categoriaMoto === "nacional"
-                          ? "Nacional"
-                          : "Importada"}
+                          ? "🇧🇷 Nacional"
+                          : "🌍 Importada"}
                       </div>
                     </div>
                   </div>
@@ -430,7 +374,7 @@ const Inscritos = () => {
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
-                Anterior
+                ← Anterior
               </button>
 
               <div className="flex space-x-1">
@@ -477,11 +421,12 @@ const Inscritos = () => {
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
-                Próximo
+                Próximo →
               </button>
             </div>
           )}
 
+          {/* Botão Atualizar */}
           <div className="mt-8 text-center">
             <button
               onClick={carregarParticipantes}

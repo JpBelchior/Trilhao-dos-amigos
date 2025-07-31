@@ -1,3 +1,4 @@
+// frontend/src/hooks/useNavbarFunctions.js
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -8,8 +9,8 @@ export const useNavbarFunctions = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuAberto, setMenuAberto] = useState(false);
-  const menuRef = useRef(null);
   const [inscritoAberto, setInscritoAberto] = useState(false);
+  const menuRef = useRef(null);
   const inscritoRef = useRef(null);
 
   // Fechar menu ao clicar fora
@@ -29,8 +30,8 @@ export const useNavbarFunctions = () => {
 
   // Fechar menu ao mudar de rota
   useEffect(() => {
-    setInscritoAberto(false);
     setMenuAberto(false);
+    setInscritoAberto(false);
   }, [location.pathname]);
 
   const toggleMenu = () => setMenuAberto((prev) => !prev);
@@ -42,7 +43,7 @@ export const useNavbarFunctions = () => {
     navigate(rota);
   };
 
-  // Função para verificar se a rota está ativa (incluindo subrotas do menu dropdown)
+  // Função para verificar se as rotas do dropdown "Início" estão ativas
   const isActiveInicio = () => {
     const rotasInicio = [
       "/",
@@ -50,21 +51,27 @@ export const useNavbarFunctions = () => {
       "/provas",
       "/informacoes-local",
     ];
+    return rotasInicio.includes(location.pathname);
+  };
+
+  // Função para verificar se as rotas do dropdown "Inscritos" estão ativas
+  const isActiveInscritos = () => {
     const rotasInscritos = ["/inscritos", "/estatisticas"];
-    return (
-      rotasInicio.includes(location.pathname) ||
-      rotasInscritos.includes(location.pathname)
-    );
+    return rotasInscritos.includes(location.pathname);
   };
 
   const isActive = (path) => location.pathname === path;
 
   return {
     menuAberto,
+    inscritoAberto,
     menuRef,
+    inscritoRef,
     toggleMenu,
+    toggleInscrito,
     irPara,
     isActiveInicio,
+    isActiveInscritos,
     isActive,
   };
 };

@@ -137,3 +137,33 @@ export interface IEstoqueDisponivel {
     };
   };
 }
+
+export interface IGerente {
+  id?: number;
+  nome: string;
+  email: string;
+  senha: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// ============ DTOs PARA GERENTE ============
+
+export interface ICriarGerenteDTO {
+  nome: string;
+  email: string;
+  senha: string;
+}
+
+export interface ILoginGerenteDTO {
+  email: string;
+  senha: string;
+}
+
+export interface IGerenteResponse {
+  id: number;
+  nome: string;
+  email: string;
+  createdAt?: Date;
+  // Não incluir senha na resposta
+}
