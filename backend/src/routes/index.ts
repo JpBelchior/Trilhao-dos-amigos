@@ -1,9 +1,10 @@
-// src/routes/index.ts
+// backend/src/routes/index.ts - VERSÃO ATUALIZADA
 import { Router } from "express";
 import estoqueRoutes from "./Estoque/estoque";
 import participanteRoutes from "./Participante/participantes";
 import pagamentoRoutes from "./Pagamento/pagamento";
 import localizacaoRoutes from "./Localizacao/localizacao";
+import gerenteRoutes from "./Gerente/gerente";
 
 const router = Router();
 
@@ -15,8 +16,9 @@ router.get("/", (req, res) => {
     endpoints: {
       estoque: "/api/estoque",
       participantes: "/api/participantes",
-      resumo: "/api/estoque/resumo",
-      verificar: "/api/estoque/:tamanho/:tipo",
+      pagamento: "/api/pagamento",
+      localizacao: "/api/localizacao",
+      gerente: "/api/gerente",
     },
     timestamp: new Date().toISOString(),
   });
@@ -31,6 +33,10 @@ router.use("/participantes", participanteRoutes);
 // Rotas de pagamento
 router.use("/pagamento", pagamentoRoutes);
 
+// Rotas de localização
 router.use("/localizacao", localizacaoRoutes);
+
+// Rotas do gerente
+router.use("/gerente", gerenteRoutes);
 
 export default router;

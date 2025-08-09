@@ -151,6 +151,72 @@ const startServer = async () => {
     console.error("❌ Erro ao iniciar servidor:", error);
     process.exit(1);
   }
+
+  app.get("/setup-gerente", async (req, res) => {
+    try {
+      console.log("🔧 [Setup] Verificando se já existe gerente...");
+
+      const { Gerente } = await import("./models");
+
+      // Verificar se já existe algum gerente
+      const gerenteExistente = await Gerente.findOne();
+
+      if (gerenteExistente) {
+        res.json({
+          success: false,
+          message: "Já existe um gerente cadastrado no sistema",
+          gerente: {
+            nome: gerenteExistente.nome,
+            email: gerenteExistente.email,
+            criadoEm: gerenteExistente.createdAt,
+          },
+          instrucoes: "Use a rota POST /api/gerente/login para fazer login",
+        });
+        return;
+      }
+
+      // Se não existe, criar gerente padrão
+      console.log("👤 [Setup] Criando gerente padrão...");
+
+      const gerente = await Gerente.criarGerente({
+        nome: "Administrador Trilhão",
+        email: "admin@trilhao.com",
+        senha: "admin123", //  ALTERAR EM PRODUÇÃO
+      });
+
+      res.json({
+        success: true,
+        message: "Gerente padrão criado com sucesso!",
+        gerente: {
+          id: gerente.id,
+          nome: gerente.nome,
+          email: gerente.email,
+        },
+        credenciais: {
+          email: "admin@trilhao.com",
+          senha: "admin123",
+        },
+        instrucoes: [
+          "1. Use estas credenciais para fazer login em /api/gerente/login",
+          "2. ALTERE A SENHA imediatamente após o primeiro login",
+          "3. Esta rota será desabilitada após o primeiro gerente ser criado",
+        ],
+        proximosPasso:
+          "Acesse o painel administrativo e altere suas credenciais",
+      });
+
+      console.log("✅ [Setup] Gerente padrão criado com sucesso!");
+    } catch (error) {
+      console.error("❌ [Setup] Erro ao criar gerente:", error);
+
+      res.status(500).json({
+        success: false,
+        error: "Erro ao criar gerente padrão",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
+        solucao: "Verifique a conexão com o banco de dados e tente novamente",
+      });
+    }
+  });
 };
 
 startServer();
