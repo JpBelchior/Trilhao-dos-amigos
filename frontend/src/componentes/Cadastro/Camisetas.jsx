@@ -1,4 +1,4 @@
-// src/componentes/cadastro/StepCamisetas.jsx
+// frontend/src/componentes/Cadastro/Camisetas.jsx
 import React from "react";
 import {
   Shirt,
@@ -7,6 +7,7 @@ import {
   MedalIcon,
   BadgeDollarSign,
 } from "lucide-react";
+import { InputTextarea } from "../form";
 
 const StepCamisetas = ({
   formData,
@@ -62,34 +63,27 @@ const StepCamisetas = ({
               }
               className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
             >
-              <option value={TipoCamiseta.MANGA_CURTA}>
-                Manga Curta -{" "}
-                {verificarDisponibilidade(
-                  formData.tamanhoCamiseta,
-                  TipoCamiseta.MANGA_CURTA
-                )}{" "}
-                disponíveis
-              </option>
-              <option value={TipoCamiseta.MANGA_LONGA}>
-                Manga Longa -{" "}
-                {verificarDisponibilidade(
-                  formData.tamanhoCamiseta,
-                  TipoCamiseta.MANGA_LONGA
-                )}{" "}
-                disponíveis
-              </option>
+              {Object.values(TipoCamiseta).map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {tipo === "manga_curta" ? "Manga Curta" : "Manga Longa"} -{" "}
+                  {verificarDisponibilidade(formData.tamanhoCamiseta, tipo)}{" "}
+                  disponíveis
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
+        {/* Alerta se camiseta indisponível */}
         {verificarDisponibilidade(
           formData.tamanhoCamiseta,
           formData.tipoCamiseta
         ) <= 0 && (
-          <div className="bg-red-900/50 border border-red-400 rounded-xl p-4">
-            <AlertCircle className="inline mr-2 mb-1 text-red-400" size={20} />
+          <div className="bg-red-900/30 border border-red-400/50 rounded-xl p-4 flex items-center">
+            <AlertCircle className="text-red-400 mr-3" size={20} />
             <span className="text-red-300">
-              Esta camiseta não está disponível no estoque!
+              ⚠️ Esta camiseta não está disponível. Escolha outro tamanho ou
+              tipo.
             </span>
           </div>
         )}
@@ -102,19 +96,24 @@ const StepCamisetas = ({
           Camisetas Extras (R$ 50,00 cada)
         </h3>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-4">
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-gray-300 mb-2">Tamanho</label>
             <select
               value={camisetaExtra.tamanho}
               onChange={(e) =>
-                setCamisetaExtra({ ...camisetaExtra, tamanho: e.target.value })
+                setCamisetaExtra((prev) => ({
+                  ...prev,
+                  tamanho: e.target.value,
+                }))
               }
               className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none"
             >
               {Object.values(TamanhoCamiseta).map((tamanho) => (
                 <option key={tamanho} value={tamanho}>
-                  {tamanho}
+                  {tamanho} -{" "}
+                  {verificarDisponibilidade(tamanho, camisetaExtra.tipo)}{" "}
+                  disponíveis
                 </option>
               ))}
             </select>
@@ -125,42 +124,49 @@ const StepCamisetas = ({
             <select
               value={camisetaExtra.tipo}
               onChange={(e) =>
-                setCamisetaExtra({ ...camisetaExtra, tipo: e.target.value })
+                setCamisetaExtra((prev) => ({ ...prev, tipo: e.target.value }))
               }
               className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none"
             >
-              <option value={TipoCamiseta.MANGA_CURTA}>Manga Curta</option>
-              <option value={TipoCamiseta.MANGA_LONGA}>Manga Longa</option>
+              {Object.values(TipoCamiseta).map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {tipo === "manga_curta" ? "Manga Curta" : "Manga Longa"} -{" "}
+                  {verificarDisponibilidade(camisetaExtra.tamanho, tipo)}{" "}
+                  disponíveis
+                </option>
+              ))}
             </select>
-          </div>
-
-          <div className="flex items-end">
-            <button
-              type="button"
-              onClick={adicionarCamisetaExtra}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition-all"
-            >
-              Adicionar
-            </button>
           </div>
         </div>
 
-        <p className="text-gray-400 text-sm mb-4">
-          Disponível:{" "}
-          {verificarDisponibilidade(camisetaExtra.tamanho, camisetaExtra.tipo)}{" "}
-          unidades
-        </p>
+        <button
+          onClick={adicionarCamisetaExtra}
+          disabled={
+            verificarDisponibilidade(
+              camisetaExtra.tamanho,
+              camisetaExtra.tipo
+            ) <= 0
+          }
+          className={`w-full py-3 px-6 rounded-xl font-bold transition-all ${
+            verificarDisponibilidade(
+              camisetaExtra.tamanho,
+              camisetaExtra.tipo
+            ) > 0
+              ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+              : "bg-gray-600 text-gray-400 cursor-not-allowed"
+          }`}
+        >
+          + Adicionar Camiseta Extra (R$ 50,00)
+        </button>
 
-        {/* Lista de Extras Adicionadas */}
+        {/* Lista de camisetas extras adicionadas */}
         {formData.camisetasExtras.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-white">
-              Camisetas extras selecionadas:
-            </h4>
+          <div className="mt-4 space-y-2">
+            <h4 className="font-bold text-yellow-400">Camisetas Extras:</h4>
             {formData.camisetasExtras.map((extra, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center bg-black/40 rounded-xl p-3"
+                className="flex justify-between items-center bg-black/30 rounded-xl p-3"
               >
                 <span className="text-white">
                   {extra.tamanho} -{" "}
@@ -181,19 +187,14 @@ const StepCamisetas = ({
         )}
       </div>
 
-      {/* Observações */}
-      <div>
-        <label className="block text-gray-300 mb-2">
-          Observações (opcional)
-        </label>
-        <textarea
-          value={formData.observacoes}
-          onChange={(e) => atualizarFormData({ observacoes: e.target.value })}
-          className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-          rows="3"
-          placeholder="Alguma observação especial..."
-        />
-      </div>
+      {/* Observações - USANDO COMPONENTE REUTILIZÁVEL */}
+      <InputTextarea
+        label="Observações (opcional)"
+        value={formData.observacoes}
+        onChange={(valor) => atualizarFormData({ observacoes: valor })}
+        placeholder="Alguma observação especial..."
+        rows={3}
+      />
     </div>
   );
 };

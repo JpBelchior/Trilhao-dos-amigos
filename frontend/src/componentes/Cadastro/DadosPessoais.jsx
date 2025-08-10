@@ -1,49 +1,28 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// frontend/src/componentes/Cadastro/DadosPessoais.jsx
+import React from "react";
 import { User } from "lucide-react";
+import { InputTexto } from "../form";
 
 const StepDadosPessoais = ({ formData, atualizarFormData }) => {
-  const [estados, setEstados] = useState([]);
-  const [cidades, setCidades] = useState([]);
-
-  const API_BASE = "http://localhost:8000/api/localizacao";
-
-  // Carregar estados ao iniciar
-  useEffect(() => {
-    axios
-      .get(`${API_BASE}/estados`)
-      .then((res) => setEstados(res.data.dados.estados))
-      .catch((err) => console.error("Erro ao carregar estados:", err));
-  }, []);
-
-  // Carregar cidades quando o estado mudar
-  useEffect(() => {
-    if (formData.estado) {
-      axios
-        .get(`${API_BASE}/cidades/${formData.estado}`)
-        .then((res) => setCidades(res.data.dados.cidades))
-        .catch((err) => console.error("Erro ao carregar cidades:", err));
-    } else {
-      setCidades([]);
-    }
-  }, [formData.estado]);
-
+  // Função para formatar CPF
   const formatarCPF = (valor) => {
-    const apenasNumeros = valor.replace(/\D/g, "");
-    return apenasNumeros
+    const numeros = valor.replace(/\D/g, "");
+    return numeros
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})/, "$1-$2");
+      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+      .replace(/(-\d{2})\d+?$/, "$1");
   };
 
+  // Função para formatar telefone
   const formatarTelefone = (valor) => {
-    const apenasNumeros = valor.replace(/\D/g, "");
-    if (apenasNumeros.length <= 10) {
-      return apenasNumeros
+    const numeros = valor.replace(/\D/g, "");
+    if (numeros.length <= 10) {
+      return numeros
         .replace(/(\d{2})(\d)/, "($1) $2")
         .replace(/(\d{4})(\d)/, "$1-$2");
     } else {
-      return apenasNumeros
+      return numeros
         .replace(/(\d{2})(\d)/, "($1) $2")
         .replace(/(\d{5})(\d)/, "$1-$2");
     }
@@ -57,98 +36,64 @@ const StepDadosPessoais = ({ formData, atualizarFormData }) => {
       </h2>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Nome */}
-        <div>
-          <label className="block text-gray-300 mb-2">Nome Completo *</label>
-          <input
-            type="text"
-            value={formData.nome}
-            onChange={(e) => atualizarFormData({ nome: e.target.value })}
-            className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-            placeholder="Seu nome completo"
-          />
-        </div>
+        <InputTexto
+          label="Nome Completo"
+          value={formData.nome}
+          onChange={(valor) => atualizarFormData({ nome: valor })}
+          placeholder="Seu nome completo"
+          required
+        />
 
-        {/* CPF */}
-        <div>
-          <label className="block text-gray-300 mb-2">CPF *</label>
-          <input
-            type="text"
-            value={formData.cpf}
-            onChange={(e) =>
-              atualizarFormData({ cpf: formatarCPF(e.target.value) })
-            }
-            className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-            placeholder="000.000.000-00"
-            maxLength={14}
-          />
-        </div>
+        <InputTexto
+          label="CPF"
+          value={formData.cpf}
+          onChange={(valor) => atualizarFormData({ cpf: formatarCPF(valor) })}
+          placeholder="000.000.000-00"
+          maxLength={14}
+          required
+        />
 
-        {/* Email */}
-        <div>
-          <label className="block text-gray-300 mb-2">Email *</label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              atualizarFormData({ email: e.target.value.toLowerCase() })
-            }
-            className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-            placeholder="seu@email.com"
-          />
-        </div>
+        <InputTexto
+          label="Email"
+          type="email"
+          value={formData.email}
+          onChange={(valor) =>
+            atualizarFormData({ email: valor.toLowerCase() })
+          }
+          placeholder="seu@email.com"
+          required
+        />
 
-        {/* Telefone */}
-        <div>
-          <label className="block text-gray-300 mb-2">Telefone *</label>
-          <input
-            type="tel"
-            value={formData.telefone}
-            onChange={(e) =>
-              atualizarFormData({ telefone: formatarTelefone(e.target.value) })
-            }
-            className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-            placeholder="(35) 99999-9999"
-            maxLength={15}
-          />
-        </div>
+        <InputTexto
+          label="Telefone"
+          type="tel"
+          value={formData.telefone}
+          onChange={(valor) =>
+            atualizarFormData({ telefone: formatarTelefone(valor) })
+          }
+          placeholder="(11) 99999-9999"
+          maxLength={15}
+          required
+        />
 
-        {/* Estado */}
-        <div>
-          <label className="block text-gray-300 mb-2">Estado *</label>
-          <select
-            value={formData.estado}
-            onChange={(e) =>
-              atualizarFormData({ estado: e.target.value, cidade: "" })
-            }
-            className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-          >
-            <option value="">Selecione seu estado</option>
-            {estados.map((estado) => (
-              <option key={estado.sigla} value={estado.sigla}>
-                {estado.nome} ({estado.sigla})
-              </option>
-            ))}
-          </select>
-        </div>
+        <InputTexto
+          label="Cidade"
+          value={formData.cidade}
+          onChange={(valor) => atualizarFormData({ cidade: valor })}
+          placeholder="Sua cidade"
+          required
+        />
 
-        {/* Cidade */}
-        <div>
-          <label className="block text-gray-300 mb-2">Cidade *</label>
-          <select
-            value={formData.cidade}
-            onChange={(e) => atualizarFormData({ cidade: e.target.value })}
-            disabled={!formData.estado}
-            className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none"
-          >
-            <option value="">Selecione sua cidade</option>
-            {cidades.map((cidade) => (
-              <option key={cidade} value={cidade}>
-                {cidade}
-              </option>
-            ))}
-          </select>
-        </div>
+        <InputTexto
+          label="Estado"
+          value={formData.estado}
+          onChange={(valor) =>
+            atualizarFormData({ estado: valor.toUpperCase() })
+          }
+          placeholder="SP"
+          maxLength={2}
+          required
+        />
       </div>
     </div>
   );

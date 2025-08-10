@@ -1,5 +1,4 @@
-// CRIAR NOVO ARQUIVO: frontend/src/paginas/Admin/PerfilGerente.jsx
-
+// frontend/src/paginas/Admin/PerfilGerente.jsx
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +13,7 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import { InputTexto } from "../../componentes/form";
 
 const PerfilGerente = () => {
   const { gerente, atualizarPerfil } = useAuth();
@@ -97,35 +97,33 @@ const PerfilGerente = () => {
       }
     }
 
-    // Validar senha se há dados de senha
+    // Validar dados de senha se fornecidos
     if (temDadosSenha) {
-      if (!formData.senhaAtual) {
-        setErro("Senha atual é obrigatória para alterar a senha");
+      if (!formData.senhaAtual.trim()) {
+        setErro("Senha atual é obrigatória para alterar dados");
         return false;
       }
-      if (!formData.novaSenha) {
-        setErro("Nova senha é obrigatória");
-        return false;
-      }
-      if (formData.novaSenha.length < 6) {
-        setErro("Nova senha deve ter pelo menos 6 caracteres");
-        return false;
-      }
-      if (formData.novaSenha !== formData.confirmarSenha) {
-        setErro("Confirmação de senha não confere");
-        return false;
-      }
-      if (formData.novaSenha === formData.senhaAtual) {
-        setErro("Nova senha deve ser diferente da senha atual");
-        return false;
+
+      if (formData.novaSenha) {
+        if (formData.novaSenha.length < 6) {
+          setErro("Nova senha deve ter pelo menos 6 caracteres");
+          return false;
+        }
+
+        if (formData.novaSenha !== formData.confirmarSenha) {
+          setErro("Confirmação de senha não confere");
+          return false;
+        }
       }
     }
 
     return true;
   };
 
-  // Salvar alterações
-  const salvarAlteracoes = async () => {
+  // Submeter alterações
+  const submeterAlteracoes = async (e) => {
+    e.preventDefault();
+
     if (!validarFormulario()) {
       return;
     }
@@ -135,81 +133,58 @@ const PerfilGerente = () => {
     setSucesso("");
 
     try {
-      console.log("💾 Salvando alterações no perfil...");
+      // Preparar dados apenas com campos alterados
+      const dadosAlteracao = {};
 
-      // Preparar dados para envio
-      const dadosParaEnviar = {};
-
-      // Adicionar nome se foi alterado
+      // Verificar se nome foi alterado
       if (formData.nome.trim() !== gerente.nome) {
-        dadosParaEnviar.nome = formData.nome.trim();
+        dadosAlteracao.nome = formData.nome.trim();
       }
 
-      // Adicionar email se foi alterado
+      // Verificar se email foi alterado
       if (formData.email.trim().toLowerCase() !== gerente.email.toLowerCase()) {
-        dadosParaEnviar.email = formData.email.trim().toLowerCase();
+        dadosAlteracao.email = formData.email.trim().toLowerCase();
       }
 
-      // Adicionar senha se foi preenchida
+      // Adicionar senha atual se fornecida
+      if (formData.senhaAtual.trim()) {
+        dadosAlteracao.senhaAtual = formData.senhaAtual;
+      }
+
+      // Adicionar nova senha se fornecida
       if (formData.novaSenha) {
-        dadosParaEnviar.senhaAtual = formData.senhaAtual;
-        dadosParaEnviar.novaSenha = formData.novaSenha;
-        dadosParaEnviar.confirmarSenha = formData.confirmarSenha;
+        dadosAlteracao.novaSenha = formData.novaSenha;
       }
 
-      console.log("📤 Enviando dados:", {
-        alterandoNome: !!dadosParaEnviar.nome,
-        alterandoEmail: !!dadosParaEnviar.email,
-        alterandoSenha: !!dadosParaEnviar.novaSenha,
-      });
+      console.log("📝 Dados para alteração:", dadosAlteracao);
 
-      // Chamar API através do AuthContext
-      const resultado = await atualizarPerfil(dadosParaEnviar);
+      // Usar função do contexto para atualizar
+      const resultado = await atualizarPerfil(dadosAlteracao);
 
-      if (!resultado.sucesso) {
+      if (resultado.sucesso) {
+        setSucesso("✅ Perfil atualizado com sucesso!");
+
+        // Limpar campos de senha
+        setFormData((prev) => ({
+          ...prev,
+          senhaAtual: "",
+          novaSenha: "",
+          confirmarSenha: "",
+        }));
+
+        // Atualizar dados locais se nome/email mudaram
+        if (dadosAlteracao.nome || dadosAlteracao.email) {
+          setFormData((prev) => ({
+            ...prev,
+            nome: resultado.dados.nome,
+            email: resultado.dados.email,
+          }));
+        }
+      } else {
         throw new Error(resultado.erro || "Erro ao atualizar perfil");
       }
-
-      console.log("✅ Perfil atualizado com sucesso:", resultado.dados);
-
-      // Mostrar mensagem de sucesso
-      const alteracoes = resultado.alteracoes || [];
-      let mensagemSucesso = "Perfil atualizado com sucesso!";
-
-      if (alteracoes.length === 3) {
-        mensagemSucesso = "Nome, email e senha atualizados com sucesso!";
-      } else if (alteracoes.includes("nome") && alteracoes.includes("email")) {
-        mensagemSucesso = "Nome e email atualizados com sucesso!";
-      } else if (alteracoes.includes("nome") && alteracoes.includes("senha")) {
-        mensagemSucesso = "Nome e senha atualizados com sucesso!";
-      } else if (alteracoes.includes("email") && alteracoes.includes("senha")) {
-        mensagemSucesso = "Email e senha atualizados com sucesso!";
-      } else if (alteracoes.includes("nome")) {
-        mensagemSucesso = "Nome atualizado com sucesso!";
-      } else if (alteracoes.includes("email")) {
-        mensagemSucesso = "Email atualizado com sucesso!";
-      } else if (alteracoes.includes("senha")) {
-        mensagemSucesso = "Senha atualizada com sucesso!";
-      }
-
-      setSucesso(mensagemSucesso);
-
-      // Limpar campos de senha
-      setFormData((prev) => ({
-        ...prev,
-        senhaAtual: "",
-        novaSenha: "",
-        confirmarSenha: "",
-      }));
-
-      // Esconder senhas
-      setMostrarSenhas({
-        atual: false,
-        nova: false,
-        confirmar: false,
-      });
     } catch (error) {
-      console.error("❌ Erro ao salvar alterações:", error);
+      console.error("❌ Erro ao atualizar perfil:", error);
       setErro(error.message || "Erro ao atualizar perfil");
     } finally {
       setLoading(false);
@@ -217,149 +192,116 @@ const PerfilGerente = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">
       <div className="container mx-auto px-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h1 className="text-5xl font-black text-white mb-4">
-              MEU <span className="text-yellow-400">PERFIL</span>
-            </h1>
-            <p className="text-gray-400 text-xl">
-              Edite suas informações pessoais e de segurança
-            </p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate("/admin")}
+              className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl transition-all"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="text-3xl font-bold text-white">Perfil do Gerente</h1>
           </div>
-
-          <button
-            onClick={() => navigate("/admin")}
-            className=" bg-yellow-500 hover:bg-yellow-400 hover:scale-105  disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
-          >
-            <ArrowLeft className="mr-2" size={20} />
-            Voltar ao Dashboard
-          </button>
         </div>
 
-        {/* Formulário de Perfil */}
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
-            {/* Mensagens de Feedback */}
-            {sucesso && (
-              <div className="bg-green-900/50 border border-green-400/50 rounded-2xl p-4 mb-6 flex items-center">
-                <CheckCircle className="text-green-400 mr-3" size={20} />
-                <span className="text-green-300">{sucesso}</span>
-              </div>
-            )}
+        {/* Formulário */}
+        <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
+          {/* Mensagens */}
+          {sucesso && (
+            <div className="mb-6 bg-green-900/30 border border-green-400/50 rounded-xl p-4 flex items-center">
+              <CheckCircle className="text-green-400 mr-3" size={20} />
+              <span className="text-green-300">{sucesso}</span>
+            </div>
+          )}
 
-            {erro && (
-              <div className="bg-red-900/50 border border-red-400/50 rounded-2xl p-4 mb-6 flex items-center">
-                <AlertTriangle className="text-red-400 mr-3" size={20} />
-                <span className="text-red-300">{erro}</span>
-              </div>
-            )}
+          {erro && (
+            <div className="mb-6 bg-red-900/30 border border-red-400/50 rounded-xl p-4 flex items-center">
+              <AlertTriangle className="text-red-400 mr-3" size={20} />
+              <span className="text-red-300">{erro}</span>
+            </div>
+          )}
 
-            {/* Seção: Informações Básicas */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-white flex items-center mb-6">
-                <User className="mr-3 text-yellow-400" size={24} />
-                Informações Básicas
+          <form onSubmit={submeterAlteracoes} className="space-y-6">
+            {/* Dados Básicos */}
+            <div>
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                <User className="mr-3 text-green-400" size={24} />
+                Dados Básicos
               </h3>
 
-              <div className="space-y-4">
-                {/* Email */}
-                <div>
-                  <label className="block text-gray-300 mb-2 font-semibold">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => atualizarCampo("email", e.target.value)}
-                    disabled={loading}
-                    className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                    placeholder="Digite seu email"
-                  />
-                  <p className="text-gray-500 text-sm mt-1">
-                    Email será usado para fazer login
-                  </p>
-                </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* USANDO COMPONENTE REUTILIZÁVEL */}
+                <InputTexto
+                  label="Nome Completo"
+                  value={formData.nome}
+                  onChange={(valor) => atualizarCampo("nome", valor)}
+                  placeholder="Seu nome completo"
+                  disabled={loading}
+                  required
+                  maxLength={100}
+                />
 
-                {/* Nome */}
-                <div>
-                  <label className="block text-gray-300 mb-2 font-semibold">
-                    Nome Completo *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.nome}
-                    onChange={(e) => atualizarCampo("nome", e.target.value)}
-                    disabled={loading}
-                    className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                    placeholder="Digite seu nome completo"
-                  />
-                </div>
+                <InputTexto
+                  label="Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(valor) => atualizarCampo("email", valor)}
+                  placeholder="seu@email.com"
+                  disabled={loading}
+                  required
+                />
               </div>
             </div>
 
-            {/* Seção: Segurança */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-white flex items-center mb-6">
+            {/* Alteração de Senha */}
+            <div>
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
                 <Lock className="mr-3 text-yellow-400" size={24} />
                 Alterar Senha
               </h3>
 
               <div className="space-y-4">
-                {/* Senha Atual */}
-                <div>
-                  <label className="block text-gray-300 mb-2 font-semibold">
-                    Senha Atual
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={mostrarSenhas.atual ? "text" : "password"}
-                      value={formData.senhaAtual}
-                      onChange={(e) =>
-                        atualizarCampo("senhaAtual", e.target.value)
-                      }
-                      disabled={loading}
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                      placeholder="Digite sua senha atual"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => toggleMostrarSenha("atual")}
-                      disabled={loading}
-                      className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                    >
-                      {mostrarSenhas.atual ? (
-                        <EyeOff size={20} />
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </button>
-                  </div>
+                {/* Senha Atual - USANDO COMPONENTE REUTILIZÁVEL */}
+                <div className="relative">
+                  <InputTexto
+                    label="Senha Atual"
+                    type={mostrarSenhas.atual ? "text" : "password"}
+                    value={formData.senhaAtual}
+                    onChange={(valor) => atualizarCampo("senhaAtual", valor)}
+                    placeholder="Digite sua senha atual"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => toggleMostrarSenha("atual")}
+                    className="absolute right-3 top-9 text-gray-400 hover:text-white"
+                  >
+                    {mostrarSenhas.atual ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+                  </button>
                 </div>
 
-                {/* Nova Senha */}
-                <div>
-                  <label className="block text-gray-300 mb-2 font-semibold">
-                    Nova Senha
-                  </label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Nova Senha */}
                   <div className="relative">
-                    <input
+                    <InputTexto
+                      label="Nova Senha"
                       type={mostrarSenhas.nova ? "text" : "password"}
                       value={formData.novaSenha}
-                      onChange={(e) =>
-                        atualizarCampo("novaSenha", e.target.value)
-                      }
+                      onChange={(valor) => atualizarCampo("novaSenha", valor)}
+                      placeholder="Nova senha (mín. 6 caracteres)"
                       disabled={loading}
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                      placeholder="Digite sua nova senha"
                     />
                     <button
                       type="button"
                       onClick={() => toggleMostrarSenha("nova")}
-                      disabled={loading}
-                      className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                      className="absolute right-3 top-9 text-gray-400 hover:text-white"
                     >
                       {mostrarSenhas.nova ? (
                         <EyeOff size={20} />
@@ -368,32 +310,23 @@ const PerfilGerente = () => {
                       )}
                     </button>
                   </div>
-                  <p className="text-gray-500 text-sm mt-1">
-                    Mínimo 6 caracteres
-                  </p>
-                </div>
 
-                {/* Confirmar Nova Senha */}
-                <div>
-                  <label className="block text-gray-300 mb-2 font-semibold">
-                    Confirmar Nova Senha
-                  </label>
+                  {/* Confirmar Senha */}
                   <div className="relative">
-                    <input
+                    <InputTexto
+                      label="Confirmar Nova Senha"
                       type={mostrarSenhas.confirmar ? "text" : "password"}
                       value={formData.confirmarSenha}
-                      onChange={(e) =>
-                        atualizarCampo("confirmarSenha", e.target.value)
+                      onChange={(valor) =>
+                        atualizarCampo("confirmarSenha", valor)
                       }
+                      placeholder="Confirme a nova senha"
                       disabled={loading}
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                      placeholder="Confirme sua nova senha"
                     />
                     <button
                       type="button"
                       onClick={() => toggleMostrarSenha("confirmar")}
-                      disabled={loading}
-                      className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                      className="absolute right-3 top-9 text-gray-400 hover:text-white"
                     >
                       {mostrarSenhas.confirmar ? (
                         <EyeOff size={20} />
@@ -406,52 +339,26 @@ const PerfilGerente = () => {
               </div>
             </div>
 
-            {/* Botões de Ação */}
-            <div className="flex gap-4 justify-end">
+            {/* Botão de Salvar */}
+            <div className="pt-6">
               <button
-                onClick={() => navigate("/admin")}
+                type="submit"
                 disabled={loading}
-                className=" bg-yellow-500 hover:bg-yellow-400 hover:scale-105 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-
-              <button
-                onClick={salvarAlteracoes}
-                disabled={loading}
-                className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
+                className={`w-full font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center ${
                   loading
-                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    : "bg-green-500 hover:from-green-400 hover:to-green-500 text-white transform hover:scale-105"
+                    ? "bg-gray-600 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
                 {loading ? (
-                  <>
-                    <Loader2 className="animate-spin mr-2" size={20} />
-                    Salvando...
-                  </>
+                  <Loader2 className="mr-2 animate-spin" size={20} />
                 ) : (
-                  <>
-                    <Save className="mr-2" size={20} />
-                    Salvar Alterações
-                  </>
+                  <Save className="mr-2" size={20} />
                 )}
+                {loading ? "Salvando..." : "Salvar Alterações"}
               </button>
             </div>
-          </div>
-
-          {/* Informações de Segurança */}
-          <div className="mt-8 bg-yellow-900/30 rounded-2xl p-6 border border-yellow-400/30">
-            <h4 className="text-lg font-bold text-yellow-400 mb-3">
-              🔒 Informações de Segurança
-            </h4>
-            <div className="space-y-2 text-sm text-gray-300">
-              <p>• Sua senha é criptografada e não pode ser recuperada</p>
-              <p>• Use uma senha forte com pelo menos 6 caracteres</p>
-              <p>• Se alterar o email, use-o para fazer login na próxima vez</p>
-              <p>• Email deve ser válido e único no sistema</p>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
