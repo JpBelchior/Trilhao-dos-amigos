@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import ErroComponent from "../componentes/Erro";
+import { useAuth } from "../context/AuthContext";
 
 const LoginGerente = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   // Estados do formulário
   const [formData, setFormData] = useState({
@@ -56,48 +58,41 @@ const LoginGerente = () => {
   // Submeter login
   const submeterLogin = async (e) => {
     e.preventDefault();
-
     if (!validarFormulario()) {
       return;
     }
-
     setLoading(true);
     setErro(null);
-
     try {
       console.log("🔑 Tentando fazer login como gerente:", formData.email);
+      // Usar o login do AuthContext ao invés de fetch direto
+      const resultado = await login(
+        formData.email.trim().toLowerCase(),
+        formData.senha
+      );
 
-      // Fazer requisição para o backend
-      const response = await fetch("http://localhost:8000/api/gerente/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          senha: formData.senha,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.sucesso) {
-        throw new Error(data.erro || "Erro ao fazer login");
+      if (!resultado.sucesso) {
+        throw new Error(resultado.erro || "Erro ao fazer login");
       }
 
-      console.log("✅ Login realizado com sucesso:", data.dados);
+      console.log("✅ Login realizado com sucesso:", resultado.dados);
 
-      // Salvar dados do gerente no localStorage
-      localStorage.setItem("gerente", JSON.stringify(data.dados));
-      localStorage.setItem("token", data.dados.token);
+      // 🎯 REDIRECIONAMENTO CORRIGIDO
+      console.log("🔄 Redirecionando para /admin...");
 
-      // Redirecionar para área de administração
-      navigate("/admin", { replace: true });
+      // Verificar se veio de alguma página específica
+      const destination = location.state?.from || "/admin";
+      console.log("🎯 Destino do redirecionamento:", destination);
 
       // Mostrar mensagem de sucesso
       alert(
-        `Bem-vindo(a), ${data.dados.nome}! Redirecionando para área de administração...`
+        `Bem-vindo(a), ${resultado.dados.gerente.nome}! Redirecionando para área administrativa...`
       );
+
+      // Fazer o redirecionamento
+      navigate(destination, { replace: true });
+
+      console.log("✅ Navigate executado para:", destination);
     } catch (error) {
       console.error("❌ Erro no login:", error);
       setErro(error.message || "Erro de conexão");
