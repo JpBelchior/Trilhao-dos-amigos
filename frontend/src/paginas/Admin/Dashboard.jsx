@@ -207,8 +207,8 @@ const AdminDashboard = () => {
             title="Participantes"
             description="Gerenciar inscrições, confirmar pagamentos e editar dados dos participantes"
             color="green"
-            badge={`${estatisticas.participantesConfirmados} confirmados`}
-            onClick={() => handleNavegar("Participantes")}
+            badge={`${estatisticas.totalParticipantes} inscritos`}
+            onClick={() => navigate("/admin/participantes")} // ← NAVEGAÇÃO DIRETA
           />
 
           <ActionCard

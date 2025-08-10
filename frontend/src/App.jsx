@@ -1,3 +1,5 @@
+// frontend/src/App.jsx - VERSÃO CORRIGIDA E COMPLETA
+
 import React from "react";
 import {
   HashRouter as Router,
@@ -5,14 +7,21 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+
 // 🎯 CONTEXT DE AUTENTICAÇÃO
 import { AuthProvider } from "./context/AuthContext";
-// 🧪 COMPONENTES DE TESTE (TEMPORÁRIOS)
 
+// COMPONENTES DE PROTEÇÃO
 import ProtectedRoute from "./componentes/ProtectedRoute";
-// 🎯 DASHBOARD ADMINISTRATIVO REAL
+
+// 🎯 DASHBOARD ADMINISTRATIVO
 import AdminDashboard from "./paginas/Admin/Dashboard";
 import PerfilGerente from "./paginas/Admin/PerfilGerente";
+
+// ✅ IMPORT DO ADMIN PARTICIPANTES - VERIFICAR SE ESTE ARQUIVO EXISTE
+// Se o arquivo não existir, comente esta linha temporariamente
+import AdminParticipantes from "./paginas/Admin/AdminParticipantes";
+
 // COMPONENTES NORMAIS DO SITE
 import Navbar from "./componentes/NavBar";
 import TrilhaoHomePage from "./paginas/PaginaPrincipal";
@@ -25,19 +34,22 @@ import Provas from "./paginas/Provas";
 import InformacoesLocal from "./paginas/InformacoesLocal";
 import LoginGerente from "./paginas/Login";
 import Footer from "./componentes/paginaPrincipal/Footer";
+
 // Componente interno que tem acesso ao useLocation
 function AppContent() {
   const location = useLocation();
+
   // Verificar se deve mostrar a navbar
-  // Esconder na: login, páginas de teste e área admin
   const shouldShowNavbar =
     !location.pathname.includes("/login") &&
     !location.pathname.includes("/teste-") &&
     !location.pathname.includes("/admin");
+
   return (
     <div className="min-h-screen">
       {/* Navbar Condicional - só nas páginas públicas */}
       {shouldShowNavbar && <Navbar />}
+
       {/* Espaçador para compensar a navbar fixa */}
       <div className={shouldShowNavbar ? "pt-20" : ""}>
         <Routes>
@@ -62,7 +74,7 @@ function AppContent() {
           {/* ÁREA ADMINISTRATIVA - PROTEGIDA */}
           {/* ================================ */}
 
-          {/* 🎯 DASHBOARD PRINCIPAL - ROTA REAL */}
+          {/* Dashboard Principal */}
           <Route
             path="/admin"
             element={
@@ -72,11 +84,22 @@ function AppContent() {
             }
           />
 
+          {/* Perfil do Gerente */}
           <Route
             path="/admin/perfil"
             element={
               <ProtectedRoute>
                 <PerfilGerente />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Gerenciar Participantes */}
+          <Route
+            path="/admin/participantes"
+            element={
+              <ProtectedRoute>
+                <AdminParticipantes />
               </ProtectedRoute>
             }
           />
@@ -88,14 +111,15 @@ function AppContent() {
     </div>
   );
 }
+
 function App() {
   return (
     <Router>
-      {/* 🎯 AUTHPROVIDER ENVOLVENDO TODA A APLICAÇÃO */}
       <AuthProvider>
         <AppContent />
       </AuthProvider>
     </Router>
   );
 }
+
 export default App;
