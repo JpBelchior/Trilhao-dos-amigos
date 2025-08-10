@@ -27,4 +27,6 @@ router.get(
   GerenteController.verificarToken
 );
 
+router.put("/perfil", verificarAutenticacao, GerenteController.atualizarPerfil);
+
 export default router;

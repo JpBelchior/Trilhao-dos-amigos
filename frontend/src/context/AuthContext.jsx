@@ -109,6 +109,55 @@ export const AuthProvider = ({ children }) => {
       return { sucesso: false, erro: error.message };
     }
   };
+
+  const atualizarPerfil = async (dadosAtualizacao) => {
+    try {
+      console.log("🔄 [AuthContext] Atualizando perfil...", dadosAtualizacao);
+
+      const response = await fetchAuth(
+        "http://localhost:8000/api/gerente/perfil",
+        {
+          method: "PUT",
+          body: JSON.stringify(dadosAtualizacao),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.sucesso) {
+        throw new Error(data.erro || "Erro ao atualizar perfil");
+      }
+
+      // ✅ Atualizar dados do gerente no estado e localStorage
+      const gerenteAtualizado = data.dados.gerente;
+      setGerente(gerenteAtualizado);
+      localStorage.setItem("gerente", JSON.stringify(gerenteAtualizado));
+
+      // ✅ NOVO: Verificar se há novo token (quando email é alterado)
+      if (data.dados.novoToken) {
+        console.log(
+          "🔑 [AuthContext] Atualizando token devido alteração de email"
+        );
+        setToken(data.dados.novoToken);
+        localStorage.setItem("token", data.dados.novoToken);
+      }
+
+      console.log(
+        "✅ [AuthContext] Perfil atualizado com sucesso:",
+        gerenteAtualizado.nome
+      );
+
+      return {
+        sucesso: true,
+        dados: data.dados,
+        alteracoes: data.dados.alteracoes,
+        novoToken: !!data.dados.novoToken, // Informar se token foi atualizado
+      };
+    } catch (error) {
+      console.error("❌ [AuthContext] Erro ao atualizar perfil:", error);
+      return { sucesso: false, erro: error.message };
+    }
+  };
   const logout = () => {
     console.log("👋 [AuthContext] Fazendo logout...");
     setToken(null);
@@ -174,6 +223,7 @@ export const AuthProvider = ({ children }) => {
     isLoggedIn,
     getAuthHeaders,
     fetchAuth,
+    atualizarPerfil,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

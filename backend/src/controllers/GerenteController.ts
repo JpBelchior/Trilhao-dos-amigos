@@ -302,4 +302,230 @@ export class GerenteController {
       res.status(500).json(response);
     }
   }
+  // ADICIONAR esta função ao final do arquivo backend/src/controllers/GerenteController.ts
+
+  // ✅ NOVA FUNÇÃO: PUT /api/gerente/perfil - Atualizar dados do gerente logado
+  public static async atualizarPerfil(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const gerente = req.gerente;
+      const { nome, email, senhaAtual, novaSenha, confirmarSenha } = req.body;
+
+      console.log(
+        "🔄 [GerenteController] Atualizando perfil do gerente:",
+        gerente?.id
+      );
+
+      if (!gerente) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Gerente não autenticado",
+        };
+        res.status(401).json(response);
+        return;
+      }
+
+      // Buscar dados completos do gerente no banco
+      const gerenteCompleto = await Gerente.findByPk(gerente.id);
+      if (!gerenteCompleto) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Gerente não encontrado",
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // ✅ VALIDAÇÕES
+      const dadosParaAtualizar: any = {};
+      let emailAlterado = false;
+
+      // 1. Validar nome se fornecido
+      if (nome !== undefined) {
+        if (!nome || nome.trim().length < 2) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Nome deve ter pelo menos 2 caracteres",
+          };
+          res.status(400).json(response);
+          return;
+        }
+        if (nome.trim().length > 100) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Nome deve ter no máximo 100 caracteres",
+          };
+          res.status(400).json(response);
+          return;
+        }
+        // Só atualizar se for diferente do atual
+        if (nome.trim() !== gerenteCompleto.nome) {
+          dadosParaAtualizar.nome = nome.trim();
+        }
+      }
+
+      // 2. Validar email se fornecido
+      if (email !== undefined) {
+        const emailNormalizado = email.trim().toLowerCase();
+
+        // Validar formato do email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailNormalizado)) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Email inválido",
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Verificar se é diferente do atual
+        if (emailNormalizado !== gerenteCompleto.email.toLowerCase()) {
+          // Verificar se o novo email já existe
+          const emailJaExiste = await Gerente.buscarPorEmail(emailNormalizado);
+          if (emailJaExiste && emailJaExiste.id !== gerenteCompleto.id) {
+            const response: IApiResponse = {
+              sucesso: false,
+              erro: "Este email já está sendo usado",
+            };
+            res.status(400).json(response);
+            return;
+          }
+
+          dadosParaAtualizar.email = emailNormalizado;
+          emailAlterado = true;
+        }
+      }
+
+      // 3. Validar mudança de senha se fornecida
+      if (novaSenha) {
+        if (!senhaAtual) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Senha atual é obrigatória para alterar a senha",
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Verificar se senha atual está correta
+        const senhaAtualValida = await gerenteCompleto.verificarSenha(
+          senhaAtual
+        );
+        if (!senhaAtualValida) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Senha atual incorreta",
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Verificar se nova senha é válida
+        if (novaSenha.length < 6) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Nova senha deve ter pelo menos 6 caracteres",
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Verificar confirmação de senha
+        if (novaSenha !== confirmarSenha) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Confirmação de senha não confere",
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Verificar se nova senha é diferente da atual
+        const novaSenhaIgualAtual = await gerenteCompleto.verificarSenha(
+          novaSenha
+        );
+        if (novaSenhaIgualAtual) {
+          const response: IApiResponse = {
+            sucesso: false,
+            erro: "Nova senha deve ser diferente da senha atual",
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Hash da nova senha
+        dadosParaAtualizar.senha = await Gerente.hashSenha(novaSenha);
+      }
+
+      // Verificar se há algo para atualizar
+      if (Object.keys(dadosParaAtualizar).length === 0) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Nenhuma alteração foi enviada",
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // ✅ SALVAR NO BANCO
+      await gerenteCompleto.update(dadosParaAtualizar);
+
+      console.log("✅ Perfil atualizado:", {
+        id: gerenteCompleto.id,
+        nome: gerenteCompleto.nome,
+        email: gerenteCompleto.email,
+        alteracoes: Object.keys(dadosParaAtualizar),
+      });
+
+      // ✅ GERAR NOVO TOKEN SE EMAIL FOI ALTERADO
+      let novoToken = null;
+      if (emailAlterado) {
+        const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
+        novoToken = jwt.sign(
+          {
+            id: gerenteCompleto.id,
+            email: gerenteCompleto.email,
+            nome: gerenteCompleto.nome,
+            tipo: "gerente",
+          },
+          jwtSecret,
+          {
+            expiresIn: "8h",
+          }
+        );
+        console.log("🔑 Novo token JWT gerado devido alteração de email");
+      }
+
+      // ✅ RESPOSTA DE SUCESSO
+      const response: IApiResponse = {
+        sucesso: true,
+        dados: {
+          gerente: {
+            id: gerenteCompleto.id!,
+            nome: gerenteCompleto.nome,
+            email: gerenteCompleto.email,
+            createdAt: gerenteCompleto.createdAt,
+          },
+          alteracoes: Object.keys(dadosParaAtualizar),
+          novoToken: novoToken, // Incluir novo token se email foi alterado
+        },
+        mensagem: dadosParaAtualizar.senha
+          ? "Perfil e senha atualizados com sucesso"
+          : "Perfil atualizado com sucesso",
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("💥 [GerenteController] Erro ao atualizar perfil:", error);
+      const response: IApiResponse = {
+        sucesso: false,
+        erro: "Erro ao atualizar perfil",
+        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      };
+      res.status(500).json(response);
+    }
+  }
 }

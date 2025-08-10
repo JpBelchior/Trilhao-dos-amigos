@@ -10,6 +10,7 @@ import {
   Trophy,
   RefreshCw,
   Camera,
+  Lock,
 } from "lucide-react";
 import LoadingComponent from "../../componentes/Loading";
 import ErroComponent from "../../componentes/Erro";
@@ -96,7 +97,14 @@ const AdminDashboard = () => {
   };
   const handleNavegar = (destino) => {
     console.log("🔄 [Dashboard] Navegando para:", destino);
-    // Aqui você pode implementar a lógica de navegação
+
+    // ✅ Implementar navegação para perfil
+    if (destino === "Perfil") {
+      navigate("/admin/perfil");
+      return;
+    }
+
+    // Para outras páginas, mostrar alert temporário
     alert(`Navegação para ${destino} será implementada no próximo passo!`);
   };
 
@@ -138,16 +146,27 @@ const AdminDashboard = () => {
               Últimas atualizações: {new Date().toLocaleString()}
             </p>
           </div>
-
-          <button
-            onClick={handleLogout}
-            className={`group flex items-center mb-12 px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105
+          <div className="justify-end flex p-5 mr-3">
+            <button
+              onClick={() => navigate("/admin/perfil")}
+              className={`group flex items-center mb-12 mr-5 px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105
                   bg-yellow-500 text-black shadow-lg shadow-yellow-400/25
                `}
-          >
-            <LogOut className="mr-2" size={20} />
-            Sair
-          </button>
+            >
+              <Lock className="mr-2" size={20} />
+              Atualizar Perfil
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className={`group flex items-center mb-12 px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105
+                  bg-yellow-500 text-black shadow-lg shadow-yellow-400/25
+               `}
+            >
+              <LogOut className="mr-2" size={20} />
+              Sair
+            </button>
+          </div>
         </div>
 
         {/* 🎯 CARDS DE ESTATÍSTICAS USANDO STATCARD */}

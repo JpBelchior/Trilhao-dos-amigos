@@ -12,6 +12,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./componentes/ProtectedRoute";
 // 🎯 DASHBOARD ADMINISTRATIVO REAL
 import AdminDashboard from "./paginas/Admin/Dashboard";
+import PerfilGerente from "./paginas/Admin/PerfilGerente";
 // COMPONENTES NORMAIS DO SITE
 import Navbar from "./componentes/NavBar";
 import TrilhaoHomePage from "./paginas/PaginaPrincipal";
@@ -67,6 +68,15 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/perfil"
+            element={
+              <ProtectedRoute>
+                <PerfilGerente />
               </ProtectedRoute>
             }
           />
