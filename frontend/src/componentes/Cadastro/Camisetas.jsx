@@ -31,7 +31,7 @@ const StepCamisetas = ({
       <div className="bg-green-900/30 rounded-2xl p-6 border border-green-400/30">
         <h3 className="text-xl font-bold text-green-400 mb-4">
           <Gift className="inline mr-2 mb-1" size={20} />
-          Camiseta Grátis (incluída na inscrição)
+          Camiseta Grátis
         </h3>
 
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -156,7 +156,7 @@ const StepCamisetas = ({
               : "bg-gray-600 text-gray-400 cursor-not-allowed"
           }`}
         >
-          + Adicionar Camiseta Extra (R$ 50,00)
+          Adicionar Camiseta
         </button>
 
         {/* Lista de camisetas extras adicionadas */}

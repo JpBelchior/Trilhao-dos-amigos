@@ -10,6 +10,7 @@ import {
   Edit3,
   Phone,
   Mail,
+  Trash2, // NOVO: ícone para excluir
 } from "lucide-react";
 
 const ListaParticipantes = ({
@@ -17,7 +18,7 @@ const ListaParticipantes = ({
   indiceInicio,
   selecionarParticipante,
   confirmarPagamento,
-  cancelarParticipante,
+  excluirParticipante, // NOVO: função para excluir
   operacaoLoading,
 }) => {
   // Função para obter cor do status
@@ -87,27 +88,19 @@ const ListaParticipantes = ({
     }
   };
 
-  // Função para cancelar participante com prompt
-  const handleCancelarParticipante = async (participante) => {
+  // NOVO: Função para excluir participante com confirmação
+  const handleExcluirParticipante = async (participante) => {
     const confirmacao = window.confirm(
-      `⚠️ ATENÇÃO: Cancelar inscrição de ${participante.nome}?\n\nEsta ação liberará as camisetas reservadas e não pode ser desfeita.`
+      `⚠️ ATENÇÃO: Excluir permanentemente ${participante.nome}?\n\nEsta ação não pode ser desfeita e liberará todas as camisetas reservadas.`
     );
 
     if (confirmacao) {
-      const motivo = window.prompt(
-        "Motivo do cancelamento:",
-        "Cancelado a pedido do participante"
-      );
+      const resultado = await excluirParticipante(participante.id);
 
-      if (motivo !== null) {
-        // Usuário não cancelou o prompt
-        const resultado = await cancelarParticipante(participante.id, motivo);
-
-        if (resultado.sucesso) {
-          alert(`✅ Inscrição de ${participante.nome} cancelada com sucesso!`);
-        } else {
-          alert(`❌ Erro ao cancelar inscrição: ${resultado.erro}`);
-        }
+      if (resultado.sucesso) {
+        alert(`✅ ${participante.nome} foi excluído com sucesso!`);
+      } else {
+        alert(`❌ Erro ao excluir: ${resultado.erro}`);
       }
     }
   };
@@ -224,58 +217,45 @@ const ListaParticipantes = ({
 
               {/* Ações Administrativas */}
               <div className="space-y-2">
-                {/* Botão Editar - Sempre disponível */}
-                <button
-                  onClick={() => selecionarParticipante(participante)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center text-sm"
-                >
-                  <Edit3 className="mr-2" size={14} />
-                  Editar Dados
-                </button>
-
-                {/* Ações baseadas no status */}
-                {participante.statusPagamento === "pendente" && (
-                  <>
-                    <button
-                      onClick={() => handleConfirmarPagamento(participante)}
-                      disabled={operacaoLoading}
-                      className={`w-full font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center text-sm ${
-                        operacaoLoading
-                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                          : "bg-green-600 hover:bg-green-700 text-white"
-                      }`}
-                    >
-                      <CheckCircle className="mr-2" size={14} />
-                      Confirmar Pagamento
-                    </button>
-
-                    <button
-                      onClick={() => handleCancelarParticipante(participante)}
-                      disabled={operacaoLoading}
-                      className={`w-full font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center text-sm ${
-                        operacaoLoading
-                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                          : "bg-red-600 hover:bg-red-700 text-white"
-                      }`}
-                    >
-                      <XCircle className="mr-2" size={14} />
-                      Cancelar
-                    </button>
-                  </>
-                )}
-
-                {participante.statusPagamento === "confirmado" && (
+                {/* LINHA COM BOTÕES LADO A LADO */}
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Botão Editar */}
                   <button
-                    onClick={() => handleCancelarParticipante(participante)}
+                    onClick={() => selecionarParticipante(participante)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-xl transition-all flex items-center justify-center text-sm"
+                  >
+                    <Edit3 className="mr-1" size={12} />
+                    Editar
+                  </button>
+
+                  {/* Botão Excluir */}
+                  <button
+                    onClick={() => handleExcluirParticipante(participante)}
                     disabled={operacaoLoading}
-                    className={`w-full font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center text-sm ${
+                    className={`font-bold py-2 px-3 rounded-xl transition-all flex items-center justify-center text-sm ${
                       operacaoLoading
                         ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                         : "bg-red-600 hover:bg-red-700 text-white"
                     }`}
                   >
-                    <XCircle className="mr-2" size={14} />
-                    Cancelar Inscrição
+                    <Trash2 className="mr-1" size={12} />
+                    Excluir
+                  </button>
+                </div>
+
+                {/* BOTÕES ESPECÍFICOS POR STATUS - EMBAIXO */}
+                {participante.statusPagamento === "pendente" && (
+                  <button
+                    onClick={() => handleConfirmarPagamento(participante)}
+                    disabled={operacaoLoading}
+                    className={`w-full font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center text-sm ${
+                      operacaoLoading
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700 text-white"
+                    }`}
+                  >
+                    <CheckCircle className="mr-2" size={14} />
+                    Confirmar Pagamento
                   </button>
                 )}
 

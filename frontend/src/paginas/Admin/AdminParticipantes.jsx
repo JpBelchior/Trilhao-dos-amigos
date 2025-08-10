@@ -88,75 +88,83 @@ const AdminParticipantes = () => {
     fecharModal();
   };
 
+  // NOVA: Função para excluir participante (movida do modal)
+  const handleExcluirParticipante = async (participanteId) => {
+    try {
+      // Usar a mesma lógica que funcionava no modal
+      const response = await fetch(
+        `http://localhost:8000/api/participantes/${participanteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        // Recarregar dados
+        await recarregarDados();
+        return { sucesso: true };
+      } else {
+        return {
+          sucesso: false,
+          erro: data.erro || "Erro ao excluir participante",
+        };
+      }
+    } catch (error) {
+      console.error("Erro ao excluir participante:", error);
+      return { sucesso: false, erro: error.message || "Erro de conexão" };
+    }
+  };
+
   // Função para exportar lista (futura implementação)
   const exportarLista = () => {
     alert("📊 Exportação será implementada na próxima versão!");
-    // TODO: Implementar exportação CSV/PDF
   };
 
-  // Se estiver carregando
-  if (loading) {
-    return (
-      <LoadingComponent
-        loading="Carregando participantes..."
-        className="bg-gradient-to-br from-green-900 via-black to-green-900"
-      />
-    );
-  }
-
-  // Se houve erro
-  if (erro) {
-    return (
-      <ErroComponent
-        erro={{
-          mensagem: erro,
-          tipo: "conexao",
-        }}
-        onTentarNovamente={recarregarDados}
-        className="bg-gradient-to-br from-green-900 via-black to-green-900"
-      />
-    );
-  }
+  if (loading) return <LoadingComponent />;
+  if (erro) return <ErroComponent erro={erro} />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">
       <div className="container mx-auto px-6">
-        {/* CABEÇALHO */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
-          <div>
-            <h1 className="text-5xl font-black text-white mb-4">
-              GERENCIAR <span className="text-yellow-400">PARTICIPANTES</span>
-            </h1>
-            <p className="text-gray-400 text-xl">
-              Visualize, edite e gerencie todas as inscrições do Trilhão dos
-              Amigos
-            </p>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mt-4"></div>
-          </div>
-
-          {/* BOTÕES DE AÇÃO DO CABEÇALHO */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-6 lg:mt-0">
+        {/* HEADER DA PÁGINA */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
+          <div className="flex items-center mb-4 lg:mb-0">
             <button
               onClick={() => navigate("/admin")}
-              className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
+              className="bg-black/40 backdrop-blur-lg p-3 rounded-xl border border-green-400/30 hover:border-green-400/60 transition-all mr-4"
             >
-              <ArrowLeft className="mr-2" size={20} />
-              Voltar ao Dashboard
+              <ArrowLeft className="text-green-400" size={24} />
             </button>
 
+            <div>
+              <h1 className="text-4xl font-black text-white mb-2">
+                <Users className="inline mr-3" size={40} />
+                GERENCIAR PARTICIPANTES
+              </h1>
+              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400"></div>
+            </div>
+          </div>
+
+          <div className="flex space-x-4">
             <button
               onClick={exportarLista}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
             >
               <Download className="mr-2" size={20} />
-              Exportar Lista
+              Exportar
             </button>
 
             <button
               onClick={recarregarDados}
-              disabled={loading || operacaoLoading}
+              disabled={loading}
               className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
-                loading || operacaoLoading
+                loading
                   ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700 text-white"
               }`}
@@ -221,7 +229,7 @@ const AdminParticipantes = () => {
             indiceInicio={indiceInicio}
             selecionarParticipante={selecionarParticipante}
             confirmarPagamento={confirmarPagamento}
-            cancelarParticipante={cancelarParticipante}
+            excluirParticipante={handleExcluirParticipante} // NOVA FUNÇÃO
             operacaoLoading={operacaoLoading}
           />
         </div>
@@ -238,32 +246,24 @@ const AdminParticipantes = () => {
                     indiceInicio + itensPorPagina,
                     participantesFiltrados.length
                   )}{" "}
-                  de {participantesFiltrados.length} participantes
+                  de {participantesFiltrados.length}
                 </span>
 
-                {/* SELECT ITENS POR PÁGINA */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 text-sm">
-                    Itens por página:
-                  </span>
-                  <select
-                    value={itensPorPagina}
-                    onChange={(e) =>
-                      alterarItensPorPagina(Number(e.target.value))
-                    }
-                    className="bg-black/50 border border-gray-600 rounded-xl px-3 py-1 text-white text-sm focus:border-yellow-400 focus:outline-none"
-                  >
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                </div>
+                <select
+                  value={itensPorPagina}
+                  onChange={(e) =>
+                    alterarItensPorPagina(Number(e.target.value))
+                  }
+                  className="bg-black/40 text-white border border-green-400/30 rounded-lg px-3 py-1 text-sm"
+                >
+                  <option value={10}>10 por página</option>
+                  <option value={25}>25 por página</option>
+                  <option value={50}>50 por página</option>
+                </select>
               </div>
 
-              {/* CONTROLES DE PAGINAÇÃO */}
+              {/* BOTÕES DE NAVEGAÇÃO */}
               <div className="flex items-center space-x-2">
-                {/* Botão Anterior */}
                 <button
                   onClick={() => irParaPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
@@ -276,44 +276,10 @@ const AdminParticipantes = () => {
                   ← Anterior
                 </button>
 
-                {/* Números das Páginas */}
-                <div className="flex space-x-1">
-                  {[...Array(totalPaginas)].map((_, i) => {
-                    const pagina = i + 1;
-                    // Mostrar apenas páginas próximas à atual
-                    if (
-                      pagina === 1 ||
-                      pagina === totalPaginas ||
-                      (pagina >= paginaAtual - 2 && pagina <= paginaAtual + 2)
-                    ) {
-                      return (
-                        <button
-                          key={pagina}
-                          onClick={() => irParaPagina(pagina)}
-                          className={`px-3 py-2 rounded-xl font-bold transition-all ${
-                            paginaAtual === pagina
-                              ? "bg-yellow-500 text-black"
-                              : "bg-black/40 text-white hover:bg-gray-700"
-                          }`}
-                        >
-                          {pagina}
-                        </button>
-                      );
-                    } else if (
-                      pagina === paginaAtual - 3 ||
-                      pagina === paginaAtual + 3
-                    ) {
-                      return (
-                        <span key={pagina} className="px-2 py-2 text-gray-400">
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
+                <span className="text-gray-400 px-4">
+                  Página {paginaAtual} de {totalPaginas}
+                </span>
 
-                {/* Botão Próximo */}
                 <button
                   onClick={() => irParaPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
@@ -356,7 +322,7 @@ const AdminParticipantes = () => {
               </p>
               <p>
                 • <strong>Status Pendente:</strong> pode confirmar pagamento ou
-                cancelar inscrição
+                excluir participante
               </p>
             </div>
             <div>

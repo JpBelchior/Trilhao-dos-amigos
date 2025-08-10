@@ -43,20 +43,6 @@ app.get("/seed", async (req, res) => {
     await popularEstoque();
     await popularCampeoes();
     await popularParticipantes();
-
-    res.json({
-      success: true,
-      message: "Dados de exemplo criados com sucesso!",
-      detalhes: {
-        estoque: "Camisetas populadas",
-        campeoes: "Hall da fama populado",
-        participantes:
-          "50 participantes criados (47 confirmados + 3 cancelados)",
-        observacao:
-          "Os 3 participantes cancelados serão excluídos automaticamente em 15 minutos",
-      },
-      timestamp: new Date().toISOString(),
-    });
   } catch (error) {
     res.status(500).json({
       error: "Erro ao criar dados de exemplo",

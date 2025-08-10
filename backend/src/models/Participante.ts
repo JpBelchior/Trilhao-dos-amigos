@@ -178,22 +178,73 @@ Participante.init(
     // Hooks - executam automaticamente
     hooks: {
       beforeCreate: async (participante: Participante) => {
-        // Gerar número de inscrição automático
-        const count = await Participante.count();
+        // ✅ CORREÇÃO: Gerar número único baseado no último número + 1
+        let numeroTentativas = 0;
+        const maxTentativas = 10;
         const ano = new Date().getFullYear();
-        participante.numeroInscricao = `TRI${ano}${String(count + 1).padStart(
-          3,
-          "0"
-        )}`;
 
-        console.log(
-          "🎫 Número de inscrição gerado:",
-          participante.numeroInscricao
-        );
+        while (numeroTentativas < maxTentativas) {
+          try {
+            // Buscar o último número de inscrição do ano atual
+            const ultimoParticipante = await Participante.findOne({
+              where: {
+                numeroInscricao: {
+                  [require("sequelize").Op.like]: `TRI${ano}%`,
+                },
+              },
+              order: [["numeroInscricao", "DESC"]],
+              attributes: ["numeroInscricao"],
+            });
+
+            let proximoNumero = 1;
+
+            if (ultimoParticipante && ultimoParticipante.numeroInscricao) {
+              // Extrair número do último registro (ex: TRI2025050 -> 050)
+              const numeroAtual = parseInt(
+                ultimoParticipante.numeroInscricao.replace(`TRI${ano}`, "")
+              );
+              proximoNumero = numeroAtual + 1;
+            }
+
+            // Gerar novo número com padding
+            const novoNumero = `TRI${ano}${String(proximoNumero).padStart(
+              3,
+              "0"
+            )}`;
+
+            // Verificar se já existe (proteção extra)
+            const jaExiste = await Participante.findOne({
+              where: { numeroInscricao: novoNumero },
+            });
+
+            if (!jaExiste) {
+              participante.numeroInscricao = novoNumero;
+              console.log(
+                "🎫 Número de inscrição gerado:",
+                participante.numeroInscricao
+              );
+              break;
+            } else {
+              console.log("⚠️ Número já existe, tentando próximo:", novoNumero);
+              numeroTentativas++;
+            }
+          } catch (error) {
+            console.error("❌ Erro ao gerar número de inscrição:", error);
+            numeroTentativas++;
+          }
+        }
+
+        // Se falhou em todas as tentativas, usar timestamp como fallback
+        if (numeroTentativas >= maxTentativas) {
+          const timestamp = Date.now().toString().slice(-6);
+          participante.numeroInscricao = `TRI${ano}${timestamp}`;
+          console.log(
+            "🆘 Usando número de emergência:",
+            participante.numeroInscricao
+          );
+        }
 
         // Calcular valor da inscrição dinamicamente
-        // Valor base: R$ 100 (inscrição + 1 camiseta grátis)
-        // Camisetas extras: R$ 50 cada (será adicionado quando criar as extras)
         if (!participante.valorInscricao) {
           participante.valorInscricao = 100.0;
         }

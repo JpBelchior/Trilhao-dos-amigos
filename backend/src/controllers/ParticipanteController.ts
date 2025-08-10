@@ -14,6 +14,7 @@ import {
 import { Op } from "sequelize";
 import { IBGEService } from "../Service/IBGEService";
 import { escape } from "querystring";
+import { AuthenticatedRequest } from "./GerenteController";
 
 export class ParticipanteController {
   // POST /api/participantes - Criar participante PENDENTE (reserva camisetas)
@@ -412,6 +413,115 @@ export class ParticipanteController {
     }
   }
 
+  public static async editarParticipante(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    const transaction = await sequelize.transaction();
+
+    try {
+      const { id } = req.params;
+      const dadosAtualizacao = req.body;
+      const gerente = req.gerente;
+
+      console.log(
+        `📝 [ParticipanteController] Gerente ${gerente?.nome} editando participante ${id}`
+      );
+
+      // Buscar participante
+      const participante = await Participante.findByPk(id, {
+        transaction,
+      });
+
+      if (!participante) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Participante não encontrado",
+        };
+        res.status(404).json(response);
+        await transaction.rollback();
+        return;
+      }
+
+      // Campos que podem ser editados pelo admin
+      const camposEditaveis = [
+        "nome",
+        "modeloMoto",
+        "categoriaMoto",
+        "statusPagamento",
+        "observacoes",
+      ];
+
+      // Validar que apenas campos permitidos estão sendo alterados
+      const camposInvalidos = Object.keys(dadosAtualizacao).filter(
+        (campo) => !camposEditaveis.includes(campo)
+      );
+
+      if (camposInvalidos.length > 0) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Campos não editáveis detectados",
+          detalhes: `Campos não permitidos: ${camposInvalidos.join(", ")}`,
+        };
+        res.status(400).json(response);
+        await transaction.rollback();
+        return;
+      }
+
+      // Apenas validações básicas necessárias
+      // (Validações específicas removidas conforme solicitado)
+
+      // Atualizar dados
+      await participante.update(dadosAtualizacao, { transaction });
+
+      await transaction.commit();
+
+      console.log(
+        `✅ Participante ${id} atualizado pelo gerente ${gerente?.nome}`
+      );
+
+      const response: IApiResponse = {
+        sucesso: true,
+        dados: {
+          id: participante.id,
+          numeroInscricao: participante.numeroInscricao,
+          nome: participante.nome,
+          email: participante.email,
+          cpf: participante.cpf,
+          telefone: participante.telefone,
+          estado: participante.estado,
+          cidade: participante.cidade,
+          modeloMoto: participante.modeloMoto,
+          categoriaMoto: participante.categoriaMoto,
+          statusPagamento: participante.statusPagamento,
+          observacoes: participante.observacoes,
+          tamanhoCamiseta: participante.tamanhoCamiseta,
+          tipoCamiseta: participante.tipoCamiseta,
+          valorInscricao: participante.valorInscricao,
+          createdAt: participante.createdAt,
+          updatedAt: participante.updatedAt,
+        },
+        mensagem: "Participante atualizado com sucesso",
+      };
+
+      res.json(response);
+    } catch (error) {
+      await transaction.rollback();
+      console.error(
+        "💥 [ParticipanteController] Erro ao editar participante:",
+        error
+      );
+
+      const response: IApiResponse = {
+        sucesso: false,
+        erro: "Erro ao atualizar participante",
+        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      };
+
+      res.status(500).json(response);
+    }
+  }
+
   // GET /api/participantes - Listar participantes
   public static async listarParticipantes(
     req: Request,
@@ -585,6 +695,106 @@ export class ParticipanteController {
       const response: IApiResponse = {
         sucesso: false,
         erro: "Erro ao atualizar pagamento",
+        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      };
+
+      res.status(500).json(response);
+    }
+  }
+
+  public static async excluirParticipante(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    const transaction = await sequelize.transaction();
+
+    try {
+      const { id } = req.params;
+      const gerente = req.gerente;
+
+      console.log(
+        `🗑️ [ParticipanteController] Gerente ${gerente?.nome} excluindo participante ${id}`
+      );
+
+      // Buscar participante com camisetas extras
+      const participante = await Participante.findByPk(id, {
+        include: [
+          {
+            model: CamisetaExtra,
+            as: "camisetasExtras",
+          },
+        ],
+        transaction,
+      });
+
+      if (!participante) {
+        const response: IApiResponse = {
+          sucesso: false,
+          erro: "Participante não encontrado",
+        };
+        res.status(404).json(response);
+        await transaction.rollback();
+        return;
+      }
+
+      // Buscar todas as camisetas para liberar do estoque
+      const camisetasParaLiberar = [
+        {
+          tamanho: participante.tamanhoCamiseta,
+          tipo: participante.tipoCamiseta,
+        },
+      ];
+
+      // Adicionar camisetas extras
+      const camisetasExtras = (participante as any).camisetasExtras || [];
+      for (const extra of camisetasExtras) {
+        camisetasParaLiberar.push({ tamanho: extra.tamanho, tipo: extra.tipo });
+      }
+
+      // Excluir participante (cascade vai excluir camisetas extras automaticamente)
+      await participante.destroy({ transaction });
+
+      console.log(
+        `📦 Liberando camisetas no estoque para: ${participante.numeroInscricao}`
+      );
+
+      // Liberar todas as camisetas no estoque
+      for (const camiseta of camisetasParaLiberar) {
+        const estoque = await EstoqueCamiseta.findOne({
+          where: { tamanho: camiseta.tamanho, tipo: camiseta.tipo },
+          transaction,
+        });
+
+        if (estoque) {
+          await estoque.atualizarReservadas();
+          console.log(
+            `✅ Camiseta liberada: ${camiseta.tamanho} ${camiseta.tipo}`
+          );
+        }
+      }
+
+      await transaction.commit();
+
+      console.log(
+        `✅ Participante excluído completamente pelo gerente ${gerente?.nome}`
+      );
+
+      const response: IApiResponse = {
+        sucesso: true,
+        mensagem: "Participante excluído com sucesso",
+      };
+
+      res.json(response);
+    } catch (error) {
+      await transaction.rollback();
+      console.error(
+        "💥 [ParticipanteController] Erro ao excluir participante:",
+        error
+      );
+
+      const response: IApiResponse = {
+        sucesso: false,
+        erro: "Erro ao excluir participante",
         detalhes: error instanceof Error ? error.message : "Erro desconhecido",
       };
 

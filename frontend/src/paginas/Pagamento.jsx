@@ -77,6 +77,9 @@ const Pagamento = () => {
 
   // Criar PIX via Mercado Pago
   const gerarPixReal = async () => {
+    if (loadingPix || dadosPix) {
+      return; // Sai sem fazer nada se já está carregando ou já tem dados, evitar duplicidade
+    }
     try {
       setLoadingPix(true);
       setErro(null);

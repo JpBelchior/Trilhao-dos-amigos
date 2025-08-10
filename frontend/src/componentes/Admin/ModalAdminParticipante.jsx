@@ -165,38 +165,6 @@ const ModalAdminParticipante = ({
     setModoEdicao(false);
   };
 
-  // Excluir participante
-  const excluirParticipante = async () => {
-    const confirmacao = window.confirm(
-      `⚠️ ATENÇÃO: Excluir permanentemente ${participante.nome}?\n\nEsta ação não pode ser desfeita e liberará todas as camisetas reservadas.`
-    );
-
-    if (!confirmacao) return;
-    if (!window.confirm("Tem certeza absoluta?")) return;
-
-    setLoading(true);
-
-    try {
-      const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participante.id}`,
-        { method: "DELETE" }
-      );
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        alert(`✅ ${participante.nome} foi excluído com sucesso!`);
-        onDelete && onDelete(participante.id);
-      } else {
-        throw new Error(data.erro || "Erro ao excluir participante");
-      }
-    } catch (error) {
-      alert(`❌ Erro ao excluir: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (!isOpen || !participante) return null;
 
   return (
@@ -389,16 +357,7 @@ const ModalAdminParticipante = ({
         <div className="border-t border-green-400/30 p-6">
           {!modoEdicao ? (
             // Modo visualização
-            <div className="flex justify-between">
-              <button
-                onClick={excluirParticipante}
-                disabled={loading}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center"
-              >
-                <Trash2 className="mr-2" size={16} />
-                Excluir
-              </button>
-
+            <div className=" flex justify-center items-center">
               <button
                 onClick={() => setModoEdicao(true)}
                 disabled={loading}

@@ -84,11 +84,6 @@ const LoginGerente = () => {
       const destination = location.state?.from || "/admin";
       console.log("🎯 Destino do redirecionamento:", destination);
 
-      // Mostrar mensagem de sucesso
-      alert(
-        `Bem-vindo(a), ${resultado.dados.gerente.nome}! Redirecionando para área administrativa...`
-      );
-
       // Fazer o redirecionamento
       navigate(destination, { replace: true });
 
