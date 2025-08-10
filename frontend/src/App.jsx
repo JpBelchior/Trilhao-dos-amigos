@@ -8,8 +8,7 @@ import {
 // 🎯 CONTEXT DE AUTENTICAÇÃO
 import { AuthProvider } from "./context/AuthContext";
 // 🧪 COMPONENTES DE TESTE (TEMPORÁRIOS)
-import TesteAuth from "./componentes/TesteAuth";
-import TesteAdminPage from "./componentes/TesteAdminPage";
+
 import ProtectedRoute from "./componentes/ProtectedRoute";
 // 🎯 DASHBOARD ADMINISTRATIVO REAL
 import AdminDashboard from "./paginas/Admin/Dashboard";
@@ -68,38 +67,6 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* ================================ */}
-          {/* ROTAS DE TESTE - TEMPORÁRIAS */}
-          {/* ================================ */}
-
-          {/* 🧪 TESTE DO CONTEXT - PÁGINA PÚBLICA */}
-          <Route
-            path="/teste-auth"
-            element={
-              <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
-                <div className="container mx-auto px-6">
-                  <h1 className="text-4xl font-black text-white text-center mb-4">
-                    🧪 TESTE DO AUTHCONTEXT
-                  </h1>
-                  <p className="text-center text-gray-400 mb-8">
-                    Esta página é PÚBLICA - qualquer um pode acessar
-                  </p>
-                  <TesteAuth />
-                </div>
-              </div>
-            }
-          />
-
-          {/* 🔒 TESTE DE ROTA PROTEGIDA */}
-          <Route
-            path="/teste-admin-protegido"
-            element={
-              <ProtectedRoute>
-                <TesteAdminPage />
               </ProtectedRoute>
             }
           />
