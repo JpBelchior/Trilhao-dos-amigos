@@ -1,5 +1,4 @@
-// src/paginas/Pagamento.jsx - VERSÃO COM MERCADO PAGO REAL
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   CreditCard,
@@ -14,13 +13,14 @@ import {
 } from "lucide-react";
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
+
 const Pagamento = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   // Estados
   const [dadosPix, setDadosPix] = useState(null);
-  const [loadingPix, setLoadingPix] = useState(true);
+  const [loadingPix, setLoadingPix] = useState(false); // CORRIGIDO: inicia como false
   const [chavePixCopiada, setChavePixCopiada] = useState(false);
   const [codigoPixCopiado, setCodigoPixCopiado] = useState(false);
   const [pagamentoConfirmado, setPagamentoConfirmado] = useState(false);
@@ -28,59 +28,26 @@ const Pagamento = () => {
   const [erro, setErro] = useState(null);
   const [inscricaoCompleta, setInscricaoCompleta] = useState(null);
   const [tempoRestante, setTempoRestante] = useState(600); // 10 minutos em segundos
+  const [pixJaGerado, setPixJaGerado] = useState(false); // Novo estado para evitar múltiplas tentativas
 
   // Dados vindos do cadastro
   const { dadosInscricao, valorTotal } = location.state || {};
 
-  // Verificar se tem dados necessários
-  useEffect(() => {
-    if (!dadosInscricao || !valorTotal) {
-      alert("Dados não encontrados. Refaça o cadastro.");
-      navigate("/cadastro");
+  // Criar PIX via Mercado Pago - com useCallback para estabilizar
+  const gerarPixReal = useCallback(async () => {
+    // Proteção melhorada
+    if (pixJaGerado || dadosPix || loadingPix) {
+      console.log("🚫 Bloqueando nova tentativa de gerar PIX", {
+        pixJaGerado,
+        dadosPix: !!dadosPix,
+        loadingPix,
+      });
       return;
     }
 
-    // Gerar PIX real assim que a página carregar
-    gerarPixReal();
-  }, [dadosInscricao, valorTotal, navigate]);
-
-  // Timer de 10 minutos
-  useEffect(() => {
-    if (!dadosPix || pagamentoConfirmado) return;
-
-    const timer = setInterval(() => {
-      setTempoRestante((prev) => {
-        if (prev <= 1) {
-          alert(
-            "Tempo esgotado! O PIX expirou. Você será redirecionado para fazer uma nova inscrição."
-          );
-          navigate("/cadastro");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [dadosPix, pagamentoConfirmado, navigate]);
-
-  // Polling para verificar status do pagamento
-  useEffect(() => {
-    if (!dadosPix || pagamentoConfirmado) return;
-
-    const verificarPagamento = setInterval(async () => {
-      await consultarStatusPagamento();
-    }, 10000);
-
-    return () => clearInterval(verificarPagamento);
-  }, [dadosPix, pagamentoConfirmado]);
-
-  // Criar PIX via Mercado Pago
-  const gerarPixReal = async () => {
-    if (loadingPix || dadosPix) {
-      return; // Sai sem fazer nada se já está carregando ou já tem dados, evitar duplicidade
-    }
     try {
+      console.log("🏦 Iniciando geração de PIX...");
+      setPixJaGerado(true); // Marcar como tentativa iniciada
       setLoadingPix(true);
       setErro(null);
 
@@ -120,13 +87,57 @@ const Pagamento = () => {
     } catch (error) {
       console.error("❌ Erro ao gerar PIX:", error);
       setErro(error.message);
+      setPixJaGerado(false); // Resetar para permitir nova tentativa em caso de erro
     } finally {
       setLoadingPix(false);
+      console.log("🏁 Finalizando geração de PIX");
     }
-  };
+  }, [pixJaGerado, dadosPix, loadingPix, dadosInscricao?.id, valorTotal]);
+
+  // Verificar se tem dados necessários - SEM navigate nas dependências
+  useEffect(() => {
+    if (!dadosInscricao || !valorTotal) {
+      alert("Dados não encontrados. Refaça o cadastro.");
+      navigate("/cadastro");
+      return;
+    }
+
+    // Gerar PIX real assim que a página carregar
+    gerarPixReal();
+  }, [dadosInscricao, valorTotal, gerarPixReal]); // Removido 'navigate' das dependências
+
+  // Timer de 10 minutos
+  useEffect(() => {
+    if (!dadosPix || pagamentoConfirmado) return;
+
+    const timer = setInterval(() => {
+      setTempoRestante((prev) => {
+        if (prev <= 1) {
+          alert(
+            "Tempo esgotado! O PIX expirou. Você será redirecionado para fazer uma nova inscrição."
+          );
+          navigate("/cadastro");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [dadosPix, pagamentoConfirmado, navigate]);
+
+  // Polling para verificar status do pagamento
+  useEffect(() => {
+    if (!dadosPix || pagamentoConfirmado) return;
+
+    const verificarPagamento = setInterval(async () => {
+      await consultarStatusPagamento();
+    }, 10000);
+
+    return () => clearInterval(verificarPagamento);
+  }, [dadosPix, pagamentoConfirmado]);
 
   // Simular pagamento aprovado (para testes)
-  // Esta função deve ser removida em produção
   const simularPagamentoAprovado = async () => {
     try {
       console.log(
@@ -138,17 +149,18 @@ const Pagamento = () => {
 
       // Dados do participante confirmado (estrutura completa)
       const participanteConfirmado = {
-        id: dadosPix.participante.id,
-        numeroInscricao: dadosPix.participante.numeroInscricao,
-        nome: dadosPix.participante.nome,
-        email: dadosPix.participante.email,
+        id: dadosPix?.participante?.id || dadosInscricao?.id,
+        numeroInscricao:
+          dadosPix?.participante?.numeroInscricao ||
+          dadosInscricao?.numeroInscricao,
+        nome: dadosPix?.participante?.nome || dadosInscricao?.nome,
+        email: dadosPix?.participante?.email || dadosInscricao?.email,
         valorInscricao: valorTotal,
         statusPagamento: "confirmado",
-        // Adicionar dados do dadosInscricao se necessário
-        cidade: dadosInscricao.cidade,
-        estado: dadosInscricao.estado,
-        modeloMoto: dadosInscricao.modeloMoto,
-        categoriaMoto: dadosInscricao.categoriaMoto,
+        cidade: dadosInscricao?.cidade,
+        estado: dadosInscricao?.estado,
+        modeloMoto: dadosInscricao?.modeloMoto,
+        categoriaMoto: dadosInscricao?.categoriaMoto,
       };
 
       console.log(
@@ -156,10 +168,11 @@ const Pagamento = () => {
         participanteConfirmado
       );
 
-      // MÉTODO 1: Tentar confirmar via API do participante diretamente
+      // Tentar confirmar via API do participante diretamente
       try {
+        const participanteId = dadosPix?.participante?.id || dadosInscricao?.id;
         const confirmResponse = await fetch(
-          `http://localhost:8000/api/participantes/${dadosPix.participante.id}/pagamento`,
+          `http://localhost:8000/api/participantes/${participanteId}/pagamento`,
           {
             method: "PUT",
             headers: {
@@ -187,46 +200,22 @@ const Pagamento = () => {
           console.log(
             "✅ [SIMULAÇÃO] Estados definidos - pagamento confirmado!"
           );
-          console.log(
-            "✅ [SIMULAÇÃO] inscricaoCompleta:",
-            participanteConfirmado
-          );
-          console.log("✅ [SIMULAÇÃO] pagamentoConfirmado:", true);
-
-          return;
+        } else {
+          throw new Error("Falha na confirmação via API");
         }
       } catch (apiError) {
-        console.warn(
-          "⚠️ [SIMULAÇÃO] Falha na API, tentando método direto:",
-          apiError
-        );
+        console.error("❌ [SIMULAÇÃO] Erro na API:", apiError);
+
+        // Fallback: apenas simular localmente
+        setInscricaoCompleta(participanteConfirmado);
+        setPagamentoConfirmado(true);
+        setLoadingStatus(false);
+
+        console.log("⚠️ [SIMULAÇÃO] Usando fallback local");
       }
-
-      // MÉTODO 2: Confirmar diretamente (fallback)
-      console.log("🔄 [SIMULAÇÃO] Usando método direto de confirmação...");
-
-      // Definir estados de sucesso diretamente
-      setInscricaoCompleta(participanteConfirmado);
-      setPagamentoConfirmado(true);
-      setLoadingStatus(false);
-
-      console.log("✅ [SIMULAÇÃO] Confirmação direta realizada!");
-      console.log(
-        "✅ [SIMULAÇÃO] inscricaoCompleta final:",
-        participanteConfirmado
-      );
-      console.log("✅ [SIMULAÇÃO] pagamentoConfirmado final:", true);
-
-      // Forçar re-render (opcional)
-      setTimeout(() => {
-        console.log("🔄 [SIMULAÇÃO] Verificação após timeout:");
-        console.log("- pagamentoConfirmado:", pagamentoConfirmado);
-        console.log("- inscricaoCompleta:", inscricaoCompleta);
-      }, 100);
     } catch (error) {
-      console.error("❌ [SIMULAÇÃO] Erro ao simular pagamento:", error);
-      setLoadingStatus(false);
-      alert("Erro ao simular pagamento. Verifique o console.");
+      console.error("💥 [SIMULAÇÃO] Erro geral:", error);
+      alert("Erro na simulação. Verifique o console.");
     }
   };
 
@@ -245,7 +234,7 @@ const Pagamento = () => {
 
       if (data.sucesso && data.dados.status === "approved") {
         console.log("🎉 Pagamento aprovado!");
-        setInscricaoCompleta(dadosPix.participante);
+        setInscricaoCompleta(dadosPix?.participante || dadosInscricao);
         setPagamentoConfirmado(true);
       }
     } catch (error) {
@@ -291,9 +280,6 @@ const Pagamento = () => {
   };
 
   // Se pagamento foi confirmado, mostrar tela de sucesso
-  // Substitua a parte do "pagamento confirmado" no seu Pagamento.jsx por isso:
-
-  // Se pagamento foi confirmado, mostrar tela de sucesso
   if (pagamentoConfirmado && inscricaoCompleta) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
@@ -319,7 +305,7 @@ const Pagamento = () => {
                   SEU NÚMERO DE INSCRIÇÃO
                 </h2>
                 <div className="text-6xl font-black text-yellow-400">
-                  {inscricaoCompleta.numeroInscricao}
+                  {inscricaoCompleta?.numeroInscricao || "Carregando..."}
                 </div>
               </div>
             </div>
@@ -329,91 +315,73 @@ const Pagamento = () => {
               <div className="flex justify-between">
                 <span className="text-gray-300">Nome:</span>
                 <span className="text-white font-semibold">
-                  {inscricaoCompleta.nome}
+                  {inscricaoCompleta?.nome || "Carregando..."}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">Email:</span>
                 <span className="text-white font-semibold">
-                  {inscricaoCompleta.email}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300">Moto:</span>
-                <span className="text-white font-semibold">
-                  {dadosInscricao.modeloMoto}
+                  {inscricaoCompleta?.email || "Carregando..."}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">Valor Pago:</span>
-                <span className="text-green-400 font-bold text-xl">
-                  R$ {valorTotal.toFixed(2)}
+                <span className="text-green-400 font-bold">
+                  R$ {valorTotal?.toFixed(2) || "0.00"}
                 </span>
               </div>
             </div>
 
-            {/* Informações do Evento */}
-            <div className="bg-yellow-900/30 rounded-2xl p-6 mb-8">
-              <h3 className="text-xl font-bold text-yellow-400 mb-4 text-center">
-                📍 INFORMAÇÕES DO EVENTO
+            {/* Próximos Passos */}
+            <div className="bg-blue-900/30 rounded-2xl p-6 mb-8">
+              <h3 className="text-blue-400 font-bold text-xl mb-4">
+                🎯 Próximos Passos:
               </h3>
-              <div className="space-y-3 text-center">
-                <div>
-                  <span className="text-gray-300">Local: </span>
-                  <span className="text-white font-semibold">
-                    Fazenda do Trilhão - Itamonte/MG
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-300">Data: </span>
-                  <span className="text-white font-semibold">
-                    Sábado - 10:30h
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-300">Distância: </span>
-                  <span className="text-white font-semibold">
-                    40km de trilha off-road
-                  </span>
-                </div>
-              </div>
+              <ul className="text-gray-300 space-y-2">
+                <li>✅ Guarde seu número de inscrição</li>
+                <li>📧 Verifique seu email para confirmações</li>
+                <li>🏍️ Prepare sua moto para o evento</li>
+                <li>📱 Acompanhe as informações no site</li>
+              </ul>
             </div>
 
-            {/* Mensagem Final */}
-            <div className="text-center">
-              <div className="bg-gradient-to-r from-green-900/50 to-yellow-900/50 rounded-2xl p-6 mb-6">
-                <h3 className="text-2xl font-bold text-white mb-3">
-                  A AVENTURA TE ESPERA!
-                </h3>
-                <p className="text-gray-300 leading-relaxed">
-                  Prepare sua moto, ajuste o equipamento e venha viver uma
-                  experiência inesquecível na Serra da Mantiqueira.
-                  <span className="text-yellow-400 font-bold">
-                    {" "}
-                    Te esperamos lá, piloto!
-                  </span>
-                </p>
-              </div>
-
-              <button
-                onClick={() => navigate("/")}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-3 px-8 rounded-2xl transition-all transform hover:scale-105"
-              >
-                Voltar ao Início
-              </button>
+            {/* Mensagem Motivacional */}
+            <div className="text-center bg-gradient-to-r from-green-900/50 to-yellow-900/50 rounded-2xl p-6 mb-8">
+              <h3 className="text-yellow-400 font-bold text-2xl mb-3">
+                🏁 Bem-vindo ao Trilhão!
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                Prepare sua moto, ajuste o equipamento e venha viver uma
+                experiência inesquecível na Serra da Mantiqueira.
+                <span className="text-yellow-400 font-bold">
+                  {" "}
+                  Te esperamos lá, piloto!
+                </span>
+              </p>
             </div>
+
+            <button
+              onClick={() => navigate("/")}
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-3 px-8 rounded-2xl transition-all transform hover:scale-105"
+            >
+              Voltar ao Início
+            </button>
           </div>
         </div>
       </div>
     );
   }
+
   // Se deu erro
   if (erro) {
     return <ErroComponent erro={erro} onTentarNovamente={gerarPixReal} />;
   }
 
-  // Se está carregando
-  if (loadingPix || !dadosPix) {
+  // Se está carregando ou não tem dados ainda
+  if (
+    (loadingPix && !dadosPix && !erro) ||
+    (!dadosPix && !erro && !pixJaGerado)
+  ) {
     return <LoadingComponent loading="Gerando PIX..." />;
   }
 
@@ -451,72 +419,57 @@ const Pagamento = () => {
               <div className="flex justify-between">
                 <span className="text-gray-300">Nome:</span>
                 <span className="text-white font-semibold">
-                  {dadosInscricao.nome}
+                  {dadosInscricao?.nome || "Carregando..."}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">Email:</span>
                 <span className="text-white font-semibold">
-                  {dadosInscricao.email}
+                  {dadosInscricao?.email || "Carregando..."}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">Inscrição:</span>
                 <span className="text-yellow-400 font-semibold">
-                  {dadosPix.participante.numeroInscricao}
+                  {dadosPix?.participante?.numeroInscricao ||
+                    dadosInscricao?.numeroInscricao ||
+                    "Carregando..."}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">Cidade:</span>
                 <span className="text-white font-semibold">
-                  {dadosInscricao.cidade}-{dadosInscricao.estado}
+                  {dadosInscricao?.cidade || "Carregando..."}-
+                  {dadosInscricao?.estado || ""}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">Moto:</span>
                 <span className="text-white font-semibold">
-                  {dadosInscricao.modeloMoto}
+                  {dadosInscricao?.modeloMoto || "Carregando..."}
                 </span>
               </div>
 
-              <hr className="border-gray-600" />
-
-              <div className="flex justify-between">
-                <span className="text-gray-300">Inscrição + 1 Camiseta:</span>
-                <span className="text-white">R$ 100,00</span>
-              </div>
-
-              {dadosInscricao.camisetasExtras?.length > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-300">
-                    {dadosInscricao.camisetasExtras.length} Camiseta(s) Extra:
-                  </span>
-                  <span className="text-white">
-                    R$ {(dadosInscricao.camisetasExtras.length * 50).toFixed(2)}
+              <div className="border-t border-gray-600 pt-4">
+                <div className="flex justify-between text-lg font-bold">
+                  <span className="text-green-400">TOTAL:</span>
+                  <span className="text-green-400">
+                    R$ {valorTotal?.toFixed(2) || "0.00"}
                   </span>
                 </div>
-              )}
-
-              <hr className="border-gray-600" />
-
-              <div className="flex justify-between text-2xl font-bold">
-                <span className="text-white">TOTAL:</span>
-                <span className="text-green-400">
-                  R$ {valorTotal.toFixed(2)}
-                </span>
               </div>
             </div>
           </div>
 
-          {/* PIX Real do Mercado Pago */}
-          <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30">
+          {/* PIX Payment */}
+          <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
             <h2 className="text-3xl font-bold text-white mb-6">
               <QrCode className="inline mr-3" size={32} />
               PIX - Mercado Pago
             </h2>
 
             {/* QR Code Real */}
-            {dadosPix.qrCodeBase64 && (
+            {dadosPix?.qrCodeBase64 && (
               <div className="bg-white rounded-2xl p-4 mb-6 text-center">
                 <img
                   src={`data:image/png;base64,${dadosPix.qrCodeBase64}`}
@@ -525,20 +478,20 @@ const Pagamento = () => {
                   style={{ maxHeight: "300px" }}
                 />
                 <p className="text-gray-600 text-sm mt-2">
-                  QR Code PIX - R$ {valorTotal.toFixed(2)}
+                  QR Code PIX - R$ {valorTotal?.toFixed(2) || "0.00"}
                 </p>
               </div>
             )}
 
             {/* Código PIX para Copia e Cola */}
-            {dadosPix.qrCode && (
+            {dadosPix?.qrCode && (
               <div className="mb-6">
                 <label className="block text-gray-300 text-sm mb-2">
                   Código PIX Copia e Cola:
                 </label>
                 <div className="flex">
                   <textarea
-                    value={dadosPix.qrCode}
+                    value={dadosPix?.qrCode || ""}
                     readOnly
                     rows="4"
                     className="flex-1 bg-black/50 border border-gray-600 rounded-l-xl px-4 py-3 text-white text-xs resize-none"
@@ -567,7 +520,10 @@ const Pagamento = () => {
               <ol className="text-gray-300 text-sm space-y-1">
                 <li>1. Abra seu app do banco</li>
                 <li>2. Escaneie o QR Code ou cole o código PIX</li>
-                <li>3. Confirme o pagamento de R$ {valorTotal.toFixed(2)}</li>
+                <li>
+                  3. Confirme o pagamento de R${" "}
+                  {valorTotal?.toFixed(2) || "0.00"}
+                </li>
                 <li>4. Aguarde a confirmação automática</li>
               </ol>
             </div>
