@@ -18,6 +18,8 @@ class CampeaoBarranco
   public resultadoAltura!: number;
   public modeloMoto!: string;
   public categoriaMoto!: CategoriaMoto;
+  public cidade!: string;
+  public estado!: string;
 
   // Timestamps automáticos
   public readonly createdAt!: Date;
@@ -112,6 +114,20 @@ CampeaoBarranco.init(
         },
       },
     },
+    cidade: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: "Cidade é obrigatória" },
+      },
+    },
+    estado: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: "Estado é obrigatório" },
+      },
+    },
   },
   {
     sequelize,
@@ -121,13 +137,13 @@ CampeaoBarranco.init(
     // Índices para performance
     indexes: [
       {
-        fields: ["ano"], // Buscar por ano
+        fields: ["ano"],
       },
       {
-        fields: ["resultado_altura"], // Ordenar por resultado (snake_case)
+        fields: ["resultado_altura"],
       },
       {
-        fields: ["categoria_moto"], // Filtrar por categoria (snake_case)
+        fields: ["categoria_moto"],
       },
       {
         unique: true,

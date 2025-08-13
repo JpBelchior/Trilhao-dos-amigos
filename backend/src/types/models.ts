@@ -1,7 +1,3 @@
-// src/types/index.ts
-
-// ============ ENUMS (Valores fixos permitidos) ============
-
 export enum TamanhoCamiseta {
   PP = "PP",
   P = "P",
@@ -26,6 +22,11 @@ export enum StatusPagamento {
   CANCELADO = "cancelado",
 }
 
+export enum StatusEntrega {
+  NAO_ENTREGUE = "nao_entregue",
+  ENTREGUE = "entregue",
+}
+
 // ============ INTERFACES (Estrutura dos dados) ============
 
 // Interface para Camisetas Extras
@@ -34,7 +35,10 @@ export interface ICamisetaExtra {
   participanteId: number;
   tamanho: TamanhoCamiseta;
   tipo: TipoCamiseta;
-  preco: number; // R$ 50,00 por camiseta extra
+  preco: number;
+  statusEntrega: StatusEntrega;
+  dataEntrega?: Date;
+  entreguePor?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -62,6 +66,10 @@ export interface IParticipante {
   dataInscricao?: Date; // Opcional porque é gerado automaticamente
   observacoes?: string; // Opcional
 
+  statusEntregaCamiseta: StatusEntrega;
+  dataEntregaCamiseta?: Date;
+  entreguePor?: string;
+
   // Relacionamento com camisetas extras
   camisetasExtras?: ICamisetaExtra[];
 }
@@ -79,8 +87,10 @@ export interface IEstoqueCamiseta {
 export interface ICampeaoBarranco {
   id?: number;
   nome: string;
-  edicao: string; // Ex: "15ª Edição"
-  ano: number; // Ex: 2024
+  edicao: string;
+  ano: number;
+  cidade: string;
+  estado: string;
   resultadoAltura: number; // Em metros, ex: 47.2
   modeloMoto: string;
   categoriaMoto: CategoriaMoto;
@@ -98,8 +108,8 @@ export interface ICriarParticipanteDTO {
   estado: string;
   modeloMoto: string;
   categoriaMoto: CategoriaMoto;
-  tamanhoCamiseta: TamanhoCamiseta; // Camiseta grátis obrigatória
-  tipoCamiseta: TipoCamiseta; // Camiseta grátis obrigatória
+  tamanhoCamiseta: TamanhoCamiseta;
+  tipoCamiseta: TipoCamiseta;
   observacoes?: string;
   // Camisetas extras opcionais
   camisetasExtras?: Array<{

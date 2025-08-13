@@ -217,7 +217,7 @@ const AdminDashboard = () => {
             description="Controlar camisetas por tamanho e tipo, visualizar reservas"
             color="yellow"
             badge={`${estatisticas.camisetasDisponiveis} disponíveis`}
-            onClick={() => handleNavegar("Estoque")}
+            onClick={() => navigate("/admin/estoque")}
           />
 
           <ActionCard

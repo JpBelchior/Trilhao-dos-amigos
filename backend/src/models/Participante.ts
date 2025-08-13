@@ -7,6 +7,7 @@ import {
   TamanhoCamiseta,
   TipoCamiseta,
   StatusPagamento,
+  StatusEntrega,
 } from "../types/models";
 
 // Campos opcionais na criação (são gerados automaticamente)
@@ -34,6 +35,11 @@ class Participante
   public statusPagamento!: StatusPagamento;
   public dataInscricao!: Date;
   public observacoes?: string;
+
+  // ✅ CAMPOS DE ENTREGA
+  public statusEntregaCamiseta!: StatusEntrega;
+  public dataEntregaCamiseta?: Date;
+  public entreguePor?: string;
 
   // Timestamps automáticos
   public readonly createdAt!: Date;
@@ -153,6 +159,7 @@ Participante.init(
       // Não tem defaultValue - será calculado dinamicamente
     },
 
+    // ✅ CAMPO QUE ESTAVA FALTANDO
     statusPagamento: {
       type: DataTypes.ENUM(...Object.values(StatusPagamento)),
       allowNull: false,
@@ -163,6 +170,26 @@ Participante.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+    },
+
+    // ✅ CAMPOS DE ENTREGA
+    statusEntregaCamiseta: {
+      type: DataTypes.ENUM(...Object.values(StatusEntrega)),
+      allowNull: false,
+      defaultValue: StatusEntrega.NAO_ENTREGUE,
+      comment: "Status de entrega da camiseta grátis",
+    },
+
+    dataEntregaCamiseta: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "Data/hora da entrega da camiseta grátis",
+    },
+
+    entreguePor: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: "Nome do organizador que entregou a camiseta",
     },
 
     observacoes: {

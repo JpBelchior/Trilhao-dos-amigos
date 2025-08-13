@@ -34,7 +34,7 @@ import Provas from "./paginas/Provas";
 import InformacoesLocal from "./paginas/InformacoesLocal";
 import LoginGerente from "./paginas/Login";
 import Footer from "./componentes/paginaPrincipal/Footer";
-
+import EstoqueAdmin from "./paginas/Admin/Estoque";
 // Componente interno que tem acesso ao useLocation
 function AppContent() {
   const location = useLocation();
@@ -83,7 +83,15 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
+          {/* Estoque de camisas*/}
+          <Route
+            path="/admin/estoque"
+            element={
+              <ProtectedRoute>
+                <EstoqueAdmin />
+              </ProtectedRoute>
+            }
+          />
           {/* Perfil do Gerente */}
           <Route
             path="/admin/perfil"

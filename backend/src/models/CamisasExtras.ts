@@ -1,7 +1,12 @@
 // src/models/CamisetaExtra.ts
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/db";
-import { ICamisetaExtra, TamanhoCamiseta, TipoCamiseta } from "../types/models";
+import {
+  ICamisetaExtra,
+  TamanhoCamiseta,
+  TipoCamiseta,
+  StatusEntrega,
+} from "../types/models";
 
 // Campos opcionais na criação
 interface CamisetaExtraCreationAttributes
@@ -16,7 +21,9 @@ class CamisetaExtra
   public tamanho!: TamanhoCamiseta;
   public tipo!: TipoCamiseta;
   public preco!: number;
-
+  public statusEntrega!: StatusEntrega;
+  public dataEntrega?: Date;
+  public entreguePor?: string;
   // Timestamps automáticos
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -71,6 +78,25 @@ CamisetaExtra.init(
       validate: {
         min: { args: [0], msg: "Preço não pode ser negativo" },
       },
+    },
+
+    statusEntrega: {
+      type: DataTypes.ENUM(...Object.values(StatusEntrega)),
+      allowNull: false,
+      defaultValue: StatusEntrega.NAO_ENTREGUE,
+      comment: "Status de entrega da camiseta extra",
+    },
+
+    dataEntrega: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "Data/hora da entrega da camiseta extra",
+    },
+
+    entreguePor: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: "Nome do organizador que entregou a camiseta extra",
     },
   },
   {
