@@ -154,6 +154,7 @@ const PerfilGerente = () => {
       // Adicionar nova senha se fornecida
       if (formData.novaSenha) {
         dadosAlteracao.novaSenha = formData.novaSenha;
+        dadosAlteracao.confirmarSenha = formData.confirmarSenha;
       }
 
       console.log("📝 Dados para alteração:", dadosAlteracao);
@@ -233,7 +234,6 @@ const PerfilGerente = () => {
               </h3>
 
               <div className="grid md:grid-cols-2 gap-6">
-                {/* USANDO COMPONENTE REUTILIZÁVEL */}
                 <InputTexto
                   label="Nome Completo"
                   value={formData.nome}
@@ -264,7 +264,6 @@ const PerfilGerente = () => {
               </h3>
 
               <div className="space-y-4">
-                {/* Senha Atual - USANDO COMPONENTE REUTILIZÁVEL */}
                 <div className="relative">
                   <InputTexto
                     label="Senha Atual"

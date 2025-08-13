@@ -344,22 +344,6 @@ export class GerenteController {
 
       // 1. Validar nome se fornecido
       if (nome !== undefined) {
-        if (!nome || nome.trim().length < 2) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Nome deve ter pelo menos 2 caracteres",
-          };
-          res.status(400).json(response);
-          return;
-        }
-        if (nome.trim().length > 100) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Nome deve ter no máximo 100 caracteres",
-          };
-          res.status(400).json(response);
-          return;
-        }
         // Só atualizar se for diferente do atual
         if (nome.trim() !== gerenteCompleto.nome) {
           dadosParaAtualizar.nome = nome.trim();
@@ -369,17 +353,6 @@ export class GerenteController {
       // 2. Validar email se fornecido
       if (email !== undefined) {
         const emailNormalizado = email.trim().toLowerCase();
-
-        // Validar formato do email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(emailNormalizado)) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Email inválido",
-          };
-          res.status(400).json(response);
-          return;
-        }
 
         // Verificar se é diferente do atual
         if (emailNormalizado !== gerenteCompleto.email.toLowerCase()) {
@@ -401,15 +374,6 @@ export class GerenteController {
 
       // 3. Validar mudança de senha se fornecida
       if (novaSenha) {
-        if (!senhaAtual) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Senha atual é obrigatória para alterar a senha",
-          };
-          res.status(400).json(response);
-          return;
-        }
-
         // Verificar se senha atual está correta
         const senhaAtualValida = await gerenteCompleto.verificarSenha(
           senhaAtual
