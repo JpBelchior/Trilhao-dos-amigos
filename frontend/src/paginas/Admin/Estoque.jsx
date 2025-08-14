@@ -33,16 +33,16 @@ const EstoqueAdmin = () => {
   const [editando, setEditando] = useState(null);
   const [novaQuantidade, setNovaQuantidade] = useState("");
 
-  // PONTO 2: Estados para filtros
+  // Estados para filtros
   const [filtroNome, setFiltroNome] = useState("");
 
-  // PONTO 3: Estado para expandir/contrair seção de estoque
+  // Estado para expandir/contrair seção de estoque
   const [estoqueExpandido, setEstoqueExpandido] = useState(false);
 
   // Estados para loading individual dos botões
   const [loadingButtons, setLoadingButtons] = useState({});
 
-  // PONTO 1: Estados para calcular camisetas entregues
+  // Estados para calcular camisetas entregues
   const [estatisticasEntrega, setEstatisticasEntrega] = useState({
     totalReservadas: 0,
     totalEntregues: 0,
@@ -60,7 +60,7 @@ const EstoqueAdmin = () => {
     carregarDados();
   }, []);
 
-  // PONTO 1: Função para calcular estatísticas de entrega
+  // Função para calcular estatísticas de entrega
   const calcularEstatisticasEntrega = (participantes) => {
     let totalCamisetasReservadas = 0;
     let totalCamisetasEntregues = 0;
@@ -91,51 +91,28 @@ const EstoqueAdmin = () => {
     });
   };
 
-  //Função melhorada para verificar se resposta é JSON
-  const parseJsonSeguro = async (response) => {
-    const contentType = response.headers.get("content-type");
-
-    if (!contentType || !contentType.includes("application/json")) {
-      const texto = await response.text();
-      console.error("❌ Resposta não é JSON:", texto.substring(0, 200));
-
-      // Verificar se é erro de autenticação (página de login HTML)
-      if (texto.includes("<!DOCTYPE") || texto.includes("<html")) {
-        throw new Error("Erro de autenticação. Faça login novamente.");
-      }
-
-      throw new Error(
-        "Servidor retornou HTML em vez de JSON. Verifique se o backend está funcionando."
-      );
-    }
-
-    return response.json();
-  };
-
   const carregarDados = async () => {
     try {
       setLoading(true);
       setErro(null);
 
-      console.log("📊 Carregando dados do estoque...");
-
       // Carregar estoque detalhado
       const estoqueResponse = await fetchAuth(
         "http://localhost:8000/api/estoque"
       );
-      const estoqueData = await parseJsonSeguro(estoqueResponse);
+      const estoqueData = await estoqueResponse.json();
 
       // Carregar resumo do estoque
       const resumoResponse = await fetchAuth(
         "http://localhost:8000/api/estoque/resumo"
       );
-      const resumoData = await parseJsonSeguro(resumoResponse);
+      const resumoData = await resumoResponse.json();
 
       // Carregar participantes com suas camisetas reservadas
       const participantesResponse = await fetchAuth(
         "http://localhost:8000/api/participantes"
       );
-      const participantesData = await parseJsonSeguro(participantesResponse);
+      const participantesData = await participantesResponse.json();
 
       if (
         estoqueData.sucesso &&
@@ -151,14 +128,8 @@ const EstoqueAdmin = () => {
         );
         setParticipantesReservados(confirmados);
 
-        // PONTO 1: Calcular estatísticas de entrega
+        // Calcular estatísticas de entrega
         calcularEstatisticasEntrega(confirmados);
-
-        console.log("✅ Dados carregados:", {
-          estoque: estoqueData.dados,
-          resumo: resumoData.dados,
-          participantes: confirmados.length,
-        });
       } else {
         throw new Error("Erro ao carregar dados do servidor");
       }
@@ -170,72 +141,31 @@ const EstoqueAdmin = () => {
     }
   };
 
-  // PONTO 4: Função melhorada para entrega de camiseta principal
+  // Função para entrega de camiseta principal
   const toggleEntregaCamisetaPrincipal = async (participanteId) => {
     const buttonKey = `principal_${participanteId}`;
 
-    if (loadingButtons[buttonKey]) {
-      console.log("🔄 Botão já está processando...");
-      return;
-    }
+    if (loadingButtons[buttonKey]) return;
 
     try {
-      console.log(
-        `🔄 [DEBUG] Processando entrega para participante: ${participanteId}`
-      );
-
       setLoadingButtons((prev) => ({ ...prev, [buttonKey]: true }));
 
       const response = await fetchAuth(
         `http://localhost:8000/api/entrega/participante/${participanteId}/camiseta-principal`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      console.log(`📡 [DEBUG] Status da resposta: ${response.status}`);
-
-      if (!response.ok) {
-        // PONTO 4: Verificar se backend suporta a operação
-        if (response.status === 404) {
-          throw new Error(
-            "Endpoint de entrega não encontrado no backend. Funcionalidade ainda não implementada."
-          );
-        } else if (response.status === 401) {
-          throw new Error("Não autorizado. Faça login novamente.");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.sucesso) {
+          await carregarDados();
         }
-        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await parseJsonSeguro(response);
-      console.log(`📊 [DEBUG] Dados recebidos:`, data);
-
-      if (data.sucesso) {
-        console.log("✅ Status de entrega alterado:", data.mensagem);
-        await carregarDados();
-      } else {
-        throw new Error(data.erro || "Erro desconhecido do servidor");
       }
     } catch (error) {
-      console.error("❌ [ERRO] Detalhes completos:", error);
-
-      let mensagemErro = "Erro desconhecido";
-      if (error.message.includes("não encontrado")) {
-        mensagemErro =
-          "Funcionalidade de entrega ainda não implementada no backend";
-      } else if (error.message.includes("HTML")) {
-        mensagemErro = "Backend não está funcionando corretamente";
-      } else if (error.message.includes("Failed to fetch")) {
-        mensagemErro =
-          "Não foi possível conectar ao servidor. Verifique se o backend está rodando.";
-      } else {
-        mensagemErro = error.message;
-      }
-
-      alert(`Erro ao alterar entrega:\n\n${mensagemErro}`);
+      console.error("❌ Erro ao alterar entrega principal:", error);
     } finally {
       setLoadingButtons((prev) => {
         const newState = { ...prev };
@@ -245,69 +175,31 @@ const EstoqueAdmin = () => {
     }
   };
 
-  // PONTO 4: Função melhorada para entrega de camiseta extra
+  // Função para entrega de camiseta extra
   const toggleEntregaCamisetaExtra = async (camisetaExtraId) => {
     const buttonKey = `extra_${camisetaExtraId}`;
 
-    if (loadingButtons[buttonKey]) {
-      console.log("🔄 Botão extra já está processando...");
-      return;
-    }
+    if (loadingButtons[buttonKey]) return;
 
     try {
-      console.log(`🔄 [DEBUG] Processando entrega extra: ${camisetaExtraId}`);
-
       setLoadingButtons((prev) => ({ ...prev, [buttonKey]: true }));
 
       const response = await fetchAuth(
         `http://localhost:8000/api/entrega/camiseta-extra/${camisetaExtraId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      console.log(`📡 [DEBUG] Status da resposta extra: ${response.status}`);
-
-      if (!response.ok) {
-        // PONTO 4: Verificar se backend suporta a operação
-        if (response.status === 404) {
-          throw new Error(
-            "Endpoint de entrega de camisetas extras não encontrado no backend."
-          );
-        } else if (response.status === 401) {
-          throw new Error("Não autorizado. Faça login novamente.");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.sucesso) {
+          await carregarDados();
         }
-        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await parseJsonSeguro(response);
-      console.log(`📊 [DEBUG] Dados extra recebidos:`, data);
-
-      if (data.sucesso) {
-        console.log("✅ Status de entrega extra alterado:", data.mensagem);
-        await carregarDados();
-      } else {
-        throw new Error(data.erro || "Erro desconhecido do servidor");
       }
     } catch (error) {
-      console.error("❌ [ERRO EXTRA] Detalhes completos:", error);
-
-      let mensagemErro = "Erro desconhecido";
-      if (error.message.includes("não encontrado")) {
-        mensagemErro =
-          "Funcionalidade de entrega de extras ainda não implementada no backend";
-      } else if (error.message.includes("HTML")) {
-        mensagemErro = "Backend não está funcionando corretamente";
-      } else if (error.message.includes("Failed to fetch")) {
-        mensagemErro = "Não foi possível conectar ao servidor";
-      } else {
-        mensagemErro = error.message;
-      }
-
-      alert(`Erro ao alterar entrega da camiseta extra:\n\n${mensagemErro}`);
+      console.error("❌ Erro ao alterar entrega extra:", error);
     } finally {
       setLoadingButtons((prev) => {
         const newState = { ...prev };
@@ -334,43 +226,30 @@ const EstoqueAdmin = () => {
       const { tamanho, tipo } = editando;
       const quantidade = parseInt(novaQuantidade);
 
-      if (isNaN(quantidade) || quantidade < 0) {
-        alert("Por favor, insira uma quantidade válida (número positivo)");
-        return;
-      }
-
-      console.log(
-        `💾 Atualizando estoque: ${tamanho} ${tipo} para ${quantidade}`
-      );
+      if (isNaN(quantidade) || quantidade < 0) return;
 
       const response = await fetchAuth(
         `http://localhost:8000/api/estoque/${tamanho}/${tipo}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ quantidadeTotal: quantidade }),
         }
       );
 
-      const data = await parseJsonSeguro(response);
+      const data = await response.json();
 
       if (data.sucesso) {
-        console.log("✅ Estoque atualizado com sucesso");
         await carregarDados();
         setEditando(null);
         setNovaQuantidade("");
-      } else {
-        throw new Error(data.erro || "Erro ao atualizar estoque");
       }
     } catch (error) {
       console.error("❌ Erro ao atualizar estoque:", error);
-      alert(`Erro ao atualizar estoque: ${error.message}`);
     }
   };
 
-  // PONTO 2: Filtrar participantes apenas por nome (reutilizando filtro de inscritos)
+  // Filtrar participantes por nome
   const participantesFiltrados = participantesReservados.filter(
     (participante) => {
       if (!filtroNome.trim()) return true;
@@ -378,7 +257,7 @@ const EstoqueAdmin = () => {
     }
   );
 
-  // Filtrar dados do estoque por tipo (para seção expandida)
+  // Filtrar dados do estoque por tipo
   const getEstoqueFiltrado = () => {
     const result = [];
 
@@ -400,29 +279,7 @@ const EstoqueAdmin = () => {
     });
   };
 
-  // PONTO 4: Função para verificar conectividade com o backend
-  const verificarBackend = async () => {
-    try {
-      console.log("🔍 Verificando conectividade com backend...");
-
-      const response = await fetch("http://localhost:8000/api/health");
-
-      if (response.ok) {
-        console.log("✅ Backend está online");
-        alert("✅ Backend está funcionando normalmente!");
-      } else {
-        console.error("❌ Backend respondeu com erro:", response.status);
-        alert(`❌ Backend retornou erro: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("❌ Erro ao conectar com backend:", error);
-      alert(
-        "❌ Não foi possível conectar ao backend. Verifique se está rodando na porta 8000."
-      );
-    }
-  };
-
-  // Componentes de botões com loading
+  // Componente de botão para camiseta principal
   const BotaoEntregaPrincipal = ({ participante }) => {
     const buttonKey = `principal_${participante.id}`;
     const isLoading = loadingButtons[buttonKey];
@@ -456,6 +313,7 @@ const EstoqueAdmin = () => {
     );
   };
 
+  // Componente de botão para camiseta extra
   const BotaoEntregaExtra = ({ camisetaExtra }) => {
     const buttonKey = `extra_${camisetaExtra.id}`;
     const isLoading = loadingButtons[buttonKey];
@@ -532,12 +390,6 @@ const EstoqueAdmin = () => {
           </div>
           <div className="flex gap-4">
             <button
-              onClick={verificarBackend}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
-            >
-              🔍 Testar Backend
-            </button>
-            <button
               onClick={carregarDados}
               className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
             >
@@ -547,7 +399,7 @@ const EstoqueAdmin = () => {
           </div>
         </div>
 
-        {/* PONTO 1: Cards de Resumo com cálculo correto */}
+        {/* Cards de Resumo */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
           <div className="bg-black/50 border border-green-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between">
@@ -576,6 +428,7 @@ const EstoqueAdmin = () => {
               <ShoppingBag className="text-green-400" size={32} />
             </div>
           </div>
+
           <div className="bg-black/50 border border-yellow-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -604,7 +457,6 @@ const EstoqueAdmin = () => {
             </div>
           </div>
 
-          {/* PONTO 1: Card com fórmula: reservadas - entregues */}
           <div className="bg-black/50 border border-orange-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -620,14 +472,13 @@ const EstoqueAdmin = () => {
           </div>
         </div>
 
-        {/* PONTO 3: Seção de Estoque com botão para expandir/contrair */}
+        {/* Seção de Estoque */}
         <div className="bg-black/30 border border-green-500/30 rounded-xl p-8 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <h2 className="text-3xl font-bold text-white mb-4 md:mb-0">
               Controle de Estoque
             </h2>
 
-            {/* PONTO 3: Botão para expandir/contrair (semelhante ao stat card) */}
             <ExpandToggleButton
               isExpanded={estoqueExpandido}
               onToggle={() => setEstoqueExpandido(!estoqueExpandido)}
@@ -637,7 +488,6 @@ const EstoqueAdmin = () => {
             />
           </div>
 
-          {/* PONTO 3: Conteúdo expandível */}
           {estoqueExpandido && (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -760,7 +610,6 @@ const EstoqueAdmin = () => {
               Camisetas Reservadas ({participantesFiltrados.length})
             </h2>
 
-            {/* PONTO 2: Filtro simplificado - apenas nome (reutilizando filtro de inscritos) */}
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Search
@@ -920,7 +769,6 @@ const EstoqueAdmin = () => {
                       </td>
                       <td className="text-center py-4 px-4">
                         <div className="flex justify-center gap-2">
-                          {/* Botão de ações rápidas */}
                           <button
                             onClick={() =>
                               toggleEntregaCamisetaPrincipal(participante.id)
@@ -966,49 +814,6 @@ const EstoqueAdmin = () => {
               </p>
             </div>
           )}
-        </div>
-
-        {/* Dicas de uso */}
-        <div className="mt-8 bg-green-900/30 rounded-2xl p-6 border border-green-400/30">
-          <h4 className="text-lg font-bold text-green-400 mb-3">
-            💡 Como usar esta página
-          </h4>
-          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
-            <div>
-              <p>
-                • <strong>Filtro por Nome:</strong> Digite para encontrar
-                participantes específicos
-              </p>
-              <p>
-                • <strong>Botões Coloridos:</strong> Clique nas camisetas para
-                marcar como entregues
-              </p>
-              <p>
-                • <strong>Verde:</strong> Camiseta já foi entregue
-              </p>
-              <p>
-                • <strong>Amarelo:</strong> Camiseta ainda não foi entregue
-              </p>
-            </div>
-            <div>
-              <p>
-                • <strong>Seção de Estoque:</strong> Clique em "Mostrar
-                Detalhes" para ver/editar quantidades
-              </p>
-              <p>
-                • <strong>Status Geral:</strong> Mostra se todas as camisetas do
-                participante foram entregues
-              </p>
-              <p>
-                • <strong>Camisas para Entrega:</strong> Calculado como:
-                Reservadas - Entregues
-              </p>
-              <p>
-                • <strong>Teste de Backend:</strong> Use o botão "Testar
-                Backend" se houver problemas
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

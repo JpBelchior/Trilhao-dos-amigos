@@ -1,82 +1,83 @@
 // backend/src/controllers/EntregaController.ts
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Participante, CamisetaExtra } from "../models";
-import { AuthenticatedRequest } from "./GerenteController";
-import { IApiResponse, StatusEntrega } from "../types/models";
+import { StatusEntrega, IApiResponse } from "../types/models";
 
 export class EntregaController {
   // PUT /api/entrega/participante/:id/camiseta-principal
-  // Marcar/desmarcar entrega da camiseta grátis
+  // Toggle do status de entrega da camiseta principal do participante
   public static async toggleEntregaCamisetaPrincipal(
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const gerente = req.gerente;
+      const participanteId = parseInt(id);
+
+      if (isNaN(participanteId)) {
+        res.status(400).json({
+          sucesso: false,
+          erro: "ID inválido",
+          detalhes: "ID deve ser um número",
+        });
+        return;
+      }
 
       console.log(
-        `📦 [EntregaController] Gerente ${gerente?.nome} alterando entrega da camiseta principal do participante ${id}`
+        `🔄 [EntregaController] Processando entrega principal para participante ID: ${participanteId}`
       );
 
-      if (!gerente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não autenticado",
-        };
-        res.status(401).json(response);
-        return;
-      }
-
       // Buscar participante
-      const participante = await Participante.findByPk(id);
-
+      const participante = await Participante.findByPk(participanteId);
       if (!participante) {
-        const response: IApiResponse = {
+        res.status(404).json({
           sucesso: false,
           erro: "Participante não encontrado",
-        };
-        res.status(404).json(response);
+          detalhes: `Participante com ID ${participanteId} não existe`,
+        });
         return;
       }
 
-      // Verificar se participante tem pagamento confirmado
+      // Verificar se o pagamento foi confirmado
       if (participante.statusPagamento !== "confirmado") {
-        const response: IApiResponse = {
+        res.status(400).json({
           sucesso: false,
-          erro: "Camiseta só pode ser entregue para participantes com pagamento confirmado",
-        };
-        res.status(400).json(response);
+          erro: "Pagamento não confirmado",
+          detalhes:
+            "Só é possível entregar camisetas para participantes com pagamento confirmado",
+        });
         return;
       }
 
       // Toggle do status de entrega
-      const novoStatus =
+      const novoStatus: StatusEntrega =
         participante.statusEntregaCamiseta === StatusEntrega.ENTREGUE
           ? StatusEntrega.NAO_ENTREGUE
           : StatusEntrega.ENTREGUE;
 
-      // Atualizar campos
-      const dadosUpdate: any = {
+      // Dados para atualização
+      const dadosAtualizacao: any = {
         statusEntregaCamiseta: novoStatus,
       };
 
+      // Se está marcando como entregue, adicionar timestamp
       if (novoStatus === StatusEntrega.ENTREGUE) {
-        // Marcando como entregue
-        dadosUpdate.dataEntregaCamiseta = new Date();
-        dadosUpdate.entreguePor = gerente.nome;
+        dadosAtualizacao.dataEntregaCamiseta = new Date();
+        dadosAtualizacao.entreguePor = "Admin"; // TODO: pegar do token JWT
       } else {
-        // Desmarcando entrega
-        dadosUpdate.dataEntregaCamiseta = null;
-        dadosUpdate.entreguePor = null;
+        // Se está desmarcando, limpar dados de entrega
+        dadosAtualizacao.dataEntregaCamiseta = null;
+        dadosAtualizacao.entreguePor = null;
       }
 
-      await participante.update(dadosUpdate);
+      // Atualizar no banco
+      await participante.update(dadosAtualizacao);
+
+      const statusTexto =
+        novoStatus === StatusEntrega.ENTREGUE ? "entregue" : "não entregue";
 
       console.log(
-        `✅ Camiseta principal ${
-          novoStatus === StatusEntrega.ENTREGUE ? "ENTREGUE" : "DESMARCADA"
-        } para ${participante.nome}`
+        `✅ Camiseta principal marcada como ${statusTexto} para ${participante.nome}`
       );
 
       const response: IApiResponse = {
@@ -85,27 +86,21 @@ export class EntregaController {
           participanteId: participante.id,
           nome: participante.nome,
           statusEntrega: novoStatus,
-          dataEntrega: participante.dataEntregaCamiseta,
-          entreguePor: participante.entreguePor,
-          camiseta: {
-            tamanho: participante.tamanhoCamiseta,
-            tipo: participante.tipoCamiseta,
-          },
+          dataEntrega: dadosAtualizacao.dataEntregaCamiseta,
         },
-        mensagem: `Camiseta principal ${
-          novoStatus === StatusEntrega.ENTREGUE
-            ? "marcada como entregue"
-            : "desmarcada"
-        }`,
+        mensagem: `Camiseta principal marcada como ${statusTexto}`,
       };
 
       res.json(response);
     } catch (error) {
-      console.error("💥 [EntregaController] Erro ao alterar entrega:", error);
+      console.error(
+        "❌ [EntregaController] Erro ao atualizar entrega principal:",
+        error
+      );
 
       const response: IApiResponse = {
         sucesso: false,
-        erro: "Erro ao alterar status de entrega",
+        erro: "Erro interno do servidor",
         detalhes: error instanceof Error ? error.message : "Erro desconhecido",
       };
 
@@ -114,119 +109,119 @@ export class EntregaController {
   }
 
   // PUT /api/entrega/camiseta-extra/:id
-  // Marcar/desmarcar entrega de camiseta extra
+  // Toggle do status de entrega de uma camiseta extra específica
   public static async toggleEntregaCamisetaExtra(
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const gerente = req.gerente;
+      const camisetaExtraId = parseInt(id);
+
+      if (isNaN(camisetaExtraId)) {
+        res.status(400).json({
+          sucesso: false,
+          erro: "ID inválido",
+          detalhes: "ID deve ser um número",
+        });
+        return;
+      }
 
       console.log(
-        `📦 [EntregaController] Gerente ${gerente?.nome} alterando entrega da camiseta extra ${id}`
+        `🔄 [EntregaController] Processando entrega extra ID: ${camisetaExtraId}`
       );
 
-      if (!gerente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não autenticado",
-        };
-        res.status(401).json(response);
-        return;
-      }
-
-      // Buscar camiseta extra com dados do participante
-      const camisetaExtra = await CamisetaExtra.findByPk(id, {
-        include: [
-          {
-            model: Participante,
-            as: "participante",
-            attributes: ["id", "nome", "statusPagamento"],
-          },
-        ],
-      });
+      // Buscar camiseta extra
+      const camisetaExtra = await CamisetaExtra.findByPk(camisetaExtraId);
 
       if (!camisetaExtra) {
-        const response: IApiResponse = {
+        res.status(404).json({
           sucesso: false,
           erro: "Camiseta extra não encontrada",
-        };
-        res.status(404).json(response);
+          detalhes: `Camiseta extra com ID ${camisetaExtraId} não existe`,
+        });
         return;
       }
 
-      // Verificar se participante tem pagamento confirmado
-      const participante = (camisetaExtra as any).participante;
-      if (participante.statusPagamento !== "confirmado") {
-        const response: IApiResponse = {
+      // Buscar participante separadamente usando o participanteId
+      const participante = await Participante.findByPk(
+        camisetaExtra.participanteId
+      );
+
+      if (!participante) {
+        res.status(404).json({
           sucesso: false,
-          erro: "Camiseta só pode ser entregue para participantes com pagamento confirmado",
-        };
-        res.status(400).json(response);
+          erro: "Participante não encontrado",
+          detalhes: "Participante associado à camiseta extra não existe",
+        });
+        return;
+      }
+
+      // Verificar se o participante tem pagamento confirmado
+      if (participante.statusPagamento !== "confirmado") {
+        res.status(400).json({
+          sucesso: false,
+          erro: "Pagamento não confirmado",
+          detalhes:
+            "Só é possível entregar camisetas para participantes com pagamento confirmado",
+        });
         return;
       }
 
       // Toggle do status de entrega
-      const novoStatus =
+      const novoStatus: StatusEntrega =
         camisetaExtra.statusEntrega === StatusEntrega.ENTREGUE
           ? StatusEntrega.NAO_ENTREGUE
           : StatusEntrega.ENTREGUE;
 
-      // Atualizar campos
-      const dadosUpdate: any = {
+      // Dados para atualização
+      const dadosAtualizacao: any = {
         statusEntrega: novoStatus,
       };
 
+      // Se está marcando como entregue, adicionar timestamp
       if (novoStatus === StatusEntrega.ENTREGUE) {
-        // Marcando como entregue
-        dadosUpdate.dataEntrega = new Date();
-        dadosUpdate.entreguePor = gerente.nome;
+        dadosAtualizacao.dataEntrega = new Date();
+        dadosAtualizacao.entreguePor = "Admin"; // TODO: pegar do token JWT
       } else {
-        // Desmarcando entrega
-        dadosUpdate.dataEntrega = null;
-        dadosUpdate.entreguePor = null;
+        // Se está desmarcando, limpar dados de entrega
+        dadosAtualizacao.dataEntrega = null;
+        dadosAtualizacao.entreguePor = null;
       }
 
-      await camisetaExtra.update(dadosUpdate);
+      // Atualizar no banco
+      await camisetaExtra.update(dadosAtualizacao);
+
+      const statusTexto =
+        novoStatus === StatusEntrega.ENTREGUE ? "entregue" : "não entregue";
 
       console.log(
-        `✅ Camiseta extra ${
-          novoStatus === StatusEntrega.ENTREGUE ? "ENTREGUE" : "DESMARCADA"
-        } para ${participante.nome}`
+        `✅ Camiseta extra ${camisetaExtra.tamanho} ${camisetaExtra.tipo} marcada como ${statusTexto}`
       );
 
       const response: IApiResponse = {
         sucesso: true,
         dados: {
           camisetaExtraId: camisetaExtra.id,
-          participanteId: participante.id,
-          nome: participante.nome,
+          participanteNome: participante.nome,
+          tamanho: camisetaExtra.tamanho,
+          tipo: camisetaExtra.tipo,
           statusEntrega: novoStatus,
-          dataEntrega: camisetaExtra.dataEntrega,
-          entreguePor: camisetaExtra.entreguePor,
-          camiseta: {
-            tamanho: camisetaExtra.tamanho,
-            tipo: camisetaExtra.tipo,
-          },
+          dataEntrega: dadosAtualizacao.dataEntrega,
         },
-        mensagem: `Camiseta extra ${
-          novoStatus === StatusEntrega.ENTREGUE
-            ? "marcada como entregue"
-            : "desmarcada"
-        }`,
+        mensagem: `Camiseta extra ${camisetaExtra.tamanho} ${camisetaExtra.tipo} marcada como ${statusTexto}`,
       };
 
       res.json(response);
     } catch (error) {
       console.error(
-        "💥 [EntregaController] Erro ao alterar entrega extra:",
+        "❌ [EntregaController] Erro ao atualizar entrega extra:",
         error
       );
 
       const response: IApiResponse = {
         sucesso: false,
-        erro: "Erro ao alterar status de entrega",
+        erro: "Erro interno do servidor",
         detalhes: error instanceof Error ? error.message : "Erro desconhecido",
       };
 
@@ -234,113 +229,82 @@ export class EntregaController {
     }
   }
 
-  // GET /api/entrega/relatorio
-  // Relatório geral de entregas
-  public static async obterRelatorioEntregas(
-    req: AuthenticatedRequest,
+  // GET /api/entrega/resumo
+  // Estatísticas gerais de entrega
+  public static async obterResumoEntregas(
+    req: Request,
     res: Response
   ): Promise<void> {
     try {
-      const gerente = req.gerente;
+      console.log("📊 [EntregaController] Calculando resumo de entregas...");
 
-      if (!gerente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não autenticado",
-        };
-        res.status(401).json(response);
-        return;
-      }
-
-      // Buscar todos os participantes confirmados com suas camisetas extras
-      const participantes = await Participante.findAll({
-        where: {
-          statusPagamento: "confirmado",
-        },
-        include: [
-          {
-            model: CamisetaExtra,
-            as: "camisetasExtras",
+      // Contar camisetas principais
+      const [
+        principaisEntregues,
+        principaisTotal,
+        extrasEntregues,
+        extrasTotal,
+      ] = await Promise.all([
+        Participante.count({
+          where: {
+            statusPagamento: "confirmado",
+            statusEntregaCamiseta: StatusEntrega.ENTREGUE,
           },
-        ],
-        order: [["nome", "ASC"]],
-      });
+        }),
+        Participante.count({
+          where: {
+            statusPagamento: "confirmado",
+          },
+        }),
+        CamisetaExtra.count({
+          where: {
+            statusEntrega: StatusEntrega.ENTREGUE,
+          },
+        }),
+        CamisetaExtra.count(),
+      ]);
 
-      // Calcular estatísticas
-      let camisetasPrincipaisEntregues = 0;
-      let camisetasPrincipaisNaoEntregues = 0;
-      let camisetasExtrasEntregues = 0;
-      let camisetasExtrasNaoEntregues = 0;
+      const totalEntregues = principaisEntregues + extrasEntregues;
+      const totalReservadas = principaisTotal + extrasTotal;
+      const percentualEntregue =
+        totalReservadas > 0
+          ? Math.round((totalEntregues / totalReservadas) * 100)
+          : 0;
 
-      participantes.forEach((participante) => {
-        // Camiseta principal
-        if (participante.statusEntregaCamiseta === StatusEntrega.ENTREGUE) {
-          camisetasPrincipaisEntregues++;
-        } else {
-          camisetasPrincipaisNaoEntregues++;
-        }
+      const resumo = {
+        camisetasPrincipais: {
+          entregues: principaisEntregues,
+          total: principaisTotal,
+          pendentes: principaisTotal - principaisEntregues,
+        },
+        camisetasExtras: {
+          entregues: extrasEntregues,
+          total: extrasTotal,
+          pendentes: extrasTotal - extrasEntregues,
+        },
+        geral: {
+          totalEntregues,
+          totalReservadas,
+          pendentes: totalReservadas - totalEntregues,
+          percentualEntregue,
+        },
+      };
 
-        // Camisetas extras
-        const extras = (participante as any).camisetasExtras || [];
-        extras.forEach((extra: any) => {
-          if (extra.statusEntrega === StatusEntrega.ENTREGUE) {
-            camisetasExtrasEntregues++;
-          } else {
-            camisetasExtrasNaoEntregues++;
-          }
-        });
-      });
+      console.log("✅ Resumo calculado:", resumo);
 
       const response: IApiResponse = {
         sucesso: true,
-        dados: {
-          resumo: {
-            totalParticipantes: participantes.length,
-            camisetasPrincipais: {
-              entregues: camisetasPrincipaisEntregues,
-              naoEntregues: camisetasPrincipaisNaoEntregues,
-              total: participantes.length,
-            },
-            camisetasExtras: {
-              entregues: camisetasExtrasEntregues,
-              naoEntregues: camisetasExtrasNaoEntregues,
-              total: camisetasExtrasEntregues + camisetasExtrasNaoEntregues,
-            },
-          },
-          participantes: participantes.map((p) => ({
-            id: p.id,
-            nome: p.nome,
-            numeroInscricao: p.numeroInscricao,
-            cidade: p.cidade,
-            camisetaPrincipal: {
-              tamanho: p.tamanhoCamiseta,
-              tipo: p.tipoCamiseta,
-              entregue: p.statusEntregaCamiseta === StatusEntrega.ENTREGUE,
-              dataEntrega: p.dataEntregaCamiseta,
-              entreguePor: p.entreguePor,
-            },
-            camisetasExtras: ((p as any).camisetasExtras || []).map(
-              (extra: any) => ({
-                id: extra.id,
-                tamanho: extra.tamanho,
-                tipo: extra.tipo,
-                entregue: extra.statusEntrega === StatusEntrega.ENTREGUE,
-                dataEntrega: extra.dataEntrega,
-                entreguePor: extra.entreguePor,
-              })
-            ),
-          })),
-        },
-        mensagem: "Relatório de entregas gerado com sucesso",
+        dados: resumo,
+        mensagem: "Resumo de entregas calculado com sucesso",
       };
 
       res.json(response);
     } catch (error) {
-      console.error("💥 [EntregaController] Erro ao gerar relatório:", error);
+      console.error("❌ [EntregaController] Erro ao calcular resumo:", error);
 
       const response: IApiResponse = {
         sucesso: false,
-        erro: "Erro ao gerar relatório de entregas",
+        erro: "Erro interno do servidor",
         detalhes: error instanceof Error ? error.message : "Erro desconhecido",
       };
 
