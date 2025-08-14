@@ -16,7 +16,7 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-
+import ExpandToggleButton from "../ExpandToggleButton";
 const CompactParticipantCard = ({
   participante,
   index,
@@ -45,13 +45,13 @@ const CompactParticipantCard = ({
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmado":
-        return "border-green-400/30 hover:border-green-400/60";
+        return "border-green-400/30 text-green-400/60";
       case "pendente":
-        return "border-yellow-400/30 hover:border-yellow-400/60";
+        return "border-yellow-400/30 text-yellow-400/60";
       case "cancelado":
-        return "border-red-400/30 hover:border-red-400/60";
+        return "border-red-400/30 text-red-400/60";
       default:
-        return "border-gray-400/30 hover:border-gray-400/60";
+        return "border-gray-400/30 text-gray-400/60";
     }
   };
 
@@ -159,9 +159,16 @@ const CompactParticipantCard = ({
           </div>
 
           {/* Botão expandir */}
-          <button className="text-gray-400 hover:text-white transition-colors p-1">
-            {expandido ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </button>
+          <ExpandToggleButton
+            isExpanded={expandido}
+            onToggle={() => setExpandido(!expandido)}
+            expandedText=""
+            collapsedText=""
+            label=""
+            variant="default"
+            size="small"
+            className="p-1 text-gray-400 hover:text-white"
+          />
         </div>
       </div>
 
@@ -269,7 +276,6 @@ const CompactParticipantCard = ({
             </div>
           )}
 
-          {/* Botões de ação */}
           <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-600/30">
             {/* Botão Editar - sempre disponível */}
             <button
@@ -294,8 +300,6 @@ const CompactParticipantCard = ({
                 Confirmar Pagamento
               </button>
             )}
-
-            {/* Botão Excluir - apenas para pendentes e cancelados */}
 
             <button
               onClick={handleExcluir}

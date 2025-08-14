@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
-
+import ExpandToggleButton from "../componentes/ExpandToggleButton";
 const Inscritos = () => {
   // Estados principais
   const [participantes, setParticipantes] = useState([]);
@@ -198,18 +198,12 @@ const Inscritos = () => {
                 <span className="text-gray-400">
                   {participantesFiltrados.length} encontrados
                 </span>
-                <button
-                  onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-xl transition-all flex items-center"
-                >
-                  <ChevronDown
-                    className={`mr-2 transition-transform ${
-                      mostrarFiltros ? "rotate-180" : ""
-                    }`}
-                    size={16}
-                  />
-                  {mostrarFiltros ? "Ocultar" : "Mostrar"} Filtros
-                </button>
+                <ExpandToggleButton
+                  isExpanded={mostrarFiltros}
+                  onToggle={() => setMostrarFiltros(!mostrarFiltros)}
+                  label="Filtros"
+                  variant="yellow"
+                />
               </div>
             </div>
 

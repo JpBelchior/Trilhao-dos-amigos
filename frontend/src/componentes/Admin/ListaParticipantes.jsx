@@ -54,25 +54,6 @@ const ListaParticipantes = ({
       ))}
 
       {/* Footer com dicas */}
-      <div className="bg-green-900/20 rounded-xl p-4 border border-green-400/20 mt-6">
-        <h4 className="text-green-400 font-semibold text-sm mb-2 flex items-center">
-          💡 Dicas de navegação
-        </h4>
-        <div className="grid md:grid-cols-2 gap-3 text-xs text-gray-300">
-          <div>
-            • <strong>Clique no card</strong> para expandir/contrair informações
-          </div>
-          <div>
-            • <strong>Botão "Editar"</strong> abre modal completo de edição
-          </div>
-          <div>
-            • <strong>Status pendente:</strong> permite confirmar ou excluir
-          </div>
-          <div>
-            • <strong>Status confirmado:</strong> apenas visualização e edição
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
