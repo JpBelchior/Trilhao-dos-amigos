@@ -5,6 +5,7 @@ import {
   TipoCamiseta,
   CategoriaMoto,
   StatusPagamento,
+  StatusEntrega,
 } from "../types/models";
 
 export const popularParticipantes = async (): Promise<void> => {
@@ -79,258 +80,6 @@ export const popularParticipantes = async (): Promise<void> => {
         cidade: "Volta Redonda",
         estado: "RJ",
         categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda NXR 160",
-      },
-      {
-        nome: "Fernanda Souza",
-        cidade: "Campos do Jordão",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Husqvarna FE 350",
-      },
-      {
-        nome: "Gabriel Rodrigues",
-        cidade: "Piquete",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha XT 660",
-      },
-      {
-        nome: "Camila Barbosa",
-        cidade: "Guaratinguetá",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "KTM 390 Adventure",
-      },
-      {
-        nome: "Bruno Gomes",
-        cidade: "Aparecida",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda Tornado 250",
-      },
-      {
-        nome: "Isabela Martins",
-        cidade: "Cachoeira Paulista",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Honda CRF 450X",
-      },
-      {
-        nome: "Diego Carvalho",
-        cidade: "Lorena",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha Factor 125",
-      },
-      {
-        nome: "Leticia Ribeiro",
-        cidade: "Pindamonhangaba",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Yamaha YZ 250F",
-      },
-      {
-        nome: "Thiago Nascimento",
-        cidade: "Taubaté",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda CG 160",
-      },
-      {
-        nome: "Patrícia Araújo",
-        cidade: "São José dos Campos",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "KTM 690 Enduro",
-      },
-      {
-        nome: "Leonardo Dias",
-        cidade: "Jacareí",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha YBR 150",
-      },
-      {
-        nome: "Vanessa Freitas",
-        cidade: "Caçapava",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Husqvarna TE 300",
-      },
-      {
-        nome: "Rodrigo Moreira",
-        cidade: "São Sebastião",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda Pop 110",
-      },
-      {
-        nome: "Stephanie Castro",
-        cidade: "Caraguatatuba",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Beta RR 300",
-      },
-      {
-        nome: "Felipe Correia",
-        cidade: "Ubatuba",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha Crypton 115",
-      },
-      {
-        nome: "Bianca Vieira",
-        cidade: "Paraty",
-        estado: "RJ",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "GasGas EC 250F",
-      },
-      {
-        nome: "André Machado",
-        cidade: "Angra dos Reis",
-        estado: "RJ",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda Bros 160",
-      },
-      {
-        nome: "Carolina Monteiro",
-        cidade: "Mangaratiba",
-        estado: "RJ",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "KTM 350 EXC-F",
-      },
-      {
-        nome: "Gustavo Cardoso",
-        cidade: "Itatiaia",
-        estado: "RJ",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha Lander 250",
-      },
-      {
-        nome: "Natália Ferreira",
-        cidade: "Penedo",
-        estado: "RJ",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Honda CRF 250X",
-      },
-      {
-        nome: "Vinicius Rocha",
-        cidade: "Visconde de Mauá",
-        estado: "RJ",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda XRE 300",
-      },
-      {
-        nome: "Amanda Silva",
-        cidade: "Aiuruoca",
-        estado: "MG",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Yamaha WR 250F",
-      },
-      {
-        nome: "Roberto Pinto",
-        cidade: "São Lourenço",
-        estado: "MG",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha Crosser 150",
-      },
-      {
-        nome: "Priscila Melo",
-        cidade: "Caxambu",
-        estado: "MG",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "KTM 250 Duke",
-      },
-      {
-        nome: "Eduardo Torres",
-        cidade: "Baependi",
-        estado: "MG",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda NXR 160",
-      },
-      {
-        nome: "Renata Campos",
-        cidade: "Carrancas",
-        estado: "MG",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Husqvarna FE 350",
-      },
-      {
-        nome: "Alexandre Ramos",
-        cidade: "Queluz",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha XT 660",
-      },
-      {
-        nome: "Claudia Teixeira",
-        cidade: "Lavrinhas",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "KTM 390 Adventure",
-      },
-      {
-        nome: "Fabio Santana",
-        cidade: "Itamonte",
-        estado: "MG",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda Tornado 250",
-      },
-      {
-        nome: "Monica Lopes",
-        cidade: "Resende",
-        estado: "RJ",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Honda CRF 450X",
-      },
-      {
-        nome: "Daniel Cavalcanti",
-        cidade: "Passa Quatro",
-        estado: "MG",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha Factor 125",
-      },
-      {
-        nome: "Simone Duarte",
-        cidade: "Cruzeiro",
-        estado: "SP",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Yamaha YZ 250F",
-      },
-      {
-        nome: "Henrique Reis",
-        cidade: "São Paulo",
-        estado: "SP",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Honda CG 160",
-      },
-      {
-        nome: "Adriana Morais",
-        cidade: "Rio de Janeiro",
-        estado: "RJ",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "KTM 690 Enduro",
-      },
-      {
-        nome: "Igor Nunes",
-        cidade: "Belo Horizonte",
-        estado: "MG",
-        categoria: CategoriaMoto.NACIONAL,
-        moto: "Yamaha YBR 150",
-      },
-      {
-        nome: "Sabrina Lacerda",
-        cidade: "Juiz de Fora",
-        estado: "MG",
-        categoria: CategoriaMoto.IMPORTADA,
-        moto: "Husqvarna TE 300",
-      },
-      {
-        nome: "Otávio Andrade",
-        cidade: "Volta Redonda",
-        estado: "RJ",
-        categoria: CategoriaMoto.NACIONAL,
         moto: "Honda Pop 110",
       },
       {
@@ -398,6 +147,23 @@ export const popularParticipantes = async (): Promise<void> => {
 
       let valorInscricao = 100.0;
 
+      // ✅ SIMULAR DIFERENTES STATUS DE ENTREGA
+      // 60% das camisetas principais já entregues para teste
+      const camisetaPrincipalEntregue = Math.random() > 0.4;
+      const statusEntregaCamiseta = camisetaPrincipalEntregue
+        ? StatusEntrega.ENTREGUE
+        : StatusEntrega.NAO_ENTREGUE;
+
+      const dataEntregaCamiseta = camisetaPrincipalEntregue
+        ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) // Últimos 7 dias
+        : undefined;
+
+      const entreguePor = camisetaPrincipalEntregue
+        ? ["João Organizador", "Maria Coordenadora", "Carlos Voluntário"][
+            Math.floor(Math.random() * 3)
+          ]
+        : undefined;
+
       const participante = await Participante.create({
         nome: dados.nome,
         cpf,
@@ -414,10 +180,15 @@ export const popularParticipantes = async (): Promise<void> => {
         valorInscricao,
         statusPagamento: StatusPagamento.CONFIRMADO,
         observacoes: "Participante de teste",
+
+        // ✅ NOVOS CAMPOS DE ENTREGA
+        statusEntregaCamiseta,
+        dataEntregaCamiseta,
+        entreguePor,
       });
 
-      // 30% chance de ter camisetas extras
-      if (Math.random() > 0.7) {
+      // 40% chance de ter camisetas extras
+      if (Math.random() > 0.6) {
         const qtdExtras = Math.floor(Math.random() * 2) + 1; // 1 a 2 extras
 
         for (let j = 0; j < qtdExtras; j++) {
@@ -425,11 +196,33 @@ export const popularParticipantes = async (): Promise<void> => {
             tamanhos[Math.floor(Math.random() * tamanhos.length)];
           const tipoExtra = tipos[Math.floor(Math.random() * tipos.length)];
 
+          // ✅ SIMULAR STATUS DE ENTREGA PARA EXTRAS
+          // 50% das camisetas extras já entregues
+          const extraEntregue = Math.random() > 0.5;
+          const statusEntregaExtra = extraEntregue
+            ? StatusEntrega.ENTREGUE
+            : StatusEntrega.NAO_ENTREGUE;
+
+          const dataEntregaExtra = extraEntregue
+            ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+            : undefined;
+
+          const entreguePorExtra = extraEntregue
+            ? ["Ana Organizadora", "Pedro Coordenador", "Lucas Voluntário"][
+                Math.floor(Math.random() * 3)
+              ]
+            : undefined;
+
           await CamisetaExtra.create({
             participanteId: participante.id!,
             tamanho: tamanhoExtra,
             tipo: tipoExtra,
             preco: 50.0,
+
+            // ✅ NOVOS CAMPOS DE ENTREGA
+            statusEntrega: statusEntregaExtra,
+            dataEntrega: dataEntregaExtra,
+            entreguePor: entreguePorExtra,
           });
 
           valorInscricao += 50.0;
@@ -439,11 +232,17 @@ export const popularParticipantes = async (): Promise<void> => {
       }
 
       console.log(
-        `✅ ${dados.nome} (${dados.cidade}/${dados.estado}) - ${dados.moto}`
+        `✅ ${dados.nome} (${dados.cidade}/${dados.estado}) - ${
+          dados.moto
+        } - Camiseta: ${
+          statusEntregaCamiseta === StatusEntrega.ENTREGUE
+            ? "ENTREGUE"
+            : "PENDENTE"
+        }`
       );
     }
 
-    // Criar participantes cancelados
+    // Criar participantes cancelados (sem campos de entrega pois não fazem sentido)
     for (let i = 0; i < participantesCancelados.length; i++) {
       const dados = participantesCancelados[i];
       const cpfNumero = String(99988877000 + i).padStart(11, "0");
@@ -466,6 +265,11 @@ export const popularParticipantes = async (): Promise<void> => {
         valorInscricao: 100.0,
         statusPagamento: StatusPagamento.CANCELADO,
         observacoes: "Participante cancelado para teste",
+
+        // ✅ CAMPOS DE ENTREGA PARA CANCELADOS (sempre não entregue)
+        statusEntregaCamiseta: StatusEntrega.NAO_ENTREGUE,
+        dataEntregaCamiseta: undefined,
+        entreguePor: undefined,
       });
 
       console.log(
@@ -485,6 +289,7 @@ export const popularParticipantes = async (): Promise<void> => {
     console.log(
       `📊 Total: ${totalParticipantes} participantes (${participantesConfirmados.length} confirmados + ${participantesCancelados.length} cancelados)`
     );
+    console.log(`📦 Status de entrega simulado para teste do sistema`);
   } catch (error) {
     console.error("❌ Erro ao popular participantes:", error);
     throw error;
