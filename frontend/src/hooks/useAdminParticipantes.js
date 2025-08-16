@@ -252,6 +252,85 @@ const useAdminParticipantes = () => {
     }
   };
 
+  const criarUsuario = async (dadosUsuario) => {
+    try {
+      setOperacaoLoading(true);
+
+      console.log(
+        "➕ [AdminParticipantes] Criando novo participante:",
+        dadosUsuario.nome
+      );
+
+      const response = await fetchAuth(
+        "http://localhost:8000/api/participantes",
+        {
+          method: "POST",
+          body: JSON.stringify(dadosUsuario),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        // Recarregar dados para incluir o novo participante
+        await carregarParticipantes();
+
+        console.log("✅ [AdminParticipantes] Participante criado com sucesso");
+        return {
+          sucesso: true,
+          dados: data.dados,
+          mensagem: "Participante criado com sucesso!",
+        };
+      } else {
+        throw new Error(data.erro || "Erro ao criar participante");
+      }
+    } catch (error) {
+      console.error(
+        "❌ [AdminParticipantes] Erro ao criar participante:",
+        error
+      );
+      return { sucesso: false, erro: error.message };
+    } finally {
+      setOperacaoLoading(false);
+    }
+  };
+
+  const excluirParticipante = async (participanteId) => {
+    try {
+      setOperacaoLoading(true);
+
+      console.log(
+        "🗑️ [AdminParticipantes] Excluindo participante:",
+        participanteId
+      );
+
+      const response = await fetchAuth(
+        `http://localhost:8000/api/participantes/${participanteId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        // Remover participante da lista local
+        setParticipantes((prev) => prev.filter((p) => p.id !== participanteId));
+
+        console.log(
+          "✅ [AdminParticipantes] Participante excluído com sucesso"
+        );
+        return { sucesso: true };
+      } else {
+        throw new Error(data.erro || "Erro ao excluir participante");
+      }
+    } catch (error) {
+      console.error("❌ [AdminParticipantes] Erro ao excluir:", error);
+      return { sucesso: false, erro: error.message };
+    } finally {
+      setOperacaoLoading(false);
+    }
+  };
   // 🔄 RECARREGAR DADOS
   const recarregarDados = async () => {
     await carregarParticipantes();
@@ -302,6 +381,8 @@ const useAdminParticipantes = () => {
   useEffect(() => {
     calcularEstatisticas(participantes);
   }, [participantes]);
+  // 🗑️ EXCLUIR PARTICIPANTE - NOVA FUNÇÃO
+  // Adicione esta função APÓS a função "cancelarParticipante" e ANTES de "recarregarDados"
 
   return {
     // Estados principais
@@ -337,6 +418,8 @@ const useAdminParticipantes = () => {
     confirmarPagamento,
     cancelarParticipante,
     recarregarDados,
+    excluirParticipante,
+    criarUsuario,
   };
 };
 

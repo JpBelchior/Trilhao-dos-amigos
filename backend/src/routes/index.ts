@@ -6,6 +6,7 @@ import pagamentoRoutes from "./Pagamento/pagamento";
 import localizacaoRoutes from "./Localizacao/localizacao";
 import gerenteRoutes from "./Gerente/gerente";
 import campeoesRoutes from "./Campeoes/campeoes";
+import entregaRoutes from "./Entregas/entregas";
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.get("/", (req, res) => {
       localizacao: "/api/localizacao",
       gerente: "/api/gerente",
       campeoes: "/api/campeoes",
+      entrega: "/api/entrega", // NOVA ROTA
     },
     timestamp: new Date().toISOString(),
   });
@@ -43,5 +45,8 @@ router.use("/gerente", gerenteRoutes);
 
 // Rotas dos campeões
 router.use("/campeoes", campeoesRoutes);
+
+//  Rotas de entrega
+router.use("/entrega", entregaRoutes);
 
 export default router;

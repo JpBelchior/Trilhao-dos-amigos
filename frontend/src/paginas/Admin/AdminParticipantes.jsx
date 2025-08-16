@@ -1,5 +1,6 @@
 // frontend/src/paginas/Admin/AdminParticipantes.jsx
 import React from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -8,7 +9,6 @@ import {
   Download,
   UserPlus,
   DollarSign,
-  TrendingUp,
 } from "lucide-react";
 
 // IMPORTAR COMPONENTES E HOOK QUE CRIAMOS
@@ -19,6 +19,7 @@ import ModalAdminParticipante from "../../componentes/Admin/ModalAdminParticipan
 import LoadingComponent from "../../componentes/Loading";
 import ErroComponent from "../../componentes/Erro";
 import StatCard from "../../componentes/Admin/StatCard";
+import ModalCriarUsuario from "../../componentes/Admin/ModalCriarUsuario";
 
 const AdminParticipantes = () => {
   const navigate = useNavigate();
@@ -56,9 +57,29 @@ const AdminParticipantes = () => {
 
     // Ações administrativas
     confirmarPagamento,
-    cancelarParticipante,
+    excluirParticipante,
     recarregarDados,
+    criarUsuario,
   } = useAdminParticipantes();
+
+  const [modalCriarAberto, setModalCriarAberto] = useState(false);
+
+  // 4️⃣ ADICIONAR FUNÇÕES PARA CONTROLAR O MODAL DE CRIAÇÃO
+  // Abrir modal de criação
+  const abrirModalCriacao = () => {
+    setModalCriarAberto(true);
+  };
+
+  // Fechar modal de criação
+  const fecharModalCriacao = () => {
+    setModalCriarAberto(false);
+  };
+
+  // Lidar com sucesso na criação
+  const handleCriarSuccess = async (dadosUsuario) => {
+    const resultado = await criarUsuario(dadosUsuario);
+    return resultado;
+  };
 
   // Calcular índice inicial para numeração
   const indiceInicio = (paginaAtual - 1) * itensPorPagina;
@@ -86,39 +107,6 @@ const AdminParticipantes = () => {
 
     // Fechar modal
     fecharModal();
-  };
-
-  // NOVA: Função para excluir participante (movida do modal)
-  const handleExcluirParticipante = async (participanteId) => {
-    try {
-      // Usar a mesma lógica que funcionava no modal
-      const response = await fetch(
-        `http://localhost:8000/api/participantes/${participanteId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        // Recarregar dados
-        await recarregarDados();
-        return { sucesso: true };
-      } else {
-        return {
-          sucesso: false,
-          erro: data.erro || "Erro ao excluir participante",
-        };
-      }
-    } catch (error) {
-      console.error("Erro ao excluir participante:", error);
-      return { sucesso: false, erro: error.message || "Erro de conexão" };
-    }
   };
 
   // Função para exportar lista (futura implementação)
@@ -152,6 +140,15 @@ const AdminParticipantes = () => {
           </div>
 
           <div className="flex space-x-4">
+            {/* NOVO BOTÃO - Criar Participante */}
+            <button
+              onClick={abrirModalCriacao}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
+            >
+              <UserPlus className="mr-2" size={20} />
+              Criar Participante
+            </button>
+
             <button
               onClick={exportarLista}
               className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
@@ -229,7 +226,7 @@ const AdminParticipantes = () => {
             indiceInicio={indiceInicio}
             selecionarParticipante={selecionarParticipante}
             confirmarPagamento={confirmarPagamento}
-            excluirParticipante={handleExcluirParticipante} // NOVA FUNÇÃO
+            excluirParticipante={excluirParticipante} // NOVA FUNÇÃO
             operacaoLoading={operacaoLoading}
           />
         </div>
@@ -297,6 +294,13 @@ const AdminParticipantes = () => {
         )}
 
         {/* MODAL DE EDIÇÃO/VISUALIZAÇÃO */}
+
+        <ModalCriarUsuario
+          isOpen={modalCriarAberto}
+          onClose={fecharModalCriacao}
+          onSuccess={handleCriarSuccess}
+          operacaoLoading={operacaoLoading}
+        />
         <ModalAdminParticipante
           participante={participanteSelecionado}
           isOpen={modalAberto}

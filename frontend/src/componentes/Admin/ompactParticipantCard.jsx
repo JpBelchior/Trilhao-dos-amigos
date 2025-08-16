@@ -103,7 +103,18 @@ const CompactParticipantCard = ({
     );
 
     if (confirmacao) {
-      await excluirParticipante(participante);
+      try {
+        const resultado = await excluirParticipante(participante.id);
+
+        if (resultado && resultado.sucesso) {
+          // Feedback de sucesso opcional
+          console.log(`✅ ${participante.nome} foi excluído com sucesso!`);
+        } else {
+        }
+      } catch (error) {
+        console.error("Erro ao excluir participante:", error);
+        alert(`❌ Erro ao excluir participante: ${error.message}`);
+      }
     }
   };
 

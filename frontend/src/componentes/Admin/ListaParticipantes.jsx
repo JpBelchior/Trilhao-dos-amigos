@@ -35,7 +35,7 @@ const ListaParticipantes = ({
           Participantes ({participantesPagina.length})
         </h3>
         <div className="text-sm text-gray-400">
-          💡 Clique para expandir detalhes
+          Clique para expandir detalhes
         </div>
       </div>
 
