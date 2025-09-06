@@ -1,54 +1,39 @@
-// src/componentes/paginaPrincipal/GallerySection.jsx
+// frontend/src/componentes/paginaPrincipal/GallerySection.jsx
 import React, { useState, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Trophy,
-  Loader2,
-  ImageIcon,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import LoadingComponent from "../Loading";
+import SimpleImage from "../SimpleImage";
+import { useApiRetry } from "../../hooks/useApiRetry";
 
 const GallerySection = () => {
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [fotos, setFotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState("");
 
-  // Carregar fotos da categoria "edições anteriores"
+  const { fetchWithRetry, loading, error } = useApiRetry(3);
+
+  // Carregar fotos da API
+  const carregarFotos = async () => {
+    try {
+      const data = await fetchWithRetry(
+        "http://localhost:8000/api/fotos/galeria/edicoes_anteriores"
+      );
+
+      if (data.sucesso && data.dados.length > 0) {
+        setFotos(data.dados);
+        setCurrentPhoto(0);
+      } else {
+        setFotos(getFotosExemplo());
+      }
+    } catch (err) {
+      setFotos(getFotosExemplo());
+    }
+  };
+
   useEffect(() => {
     carregarFotos();
   }, []);
 
-  const carregarFotos = async () => {
-    try {
-      setLoading(true);
-      setErro("");
-
-      const response = await fetch(
-        "http://localhost:8000/api/fotos/galeria/edicoes_anteriores"
-      );
-      const data = await response.json();
-
-      if (data.sucesso && data.dados.length > 0) {
-        setFotos(data.dados);
-        setCurrentPhoto(0); // Reset para primeira foto
-      } else if (data.dados.length === 0) {
-        // Não há fotos, usar dados de exemplo para não quebrar o layout
-        setFotos(getFotosExemplo());
-      } else {
-        setErro("Erro ao carregar fotos");
-        setFotos(getFotosExemplo());
-      }
-    } catch (error) {
-      console.error("Erro ao carregar fotos:", error);
-      setErro("Erro de conexão");
-      setFotos(getFotosExemplo());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fotos de exemplo como fallback
+  // Fotos de exemplo
   const getFotosExemplo = () => [
     {
       id: "exemplo-1",
@@ -77,18 +62,17 @@ const GallerySection = () => {
       edicao: "6ª Edição",
       ano: 2022,
     },
-    {
-      id: "exemplo-4",
-      titulo: "5ª Edição - 2021",
-      descricao: "Primeiro evento pós-pandemia",
-      stats: "120 Pilotos • Subidas Íngremes • Emoção Pura",
-      urlFoto: "/api/placeholder/800/500",
-      edicao: "5ª Edição",
-      ano: 2021,
-    },
   ];
 
-  // Funções de navegação
+  // Construir URL da imagem
+  const getImageUrl = (foto) => {
+    if (foto.urlFoto?.startsWith("/uploads/")) {
+      return `http://localhost:8000${foto.urlFoto}`;
+    }
+    return foto.urlFoto || "/api/placeholder/800/500";
+  };
+
+  // Navegação
   const nextPhoto = () => {
     if (fotos.length > 0) {
       setCurrentPhoto((prev) => (prev + 1) % fotos.length);
@@ -101,39 +85,12 @@ const GallerySection = () => {
     }
   };
 
-  // Ir para foto específica
-  const goToPhoto = (index) => {
-    setCurrentPhoto(index);
-  };
-
-  // Construir URL da imagem
-  const getImageUrl = (foto) => {
-    if (foto.urlFoto.startsWith("/uploads/")) {
-      return `http://localhost:8000${foto.urlFoto}`;
-    }
-    return foto.urlFoto; // Para fotos de exemplo
-  };
-
+  // Loading usando o LoadingComponent existente
   if (loading) {
-    return (
-      <section className="py-20 bg-black">
-        <div className="container mx-auto px-6">
-          <div className="relative max-w-6xl mx-auto">
-            <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-800 flex items-center justify-center">
-              <div className="text-center">
-                <Loader2
-                  className="animate-spin mx-auto mb-4 text-green-400"
-                  size={48}
-                />
-                <p className="text-white text-xl">Carregando galeria...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+    return <LoadingComponent loading="Carregando galeria..." />;
   }
 
+  // Sem fotos - versão simples
   if (fotos.length === 0) {
     return (
       <section className="py-20 bg-black">
@@ -141,13 +98,14 @@ const GallerySection = () => {
           <div className="relative max-w-6xl mx-auto">
             <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-800 flex items-center justify-center">
               <div className="text-center">
-                <ImageIcon className="mx-auto mb-4 text-gray-500" size={64} />
+                <div className="text-gray-500 text-6xl mb-4">📷</div>
                 <p className="text-gray-400 text-xl mb-2">
                   Nenhuma foto disponível
                 </p>
                 <p className="text-gray-500">
                   As fotos das edições anteriores aparecerão aqui
                 </p>
+                {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
               </div>
             </div>
           </div>
@@ -162,87 +120,94 @@ const GallerySection = () => {
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
         <div className="relative max-w-6xl mx-auto">
+          {/* Container principal */}
           <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl">
-            <img
+            <SimpleImage
               src={getImageUrl(fotoAtual)}
+              fallbackSrc="/api/placeholder/800/500"
               alt={fotoAtual.titulo}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback para imagem quebrada
-                e.target.src = "/api/placeholder/800/500";
-              }}
+              imageId={`gallery-${fotoAtual.id}`}
             />
+
+            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
 
-            {/* Info Overlay Moderna */}
-            <div className="absolute bottom-0 left-0 right-0 p-8">
-              <div className="flex items-end justify-between">
-                <div>
-                  <div className="inline-flex items-center px-4 py-2 bg-yellow-400 text-black font-bold rounded-full mb-4">
-                    <Trophy className="mr-2" size={16} />
-                    {fotoAtual.stats ||
-                      `${fotoAtual.edicao} • ${fotoAtual.ano}`}
-                  </div>
-                  <h3 className="text-white text-4xl font-black mb-2">
-                    {fotoAtual.titulo}
-                  </h3>
-                  <p className="text-yellow-200/80 text-xl">
-                    {fotoAtual.descricao}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Controles de navegação - só mostrar se houver mais de 1 foto */}
+            {/* Navegação */}
             {fotos.length > 1 && (
               <>
                 <button
                   onClick={prevPhoto}
-                  className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-black/60 backdrop-blur-lg hover:bg-yellow-500 text-white p-4 rounded-2xl transition-all hover:scale-110 border border-white/20"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all"
                 >
-                  <ChevronLeft size={28} />
+                  <ChevronLeft size={24} />
                 </button>
+
                 <button
                   onClick={nextPhoto}
-                  className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-black/60 backdrop-blur-lg hover:bg-yellow-500 text-white p-4 rounded-2xl transition-all hover:scale-110 border border-white/20"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all"
                 >
-                  <ChevronRight size={28} />
+                  <ChevronRight size={24} />
                 </button>
               </>
             )}
+
+            {/* Info da foto */}
+            <div className="absolute bottom-0 left-0 right-0 p-8">
+              <div className="flex items-end justify-between">
+                <div>
+                  <div className="inline-flex items-center px-4 py-2 bg-yellow-400 text-black font-bold rounded-full mb-4">
+                    <Trophy size={16} className="mr-2" />
+                    {fotoAtual.edicao || "Edição Especial"}
+                  </div>
+                  <h2 className="text-4xl font-bold text-white mb-2 text-shadow-xl">
+                    {fotoAtual.titulo}
+                  </h2>
+                  {fotoAtual.descricao && (
+                    <p className="text-gray-200 text-lg mb-3 text-shadow-xl">
+                      {fotoAtual.descricao}
+                    </p>
+                  )}
+                  {fotoAtual.stats && (
+                    <p className="text-orange-400 font-semibold text-shadow-xl">
+                      {fotoAtual.stats}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Indicadores - só mostrar se houver mais de 1 foto */}
+          {/* Thumbnails */}
           {fotos.length > 1 && (
-            <div className="flex justify-center mt-8 space-x-3">
-              {fotos.map((_, index) => (
+            <div className="mt-6 flex gap-2 justify-center overflow-x-auto pb-2">
+              {fotos.map((foto, index) => (
                 <button
-                  key={index}
-                  onClick={() => goToPhoto(index)}
-                  className={`h-3 rounded-full transition-all ${
+                  key={foto.id}
+                  onClick={() => setCurrentPhoto(index)}
+                  className={`flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden border-2 transition-all ${
                     index === currentPhoto
-                      ? "bg-yellow-400 w-8"
-                      : "bg-white/30 w-3 hover:bg-white/50"
+                      ? "border-green-400 opacity-100"
+                      : "border-gray-600 opacity-60 hover:opacity-80"
                   }`}
-                />
+                >
+                  <SimpleImage
+                    src={getImageUrl(foto)}
+                    fallbackSrc="/api/placeholder/80/48"
+                    alt={`Thumbnail ${foto.titulo}`}
+                    className="w-full h-full object-cover"
+                    imageId={`thumb-${foto.id}`}
+                  />
+                </button>
               ))}
             </div>
           )}
 
-          {/* Contador de fotos */}
+          {/* Indicador */}
           {fotos.length > 1 && (
             <div className="text-center mt-4">
-              <span className="text-gray-400 text-sm">
-                {currentPhoto + 1} de {fotos.length} fotos
-              </span>
-            </div>
-          )}
-
-          {/* Indicador de erro (se houver) */}
-          {erro && (
-            <div className="text-center mt-4">
-              <span className="text-yellow-400 text-sm">
-                ⚠️ {erro} - Exibindo fotos de exemplo
+              <span className="text-gray-400">
+                {currentPhoto + 1} de {fotos.length}
               </span>
             </div>
           )}

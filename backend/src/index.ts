@@ -30,8 +30,14 @@ if (!fs.existsSync(fotosDir)) {
 }
 
 // Middlewares
-app.use(helmet());
-app.use(cors());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // ✅ Permitir recursos cross-origin apenas
+  })
+);
+
+app.use(cors()); // ✅ CORS simples e permissivo para todas as rotas
+
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

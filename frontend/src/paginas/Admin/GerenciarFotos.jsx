@@ -4,7 +4,6 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Camera,
   Upload,
   Trash2,
   Edit3,
@@ -17,10 +16,11 @@ import {
   EyeOff,
   AlertTriangle,
   CheckCircle,
-  Loader2,
-  Image as ImageIcon,
-  FileImage,
+  RefreshCw,
 } from "lucide-react";
+import LoadingComponent from "../../componentes/Loading";
+import SimpleImage from "../../componentes/SimpleImage";
+import { useApiRetry } from "../../hooks/useApiRetry";
 
 const GerenciarFotos = () => {
   const { fetchAuth } = useAuth();
@@ -28,7 +28,6 @@ const GerenciarFotos = () => {
 
   // Estados principais
   const [fotos, setFotos] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
@@ -50,10 +49,13 @@ const GerenciarFotos = () => {
   const [dadosEdicao, setDadosEdicao] = useState({});
 
   // Estados para visualização
-  const [tipoVisao, setTipoVisao] = useState("grid"); // "grid" ou "list"
+  const [tipoVisao, setTipoVisao] = useState("grid");
   const [filtroCategoria, setFiltroCategoria] = useState("todas");
 
-  // Categorias disponíveis
+  // Hook para API com retry
+  const [loading, setLoading] = useState(false);
+
+  // Categorias
   const categorias = {
     edicoes_anteriores: "Edições Anteriores",
     hall_fama: "Hall da Fama",
@@ -61,15 +63,9 @@ const GerenciarFotos = () => {
     evento_atual: "Evento Atual",
   };
 
-  // Carregar fotos ao montar componente
-  useEffect(() => {
-    carregarFotos();
-  }, [filtroCategoria]);
-
-  // Função para carregar fotos
   const carregarFotos = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // ← ADICIONAR
       setErro("");
 
       const url =
@@ -77,7 +73,7 @@ const GerenciarFotos = () => {
           ? "http://localhost:8000/api/fotos"
           : `http://localhost:8000/api/fotos?categoria=${filtroCategoria}`;
 
-      const response = await fetchAuth(url);
+      const response = await fetchAuth(url); // ← USAR fetchAuth
       const data = await response.json();
 
       if (data.sucesso) {
@@ -89,11 +85,23 @@ const GerenciarFotos = () => {
       console.error("Erro ao carregar fotos:", error);
       setErro("Erro ao conectar com servidor");
     } finally {
-      setLoading(false);
+      setLoading(false); // ← ADICIONAR
     }
   };
 
-  // Função para selecionar arquivos
+  useEffect(() => {
+    carregarFotos();
+  }, [filtroCategoria]);
+
+  // Construir URL da imagem
+  const getImageUrl = (foto) => {
+    if (foto.urlFoto?.startsWith("/uploads/")) {
+      return `http://localhost:8000${foto.urlFoto}`;
+    }
+    return foto.urlFoto || "/api/placeholder/300/200";
+  };
+
+  // Selecionar arquivos
   const handleSelecionarArquivos = (e) => {
     const files = Array.from(e.target.files);
     const arquivosValidos = files.filter((file) => {
@@ -105,7 +113,7 @@ const GerenciarFotos = () => {
       ];
       return (
         tiposPermitidos.includes(file.type) && file.size <= 10 * 1024 * 1024
-      ); // 10MB
+      );
     });
 
     if (arquivosValidos.length !== files.length) {
@@ -117,7 +125,7 @@ const GerenciarFotos = () => {
     setArquivosSelecionados(arquivosValidos);
   };
 
-  // Função para fazer upload
+  // Upload
   const handleUpload = async (e) => {
     e.preventDefault();
 
@@ -136,22 +144,13 @@ const GerenciarFotos = () => {
       setErro("");
 
       const formData = new FormData();
-
-      // Adicionar arquivos
       arquivosSelecionados.forEach((file) => {
         formData.append("fotos", file);
       });
 
-      // Adicionar dados do formulário
-      formData.append("titulo", uploadData.titulo);
-      formData.append("descricao", uploadData.descricao);
-      formData.append("stats", uploadData.stats);
-      formData.append("categoria", uploadData.categoria);
-
-      if (uploadData.categoria === "edicoes_anteriores") {
-        formData.append("edicao", uploadData.edicao);
-        formData.append("ano", uploadData.ano.toString());
-      }
+      Object.entries(uploadData).forEach(([key, value]) => {
+        formData.append(key, key === "ano" ? value.toString() : value);
+      });
 
       const response = await fetchAuth(
         "http://localhost:8000/api/fotos/upload",
@@ -182,14 +181,13 @@ const GerenciarFotos = () => {
         setErro(data.erro || "Erro ao fazer upload");
       }
     } catch (error) {
-      console.error("Erro no upload:", error);
       setErro("Erro ao enviar fotos");
     } finally {
       setUploadLoading(false);
     }
   };
 
-  // Função para deletar foto
+  // Deletar foto
   const deletarFoto = async (id) => {
     if (!window.confirm("Tem certeza que deseja deletar esta foto?")) {
       return;
@@ -212,12 +210,11 @@ const GerenciarFotos = () => {
         setErro(data.erro || "Erro ao deletar foto");
       }
     } catch (error) {
-      console.error("Erro ao deletar:", error);
       setErro("Erro ao deletar foto");
     }
   };
 
-  // Função para iniciar edição
+  // Iniciar edição
   const iniciarEdicao = (foto) => {
     setEditando(foto.id);
     setDadosEdicao({
@@ -230,7 +227,7 @@ const GerenciarFotos = () => {
     });
   };
 
-  // Função para salvar edição
+  // Salvar edição
   const salvarEdicao = async (id) => {
     try {
       const response = await fetchAuth(
@@ -252,28 +249,22 @@ const GerenciarFotos = () => {
         setErro(data.erro || "Erro ao editar foto");
       }
     } catch (error) {
-      console.error("Erro ao editar:", error);
       setErro("Erro ao salvar edições");
     }
   };
 
-  // Componente de card de foto
+  // Componente de card
   const FotoCard = ({ foto }) => (
     <div className="bg-gradient-to-br from-green-900/30 to-black/60 rounded-2xl overflow-hidden border border-green-400/30 hover:border-green-400/50 transition-all">
       {/* Preview da imagem */}
       <div className="h-48 bg-gray-800 relative overflow-hidden">
-        <img
-          src={`http://localhost:8000${foto.urlFoto}`}
+        <SimpleImage
+          src={getImageUrl(foto)}
+          fallbackSrc="/api/placeholder/300/200"
           alt={foto.titulo}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.style.display = "none";
-            e.target.nextSibling.style.display = "flex";
-          }}
+          imageId={`admin-${foto.id}`}
         />
-        <div className="hidden absolute inset-0 bg-gray-800 items-center justify-center">
-          <ImageIcon className="text-gray-500" size={48} />
-        </div>
 
         {/* Badge da categoria */}
         <div className="absolute top-2 left-2">
@@ -296,34 +287,36 @@ const GerenciarFotos = () => {
       <div className="p-4">
         {editando === foto.id ? (
           // Modo edição
-          <div className="space-y-3">
+          <div>
             <input
-              value={dadosEdicao.titulo}
+              type="text"
+              value={dadosEdicao.titulo || ""}
               onChange={(e) =>
                 setDadosEdicao((prev) => ({ ...prev, titulo: e.target.value }))
               }
-              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
+              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-2 border border-gray-600 focus:border-green-400"
               placeholder="Título"
             />
             <textarea
-              value={dadosEdicao.descricao}
+              value={dadosEdicao.descricao || ""}
               onChange={(e) =>
                 setDadosEdicao((prev) => ({
                   ...prev,
                   descricao: e.target.value,
                 }))
               }
-              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400 resize-none"
+              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-2 border border-gray-600 focus:border-green-400 resize-none"
               rows="2"
               placeholder="Descrição"
             />
             <input
-              value={dadosEdicao.stats}
+              type="text"
+              value={dadosEdicao.stats || ""}
               onChange={(e) =>
                 setDadosEdicao((prev) => ({ ...prev, stats: e.target.value }))
               }
-              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
-              placeholder="Stats (ex: 100+ Pilotos • 25km)"
+              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-3 border border-gray-600 focus:border-green-400"
+              placeholder="Estatísticas"
             />
 
             <div className="flex gap-2">
@@ -376,41 +369,54 @@ const GerenciarFotos = () => {
     </div>
   );
 
+  if (loading) {
+    return <LoadingComponent loading="Carregando fotos..." />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/admin")}
-              className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl transition-all"
+              className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-xl transition-all"
             >
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-white flex items-center">
-                <Camera className="mr-3 text-green-400" />
-                Gerenciar Fotos
-              </h1>
+              <h1 className="text-3xl font-bold text-white">Gerenciar Fotos</h1>
               <p className="text-gray-400">
-                Upload e gerenciamento de fotos do evento
+                {fotos.length} foto{fotos.length !== 1 ? "s" : ""}
+                {filtroCategoria !== "todas" &&
+                  ` em ${categorias[filtroCategoria]}`}
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => setMostrarUpload(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center font-bold transition-all"
-          >
-            <Plus className="mr-2" size={20} />
-            Nova Foto
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => carregarFotos()}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
+              disabled={loading}
+            >
+              <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+              Atualizar
+            </button>
+            <button
+              onClick={() => setMostrarUpload(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl flex items-center gap-2 transition-all"
+            >
+              <Plus size={20} />
+              Nova Foto
+            </button>
+          </div>
         </div>
 
         {/* Mensagens */}
         {sucesso && (
-          <div className="mb-6 bg-green-900/30 border border-green-400/50 rounded-xl p-4 flex items-center">
+          <div className="mb-6 bg-green-900/50 border border-green-400/50 rounded-xl p-4 flex items-center">
             <CheckCircle className="text-green-400 mr-3" size={20} />
             <span className="text-green-300">{sucesso}</span>
             <button
@@ -423,7 +429,7 @@ const GerenciarFotos = () => {
         )}
 
         {erro && (
-          <div className="mb-6 bg-red-900/30 border border-red-400/50 rounded-xl p-4 flex items-center">
+          <div className="mb-6 bg-red-900/50 border border-red-400/50 rounded-xl p-4 flex items-center">
             <AlertTriangle className="text-red-400 mr-3" size={20} />
             <span className="text-red-300">{erro}</span>
             <button
@@ -478,61 +484,65 @@ const GerenciarFotos = () => {
                 <List size={20} />
               </button>
             </div>
-
-            {/* Total de fotos */}
-            <div className="text-gray-400">
-              {fotos.length} foto{fotos.length !== 1 ? "s" : ""}
-            </div>
           </div>
         </div>
 
-        {/* Loading */}
-        {loading ? (
+        {/* Grid de fotos */}
+        <div
+          className={
+            tipoVisao === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "space-y-4"
+          }
+        >
+          {fotos.map((foto) => (
+            <FotoCard key={foto.id} foto={foto} />
+          ))}
+        </div>
+
+        {/* Estado vazio - versão simples sem divs customizadas */}
+        {!loading && fotos.length === 0 && !erro && (
           <div className="text-center py-20">
-            <Loader2
-              className="animate-spin mx-auto mb-4 text-green-400"
-              size={48}
-            />
-            <p className="text-white text-xl">Carregando fotos...</p>
-          </div>
-        ) : (
-          /* Grid de fotos */
-          <div
-            className={
-              tipoVisao === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                : "space-y-4"
-            }
-          >
-            {fotos.length > 0 ? (
-              fotos.map((foto) => <FotoCard key={foto.id} foto={foto} />)
-            ) : (
-              <div className="col-span-full text-center py-20">
-                <FileImage className="mx-auto mb-4 text-gray-500" size={64} />
-                <p className="text-gray-400 text-xl mb-4">
-                  Nenhuma foto encontrada
-                </p>
-                <button
-                  onClick={() => setMostrarUpload(true)}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
-                >
-                  Adicionar primeira foto
-                </button>
-              </div>
-            )}
+            <svg
+              className="mx-auto mb-4 text-gray-500"
+              width="64"
+              height="64"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"
+              />
+            </svg>
+            <p className="text-gray-400 text-xl mb-2">
+              Nenhuma foto encontrada
+            </p>
+            <p className="text-gray-500 mb-6">
+              {filtroCategoria === "todas"
+                ? "Adicione suas primeiras fotos para começar"
+                : `Nenhuma foto na categoria "${categorias[filtroCategoria]}"`}
+            </p>
+            <button
+              onClick={() => setMostrarUpload(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 mx-auto"
+            >
+              <Plus size={20} />
+              Adicionar Primeira Foto
+            </button>
           </div>
         )}
       </div>
 
-      {/* Modal de Upload */}
+      {/* Modal de upload */}
       {mostrarUpload && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gradient-to-br from-green-900/90 to-black/90 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-green-400/30">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center">
-                <Upload className="mr-3 text-green-400" />
-                Upload de Fotos
-              </h2>
+              <h2 className="text-2xl font-bold text-white">Nova Foto</h2>
               <button
                 onClick={() => setMostrarUpload(false)}
                 className="text-gray-400 hover:text-white"
@@ -541,34 +551,7 @@ const GerenciarFotos = () => {
               </button>
             </div>
 
-            <form onSubmit={handleUpload} className="space-y-6">
-              {/* Seleção de arquivos */}
-              <div>
-                <label className="block text-white font-medium mb-2">
-                  Selecionar Fotos *
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                  onChange={handleSelecionarArquivos}
-                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
-                />
-                <p className="text-gray-400 text-sm mt-1">
-                  Máximo 10 fotos • JPEG, PNG, WebP • Máximo 10MB cada
-                </p>
-
-                {arquivosSelecionados.length > 0 && (
-                  <div className="mt-3 space-y-1">
-                    {arquivosSelecionados.map((file, index) => (
-                      <div key={index} className="text-green-400 text-sm">
-                        ✓ {file.name} ({(file.size / 1024 / 1024).toFixed(1)}MB)
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
+            <form onSubmit={handleUpload} className="space-y-4">
               {/* Título */}
               <div>
                 <label className="block text-white font-medium mb-2">
@@ -583,76 +566,10 @@ const GerenciarFotos = () => {
                       titulo: e.target.value,
                     }))
                   }
-                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-3 border border-gray-600 focus:border-green-400"
-                  placeholder="Ex: 8ª Edição - 2024"
+                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
                   required
                 />
               </div>
-
-              {/* Categoria */}
-              <div>
-                <label className="block text-white font-medium mb-2">
-                  Categoria *
-                </label>
-                <select
-                  value={uploadData.categoria}
-                  onChange={(e) =>
-                    setUploadData((prev) => ({
-                      ...prev,
-                      categoria: e.target.value,
-                    }))
-                  }
-                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-3 border border-gray-600 focus:border-green-400"
-                  required
-                >
-                  {Object.entries(categorias).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Campos específicos para edições anteriores */}
-              {uploadData.categoria === "edicoes_anteriores" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-white font-medium mb-2">
-                      Edição
-                    </label>
-                    <input
-                      type="text"
-                      value={uploadData.edicao}
-                      onChange={(e) =>
-                        setUploadData((prev) => ({
-                          ...prev,
-                          edicao: e.target.value,
-                        }))
-                      }
-                      className="w-full bg-gray-800 text-white rounded-lg px-3 py-3 border border-gray-600 focus:border-green-400"
-                      placeholder="Ex: 8ª Edição"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-white font-medium mb-2">
-                      Ano
-                    </label>
-                    <input
-                      type="number"
-                      value={uploadData.ano}
-                      onChange={(e) =>
-                        setUploadData((prev) => ({
-                          ...prev,
-                          ano: parseInt(e.target.value),
-                        }))
-                      }
-                      className="w-full bg-gray-800 text-white rounded-lg px-3 py-3 border border-gray-600 focus:border-green-400"
-                      min="2020"
-                      max="2030"
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Descrição */}
               <div>
@@ -667,9 +584,8 @@ const GerenciarFotos = () => {
                       descricao: e.target.value,
                     }))
                   }
-                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-3 border border-gray-600 focus:border-green-400 resize-none"
+                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400 resize-none"
                   rows="3"
-                  placeholder="Ex: Mais de 100 participantes enfrentaram o desafio"
                 />
               </div>
 
@@ -687,35 +603,76 @@ const GerenciarFotos = () => {
                       stats: e.target.value,
                     }))
                   }
-                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-3 border border-gray-600 focus:border-green-400"
+                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
                   placeholder="Ex: 100+ Pilotos • 25km • 4h de Duração"
                 />
               </div>
 
-              {/* Botões */}
+              {/* Categoria */}
+              <div>
+                <label className="block text-white font-medium mb-2">
+                  Categoria
+                </label>
+                <select
+                  value={uploadData.categoria}
+                  onChange={(e) =>
+                    setUploadData((prev) => ({
+                      ...prev,
+                      categoria: e.target.value,
+                    }))
+                  }
+                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
+                >
+                  {Object.entries(categorias).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Arquivos */}
+              <div>
+                <label className="block text-white font-medium mb-2">
+                  Fotos *
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleSelecionarArquivos}
+                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-600 file:text-white file:hover:bg-green-700"
+                  required
+                />
+                {arquivosSelecionados.length > 0 && (
+                  <p className="text-gray-400 text-sm mt-2">
+                    {arquivosSelecionados.length} arquivo(s) selecionado(s)
+                  </p>
+                )}
+              </div>
+
               <div className="flex gap-4">
                 <button
                   type="button"
                   onClick={() => setMostrarUpload(false)}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-xl font-medium transition-all"
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-xl"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={uploadLoading || arquivosSelecionados.length === 0}
-                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center"
+                  disabled={uploadLoading}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl flex items-center justify-center gap-2"
                 >
                   {uploadLoading ? (
                     <>
-                      <Loader2 className="animate-spin mr-2" size={20} />
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                       Enviando...
                     </>
                   ) : (
                     <>
-                      <Upload className="mr-2" size={20} />
-                      Enviar {arquivosSelecionados.length} foto
-                      {arquivosSelecionados.length !== 1 ? "s" : ""}
+                      <Upload size={20} />
+                      Enviar Fotos
                     </>
                   )}
                 </button>

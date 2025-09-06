@@ -185,13 +185,19 @@ export const AuthProvider = ({ children }) => {
   };
   // Função para fazer requisições autenticadas automaticamente
   const fetchAuth = async (url, options = {}) => {
+    // Verificar se o body é FormData
+    const isFormData = options.body instanceof FormData;
+
     const authOptions = {
       ...options,
       headers: {
-        ...getAuthHeaders(),
+        Authorization: `Bearer ${token}`,
+        // Só adicionar Content-Type se NÃO for FormData
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
         ...options.headers,
       },
     };
+
     try {
       console.log("🌐 [AuthContext] Fazendo requisição autenticada para:", url);
       const response = await fetch(url, authOptions);
