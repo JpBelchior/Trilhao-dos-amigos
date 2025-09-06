@@ -7,6 +7,7 @@ import localizacaoRoutes from "./Localizacao/localizacao";
 import gerenteRoutes from "./Gerente/gerente";
 import campeoesRoutes from "./Campeoes/campeoes";
 import entregaRoutes from "./Entregas/entregas";
+import fotoRoutes from "./Fotos/fotos";
 
 const router = Router();
 
@@ -22,7 +23,8 @@ router.get("/", (req, res) => {
       localizacao: "/api/localizacao",
       gerente: "/api/gerente",
       campeoes: "/api/campeoes",
-      entrega: "/api/entrega", // NOVA ROTA
+      entrega: "/api/entrega",
+      fotos: "/api/fotos",
     },
     timestamp: new Date().toISOString(),
   });
@@ -48,5 +50,8 @@ router.use("/campeoes", campeoesRoutes);
 
 //  Rotas de entrega
 router.use("/entrega", entregaRoutes);
+
+//  Rotas de fotos
+router.use("/fotos", fotoRoutes);
 
 export default router;

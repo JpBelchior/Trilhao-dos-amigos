@@ -35,6 +35,7 @@ import InformacoesLocal from "./paginas/InformacoesLocal";
 import LoginGerente from "./paginas/Login";
 import Footer from "./componentes/paginaPrincipal/Footer";
 import EstoqueAdmin from "./paginas/Admin/Estoque";
+import GerenciarFotos from "./paginas/Admin/GerenciarFotos";
 // Componente interno que tem acesso ao useLocation
 function AppContent() {
   const location = useLocation();
@@ -108,6 +109,15 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <AdminParticipantes />
+              </ProtectedRoute>
+            }
+          />
+          {/* Gerenciar Fotos */}
+          <Route
+            path="/admin/fotos"
+            element={
+              <ProtectedRoute>
+                <GerenciarFotos />
               </ProtectedRoute>
             }
           />

@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
 import { testConnection, syncDatabase } from "./config/db";
 import apiRoutes from "./routes";
 
@@ -14,9 +16,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+const uploadsDir = path.join(process.cwd(), "uploads");
+const fotosDir = path.join(uploadsDir, "fotos");
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log("📁 Diretório uploads criado:", uploadsDir);
+}
+
+if (!fs.existsSync(fotosDir)) {
+  fs.mkdirSync(fotosDir, { recursive: true });
+  console.log("📸 Diretório fotos criado:", fotosDir);
+}
+
 // Middlewares
 app.use(helmet());
 app.use(cors());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,11 +44,12 @@ app.get("/", (req, res) => {
   res.json({
     message: "Backend Trilhão dos Amigos funcionando!",
     api: "/api",
+    uploads: "/uploads", //  Informar endpoint de uploads
     timestamp: new Date().toISOString(),
   });
 });
 
-// ✅ ROTA ATUALIZADA - Popula estoque, campeões E participantes
+// Popula estoque, campeões E participantes
 app.get("/seed", async (req, res) => {
   try {
     const { popularEstoque, popularCampeoes } = await import(
@@ -97,9 +114,9 @@ const startServer = async () => {
       console.log("🚀 Servidor rodando na porta", PORT);
       console.log("📍 Acesse: http://localhost:" + PORT);
       console.log("🧪 Teste do banco: http://localhost:" + PORT + "/test-db");
+      console.log(`📸 Uploads: http://localhost:${PORT}/uploads`);
       console.log("🌱 Popule dados: http://localhost:" + PORT + "/seed");
 
-      // ✅ CONFIGURAR VERIFICAÇÃO AUTOMÁTICA DE CANCELADOS
       console.log(
         "🔍 Configurando verificação automática de participantes cancelados..."
       );

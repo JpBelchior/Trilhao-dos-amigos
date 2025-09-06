@@ -244,7 +244,7 @@ const AdminDashboard = () => {
             description="Gerenciar fotos dos participantes e do evento para colocar no site"
             color="green"
             badge="Álbum"
-            onClick={() => handleNavegar("Fotos")}
+            onClick={() => navigate("/admin/fotos")}
           />
         </div>
 
