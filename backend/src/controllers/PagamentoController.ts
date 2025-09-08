@@ -1,107 +1,14 @@
-// src/controllers/PagamentoController.ts
 import { Request, Response } from "express";
-import { MercadoPagoConfig, Payment } from "mercadopago";
-import { IApiResponse, StatusPagamento } from "../types/models";
-import { Participante } from "../models";
-import { ParticipanteController } from "./ParticipanteController";
 
-// Configurar Mercado Pago
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN || "",
-  options: {
-    timeout: 5000,
-  },
-});
-
-const payment = new Payment(client);
+// Importar as classes SOLID
+import { PagamentoValidator } from "../validators/PagamentoValidator";
+import { PagamentoService } from "../Service/pagamentoService";
+import { ResponseUtil } from "../utils/responseUtil";
 
 export class PagamentoController {
-  public static async simularStatusPagamento(
-    req: Request,
-    res: Response
-  ): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { status, external_reference, date_approved, simulado } = req.body;
-
-      console.log("🧪 [PagamentoController] Simulando status de pagamento:", {
-        id,
-        status,
-        simulado,
-      });
-
-      // Se for simulação de aprovação
-      if (status === "approved" && external_reference) {
-        console.log(
-          "💳 Pagamento simulado como aprovado! Confirmando participante..."
-        );
-
-        // Extrair número da inscrição do external_reference
-        const match = external_reference.match(/trilhao_([^_]+)_/);
-        if (match) {
-          const numeroInscricao = match[1];
-          const resultado = await ParticipanteController.confirmarParticipante(
-            numeroInscricao,
-            {
-              id: String(id),
-              external_reference: external_reference,
-              date_approved: date_approved || new Date().toISOString(),
-            }
-          );
-
-          if (resultado.sucesso) {
-            console.log(
-              "✅ Participante confirmado com sucesso via simulação!"
-            );
-
-            const response: IApiResponse = {
-              sucesso: true,
-              dados: {
-                pagamentoId: id,
-                status: "approved",
-                statusDetail: "approved",
-                participante: resultado.dados,
-                simulado: true,
-              },
-              mensagem: "Pagamento simulado como aprovado",
-            };
-
-            res.json(response);
-            return;
-          } else {
-            throw new Error(resultado.erro);
-          }
-        } else {
-          throw new Error("Formato de external_reference inválido");
-        }
-      }
-
-      // Para outros status, apenas retornar
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          pagamentoId: id,
-          status: status,
-          statusDetail: status,
-          simulado: true,
-        },
-        mensagem: `Status simulado: ${status}`,
-      };
-
-      res.json(response);
-    } catch (error) {
-      console.error("💥 [PagamentoController] Erro ao simular status:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao simular status do pagamento",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
-    }
-  }
-  // POST /api/pagamento/criar-pix - Criar PIX para participante já existente (PENDENTE)
+  /**
+   * POST /api/pagamento/criar-pix - Criar PIX para participante
+   */
   public static async criarPagamentoPix(
     req: Request,
     res: Response
@@ -114,28 +21,53 @@ export class PagamentoController {
         participanteId
       );
 
-      // ✅ Buscar participante existente no banco
-      const participante = await Participante.findByPk(participanteId);
-
-      if (!participante) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Participante não encontrado",
-          detalhes: "ID do participante inválido",
-        };
-        res.status(404).json(response);
-        return;
+      // 1. VALIDAR dados básicos usando Validator
+      const validacaoDados = PagamentoValidator.validarCriacaoPix({
+        participanteId,
+        valorTotal,
+      });
+      if (!validacaoDados.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados inválidos",
+          validacaoDados.detalhes
+        );
       }
 
-      // ✅ Verificar se participante está pendente
-      if (participante.statusPagamento !== StatusPagamento.PENDENTE) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Participante não está pendente",
-          detalhes: `Status atual: ${participante.statusPagamento}`,
-        };
-        res.status(400).json(response);
-        return;
+      // 2. BUSCAR participante usando Service
+      const participante = await PagamentoService.buscarParticipante(
+        parseInt(participanteId)
+      );
+      if (!participante) {
+        return ResponseUtil.naoEncontrado(
+          res,
+          "Participante não encontrado",
+          "ID do participante inválido"
+        );
+      }
+
+      // 3. VALIDAR participante para PIX usando Validator
+      const validacaoParticipante =
+        PagamentoValidator.validarParticipanteParaPix(participante);
+      if (!validacaoParticipante.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          validacaoParticipante.errors[0],
+          validacaoParticipante.detalhes
+        );
+      }
+
+      // 4. VALIDAR valor usando Validator
+      const validacaoValor = PagamentoValidator.validarValorPix(
+        participante.valorInscricao,
+        parseFloat(valorTotal)
+      );
+      if (!validacaoValor.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          validacaoValor.errors[0],
+          validacaoValor.detalhes
+        );
       }
 
       console.log("👤 Participante encontrado:", {
@@ -145,145 +77,43 @@ export class PagamentoController {
         status: participante.statusPagamento,
       });
 
-      // Gerar external_reference usando o número da inscrição
-      const externalReference = `trilhao_${
-        participante.numeroInscricao
-      }_${Date.now()}`;
+      // 5. CRIAR PIX usando Service
+      const resultado = await PagamentoService.criarPix(
+        participante,
+        parseFloat(valorTotal)
+      );
 
-      // Dados do pagamento PIX
-      const dadosPagamento = {
-        transaction_amount: valorTotal,
-        description: `Trilhão dos Amigos - ${participante.numeroInscricao} - ${participante.nome}`,
-        payment_method_id: "pix",
-
-        // Dados do pagador
-        payer: {
-          email: participante.email,
-          first_name: participante.nome.split(" ")[0],
-          last_name:
-            participante.nome.split(" ").slice(1).join(" ") || "Participante",
-          identification: {
-            type: "CPF",
-            number: participante.cpf.replace(/\D/g, ""), // Remove caracteres especiais
-          },
-        },
-
-        // Referência externa para rastrear
-        external_reference: externalReference,
-
-        // URL de notificação (webhook)
-        // notification_url: `${process.env.BACKEND_URL}/api/pagamento/webhook`,
-
-        // ✅ Configurações específicas do PIX - 10 minutos conforme solicitado
-        date_of_expiration: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutos
-      };
-
-      console.log("📋 Criando pagamento no MP para:", {
-        participante: participante.numeroInscricao,
-        valor: valorTotal,
-        expiraEm: "10 minutos",
-      });
-
-      // Criar pagamento no Mercado Pago
-      const pagamentoMp = await payment.create({ body: dadosPagamento });
-
-      console.log("✅ Pagamento criado no MP:", {
-        id: pagamentoMp.id,
-        status: pagamentoMp.status,
-        external_reference: pagamentoMp.external_reference,
-        qr_code: pagamentoMp.point_of_interaction?.transaction_data?.qr_code
-          ? "Gerado"
-          : "Não gerado",
-      });
-
-      // Verificar se o PIX foi criado corretamente
-      if (!pagamentoMp.point_of_interaction?.transaction_data?.qr_code_base64) {
-        console.error("❌ QR Code não foi gerado pelo MP");
-
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Erro ao gerar QR Code PIX",
-          detalhes: "Mercado Pago não retornou o QR Code",
-        };
-        res.status(500).json(response);
-        return;
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
-      // Salvar referência do pagamento no participante
-      participante.observacoes =
-        (participante.observacoes || "") +
-        `\nPagamento MP criado: ${pagamentoMp.id} | Ref: ${externalReference} | Expira: ${dadosPagamento.date_of_expiration}`;
-      await participante.save();
-
-      // ✅ Agendar exclusão automática após 10 minutos (se não pagar)
-      setTimeout(async () => {
-        console.log(
-          " Timeout de 10 minutos - verificando participante:",
-          participante.id
-        );
-        await ParticipanteController.excluirParticipantePendente(
-          participante.id!
-        );
-      }, 10 * 60 * 1000); // 10 minutos
-
-      // Resposta de sucesso
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          // Dados do pagamento
-          pagamentoId: pagamentoMp.id,
-          status: pagamentoMp.status,
-          externalReference: pagamentoMp.external_reference,
-
-          // Dados do PIX
-          qrCode:
-            pagamentoMp.point_of_interaction?.transaction_data?.qr_code || "",
-          qrCodeBase64:
-            pagamentoMp.point_of_interaction?.transaction_data
-              ?.qr_code_base64 || "",
-
-          // Dados do participante
-          participante: {
-            id: participante.id,
-            numeroInscricao: participante.numeroInscricao,
-            nome: participante.nome,
-            email: participante.email,
-            statusPagamento: participante.statusPagamento,
-          },
-
-          // Dados para exibição
-          valor: valorTotal,
-          descricao: dadosPagamento.description,
-          expiraEm: dadosPagamento.date_of_expiration,
-
-          // Para debug
-          mpResponse: {
-            id: pagamentoMp.id,
-            status: pagamentoMp.status,
-            status_detail: pagamentoMp.status_detail,
-          },
-        },
-        mensagem: "PIX criado com sucesso. Pagamento expira em 10 minutos.",
-      };
-
-      res.json(response);
+      // 6. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "PIX criado com sucesso. Pagamento expira em 10 minutos."
+      );
     } catch (error) {
       console.error(
         "💥 [PagamentoController] Erro ao criar pagamento PIX:",
         error
       );
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao processar pagamento",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao processar pagamento",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // GET /api/pagamento/status/:id - Consultar status do pagamento
+  /**
+   * GET /api/pagamento/status/:id - Consultar status do pagamento
+   * RESPONSABILIDADE: Apenas orquestração (SRP)
+   */
   public static async consultarStatusPagamento(
     req: Request,
     res: Response
@@ -296,62 +126,38 @@ export class PagamentoController {
         id
       );
 
-      // Consultar pagamento no Mercado Pago
-      const pagamentoMp = await payment.get({ id });
+      // CHAMAR Service para consultar status
+      const resultado = await PagamentoService.consultarStatus(id);
 
-      console.log("📊 Status atual no MP:", {
-        id: pagamentoMp.id,
-        status: pagamentoMp.status,
-        status_detail: pagamentoMp.status_detail,
-      });
-
-      // ✅ Se foi aprovado, confirmar participante
-      if (pagamentoMp.status === "approved" && pagamentoMp.external_reference) {
-        console.log("💳 Pagamento aprovado! Confirmando participante...");
-
-        // Extrair número da inscrição do external_reference
-        const match = pagamentoMp.external_reference.match(/trilhao_([^_]+)_/);
-        if (match) {
-          const numeroInscricao = match[1];
-          await ParticipanteController.confirmarParticipante(numeroInscricao, {
-            id: String(pagamentoMp.id ?? ""),
-            external_reference: pagamentoMp.external_reference,
-            date_approved: pagamentoMp.date_approved,
-          });
-        }
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          pagamentoId: pagamentoMp.id,
-          status: pagamentoMp.status,
-          statusDetail: pagamentoMp.status_detail,
-          valor: pagamentoMp.transaction_amount,
-          dataPagamento: pagamentoMp.date_approved,
-          externalReference: pagamentoMp.external_reference,
-        },
-        mensagem: `Status: ${pagamentoMp.status}`,
-      };
+      const mensagem = resultado.participanteConfirmado
+        ? "Pagamento aprovado! Participante confirmado."
+        : `Status: ${resultado.dados?.status}`;
 
-      res.json(response);
+      return ResponseUtil.sucesso(res, resultado.dados, mensagem);
     } catch (error) {
       console.error(
         "💥 [PagamentoController] Erro ao consultar status:",
         error
       );
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao consultar status do pagamento",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao consultar status do pagamento",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // POST /api/pagamento/webhook - Receber notificações do Mercado Pago (AUTOMÁTICO)
+  /**
+   * POST /api/pagamento/webhook - Receber notificações do Mercado Pago
+   */
   public static async receberWebhook(
     req: Request,
     res: Response
@@ -359,64 +165,36 @@ export class PagamentoController {
     try {
       console.log("🔔 [PagamentoController] Webhook recebido do MP:", req.body);
 
-      const { type, data } = req.body;
-
-      // Verificar se é notificação de pagamento
-      if (type === "payment") {
-        const pagamentoId = data.id;
-
-        console.log("💰 Processando webhook de pagamento:", pagamentoId);
-
-        // Consultar dados completos do pagamento
-        const pagamentoMp = await payment.get({ id: pagamentoId });
-
-        console.log("📋 Dados do pagamento via webhook:", {
-          id: pagamentoMp.id,
-          status: pagamentoMp.status,
-          external_reference: pagamentoMp.external_reference,
-          valor: pagamentoMp.transaction_amount,
-        });
-
-        // ✅ Se o pagamento foi aprovado, confirmar participante AUTOMATICAMENTE
-        if (
-          pagamentoMp.status === "approved" &&
-          pagamentoMp.external_reference
-        ) {
-          console.log(
-            "🚀 PAGAMENTO APROVADO VIA WEBHOOK! Confirmando participante automaticamente..."
-          );
-
-          // Extrair número da inscrição do external_reference
-          const match =
-            pagamentoMp.external_reference.match(/trilhao_([^_]+)_/);
-          if (match) {
-            const numeroInscricao = match[1];
-            const resultado =
-              await ParticipanteController.confirmarParticipante(
-                numeroInscricao,
-                {
-                  id: String(pagamentoMp.id ?? ""),
-                  external_reference: pagamentoMp.external_reference,
-                  date_approved: pagamentoMp.date_approved,
-                }
-              );
-
-            if (resultado.sucesso) {
-              console.log(
-                "✅ Participante confirmado com sucesso via webhook!"
-              );
-            } else {
-              console.warn(
-                "⚠️ Falha ao confirmar participante via webhook:",
-                resultado.erro
-              );
-            }
-          }
-        }
+      // 1. VALIDAR dados do webhook usando Validator
+      const validacao = PagamentoValidator.validarWebhook(req.body);
+      if (!validacao.isValid) {
+        // Para webhooks, sempre responder 200 mesmo com erro para evitar reenvios
+        console.warn("⚠️ Webhook inválido:", validacao.detalhes);
+        res.status(200).json({ received: false, erro: validacao.detalhes });
+        return;
       }
 
-      // ✅ Sempre responder com 200 para evitar reenvios do Mercado Pago
-      res.status(200).json({ received: true });
+      // 2. PROCESSAR webhook usando Service
+      const resultado = await PagamentoService.processarWebhook(req.body);
+
+      if (resultado.sucesso) {
+        console.log("✅ Webhook processado com sucesso");
+
+        if (resultado.participanteConfirmado) {
+          console.log(
+            "🎉 Participante confirmado automaticamente via webhook!"
+          );
+        }
+      } else {
+        console.warn("⚠️ Erro ao processar webhook:", resultado.erro);
+      }
+
+      // 3. SEMPRE responder 200 para evitar reenvios do Mercado Pago
+      res.status(200).json({
+        received: true,
+        participanteConfirmado: resultado.participanteConfirmado || false,
+      });
+      return;
     } catch (error) {
       console.error(
         "💥 [PagamentoController] Erro ao processar webhook:",
@@ -425,9 +203,69 @@ export class PagamentoController {
 
       // Mesmo com erro, é importante responder 200 para evitar reenvios
       res.status(200).json({
-        erro: true,
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+        received: false,
+        erro: error instanceof Error ? error.message : "Erro desconhecido",
       });
+      return;
+    }
+  }
+
+  /**
+   * PUT /api/pagamento/status/:id - Simular status de pagamento (desenvolvimento)
+   */
+  public static async simularStatusPagamento(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { status, external_reference, date_approved } = req.body;
+
+      console.log("🧪 [PagamentoController] Simulando status de pagamento:", {
+        id,
+        status,
+        external_reference,
+      });
+
+      // 1. VALIDAR dados da simulação usando Validator
+      const validacao = PagamentoValidator.validarSimulacaoStatus(req.body);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados de simulação inválidos",
+          validacao.detalhes
+        );
+      }
+
+      // 2. SIMULAR status usando Service
+      const resultado = await PagamentoService.simularStatus(
+        id,
+        status,
+        external_reference,
+        date_approved
+      );
+
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
+
+      const mensagem = resultado.participanteConfirmado
+        ? "Pagamento simulado como aprovado"
+        : `Status simulado: ${status}`;
+
+      // 3. RETORNAR resultado
+      return ResponseUtil.sucesso(res, resultado.dados, mensagem);
+    } catch (error) {
+      console.error("💥 [PagamentoController] Erro ao simular status:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao simular status do pagamento",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 }

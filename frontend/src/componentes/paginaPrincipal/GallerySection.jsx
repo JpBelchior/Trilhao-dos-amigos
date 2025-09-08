@@ -1,68 +1,52 @@
-// frontend/src/componentes/paginaPrincipal/GallerySection.jsx
+// frontend/src/componentes/paginaPrincipal/GallerySection.jsx (CORRIGIDO)
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
-import LoadingComponent from "../Loading";
 import SimpleImage from "../SimpleImage";
-import { useApiRetry } from "../../hooks/useApiRetry";
+import LoadingComponent from "../Loading";
 
 const GallerySection = () => {
-  const [currentPhoto, setCurrentPhoto] = useState(0);
   const [fotos, setFotos] = useState([]);
-
-  const { fetchWithRetry, loading, error } = useApiRetry(3);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
+  const [currentPhoto, setCurrentPhoto] = useState(0);
 
   // Carregar fotos da API
   const carregarFotos = async () => {
     try {
-      const data = await fetchWithRetry(
-        "http://localhost:8000/api/fotos/galeria/edicoes_anteriores"
+      setLoading(true);
+      setErro("");
+
+      console.log(
+        "📸 [GallerySection] Carregando fotos de edições anteriores..."
       );
 
-      if (data.sucesso && data.dados.length > 0) {
-        setFotos(data.dados);
-        setCurrentPhoto(0);
+      const response = await fetch(
+        "http://localhost:8000/api/fotos/galeria/edicoes_anteriores"
+      );
+      const data = await response.json();
+
+      if (data.sucesso && data.dados.fotos) {
+        setFotos(data.dados.fotos);
+        console.log(
+          `✅ [GallerySection] ${data.dados.fotos.length} fotos carregadas`
+        );
       } else {
-        setFotos(getFotosExemplo());
+        console.warn("⚠️ [GallerySection] Nenhuma foto encontrada");
+        setFotos([]);
       }
-    } catch (err) {
-      setFotos(getFotosExemplo());
+    } catch (error) {
+      console.error("❌ [GallerySection] Erro ao carregar fotos:", error);
+      setErro("Erro ao carregar galeria");
+      setFotos([]);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Carregar fotos ao montar o componente
   useEffect(() => {
     carregarFotos();
   }, []);
-
-  // Fotos de exemplo
-  const getFotosExemplo = () => [
-    {
-      id: "exemplo-1",
-      titulo: "8ª Edição - 2024",
-      descricao: "Mais de 100 participantes enfrentaram o desafio",
-      stats: "100+ Pilotos • 25km • 4h de Duração",
-      urlFoto: "/api/placeholder/800/500",
-      edicao: "8ª Edição",
-      ano: 2024,
-    },
-    {
-      id: "exemplo-2",
-      titulo: "7ª Edição - 2023",
-      descricao: "Trilha desafiadora na Serra da Mantiqueira",
-      stats: "180 Pilotos • Chuva • Lama Extrema",
-      urlFoto: "/api/placeholder/800/500",
-      edicao: "7ª Edição",
-      ano: 2023,
-    },
-    {
-      id: "exemplo-3",
-      titulo: "6ª Edição - 2022",
-      descricao: "Subida no Barranco",
-      stats: "150 Pilotos • Recorde de Altura • R$ 1.000",
-      urlFoto: "/api/placeholder/800/500",
-      edicao: "6ª Edição",
-      ano: 2022,
-    },
-  ];
 
   // Construir URL da imagem
   const getImageUrl = (foto) => {
@@ -85,12 +69,41 @@ const GallerySection = () => {
     }
   };
 
-  // Loading usando o LoadingComponent existente
+  // Loading
   if (loading) {
-    return <LoadingComponent loading="Carregando galeria..." />;
+    return (
+      <LoadingComponent loading="Carregando galeria de edições anteriores..." />
+    );
   }
 
-  // Sem fotos - versão simples
+  // Erro
+  if (erro) {
+    return (
+      <section className="py-20 bg-black">
+        <div className="container mx-auto px-6">
+          <div className="relative max-w-6xl mx-auto">
+            <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-red-900/20 flex items-center justify-center border border-red-500/30">
+              <div className="text-center">
+                <div className="text-red-500 text-6xl mb-4">⚠️</div>
+                <p className="text-red-400 text-xl mb-2">
+                  Erro ao carregar galeria
+                </p>
+                <p className="text-gray-500">{erro}</p>
+                <button
+                  onClick={carregarFotos}
+                  className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Tentar Novamente
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Sem fotos
   if (fotos.length === 0) {
     return (
       <section className="py-20 bg-black">
@@ -103,9 +116,8 @@ const GallerySection = () => {
                   Nenhuma foto disponível
                 </p>
                 <p className="text-gray-500">
-                  As fotos das edições anteriores aparecerão aqui
+                  As fotos das edições anteriores aparecerão aqui em breve
                 </p>
-                {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
               </div>
             </div>
           </div>
@@ -120,8 +132,9 @@ const GallerySection = () => {
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
         <div className="relative max-w-6xl mx-auto">
-          {/* Container principal */}
+          {/* Galeria principal */}
           <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl">
+            {/* Imagem de fundo */}
             <SimpleImage
               src={getImageUrl(fotoAtual)}
               fallbackSrc="/api/placeholder/800/500"
@@ -130,22 +143,23 @@ const GallerySection = () => {
               imageId={`gallery-${fotoAtual.id}`}
             />
 
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
 
             {/* Navegação */}
             {fotos.length > 1 && (
               <>
                 <button
                   onClick={prevPhoto}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all backdrop-blur-sm"
+                  aria-label="Foto anterior"
                 >
                   <ChevronLeft size={24} />
                 </button>
-
                 <button
                   onClick={nextPhoto}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all backdrop-blur-sm"
+                  aria-label="Próxima foto"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -158,7 +172,9 @@ const GallerySection = () => {
                 <div>
                   <div className="inline-flex items-center px-4 py-2 bg-yellow-400 text-black font-bold rounded-full mb-4">
                     <Trophy size={16} className="mr-2" />
-                    {fotoAtual.edicao || "Edição Especial"}
+                    {fotoAtual.edicao
+                      ? `${fotoAtual.edicao}ª Edição`
+                      : "Edição Especial"}
                   </div>
                   <h2 className="text-4xl font-bold text-white mb-2 text-shadow-xl">
                     {fotoAtual.titulo}
@@ -171,6 +187,11 @@ const GallerySection = () => {
                   {fotoAtual.stats && (
                     <p className="text-orange-400 font-semibold text-shadow-xl">
                       {fotoAtual.stats}
+                    </p>
+                  )}
+                  {fotoAtual.ano && (
+                    <p className="text-green-400 font-semibold text-shadow-xl">
+                      Ano: {fotoAtual.ano}
                     </p>
                   )}
                 </div>

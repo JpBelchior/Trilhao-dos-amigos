@@ -476,9 +476,7 @@ export class GerenteController {
           alteracoes: Object.keys(dadosParaAtualizar),
           novoToken: novoToken, // Incluir novo token se email foi alterado
         },
-        mensagem: dadosParaAtualizar.senha
-          ? "Perfil e senha atualizados com sucesso"
-          : "Perfil atualizado com sucesso",
+        mensagem: "Perfil atualizado com sucesso",
       };
 
       res.json(response);

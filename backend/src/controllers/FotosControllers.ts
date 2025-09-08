@@ -1,19 +1,19 @@
-// backend/src/controllers/FotoController.ts
 import { Request, Response } from "express";
-import { Op } from "sequelize";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import Foto, { CategoriaFoto, StatusFoto } from "../models/Foto";
-import { IApiResponse } from "../types/models";
 import { AuthenticatedRequest } from "./GerenteController";
+import { CategoriaFoto } from "../models/Foto";
 
-// 📁 Configuração do Multer para upload de fotos
+import { FotoValidator } from "../validators/FotoValidator";
+import { FotoService } from "../Service/fotoService";
+import { ResponseUtil } from "../utils/responseUtil";
+
+// Configuração do Multer (responsabilidade de configuração)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(process.cwd(), "uploads", "fotos");
 
-    // Criar diretório se não existir
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -21,7 +21,6 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Gerar nome único para o arquivo
     const timestamp = Date.now();
     const extensao = path.extname(file.originalname);
     const nomeUnico = `foto_${timestamp}_${Math.random()
@@ -31,7 +30,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// 🔍 Filtro de tipos de arquivo permitidos
 const fileFilter = (
   req: any,
   file: Express.Multer.File,
@@ -51,17 +49,18 @@ const fileFilter = (
   }
 };
 
-// 📤 Middleware de upload configurado
 export const uploadMiddleware = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB máximo
+    fileSize: 10 * 1024 * 1024,
   },
 });
 
 export class FotoController {
-  // 📤 POST /api/fotos/upload - Fazer upload de fotos
+  /**
+   * POST /api/fotos/upload - Upload de fotos
+   */
   public static async uploadFoto(
     req: AuthenticatedRequest,
     res: Response
@@ -69,189 +68,98 @@ export class FotoController {
     try {
       const gerente = req.gerente;
       const files = req.files as Express.Multer.File[];
+      const dados = req.body;
 
-      // Extrair dados do corpo da requisição (vem como strings no FormData)
-      const { titulo, descricao, stats, categoria, edicao, ano } = req.body;
+      console.log("📸 [FotoController] Upload solicitado por:", gerente?.nome);
 
-      console.log("📸 [Upload] Dados recebidos:", {
-        files: files?.length || 0,
-        titulo,
-        categoria,
-        gerente: gerente?.nome,
-      });
-
-      // Validar se arquivo foi enviado
-      if (!files || files.length === 0) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Nenhuma foto foi enviada",
-        };
-        res.status(400).json(response);
-        return;
+      // 1. VALIDAR dados usando Validator
+      const validacao = FotoValidator.validarUploadCompleto(dados, files);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados inválidos",
+          validacao.detalhes
+        );
       }
 
-      // Validar campos obrigatórios
-      if (!titulo || !categoria) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Título e categoria são obrigatórios",
-        };
-        res.status(400).json(response);
-        return;
-      }
+      // 2. PROCESSAR upload usando Service
+      const resultado = await FotoService.processarUpload(dados, files);
 
-      // Validar categoria
-      if (!Object.values(CategoriaFoto).includes(categoria)) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Categoria inválida",
-          detalhes: `Categorias válidas: ${Object.values(CategoriaFoto).join(
-            ", "
-          )}`,
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      const fotosUpload: Foto[] = [];
-
-      // Processar cada arquivo enviado
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        // Obter próxima ordem para esta categoria
-        const ultimaOrdem =
-          ((await Foto.max("ordem", {
-            where: { categoria },
-          })) as number) || 0;
-
-        const novaFoto = await Foto.create({
-          titulo: files.length > 1 ? `${titulo} (${i + 1})` : titulo,
-          descricao: descricao || null,
-          stats: stats || null,
-          categoria,
-          edicao:
-            categoria === CategoriaFoto.EDICOES_ANTERIORES ? edicao : null,
-          ano: ano ? parseInt(ano) : undefined,
-          ordem: ultimaOrdem + 1 + i,
-          nomeArquivo: file.filename,
-          caminhoArquivo: file.path,
-          tipoArquivo: file.mimetype,
-          status: StatusFoto.ATIVO,
-        });
-
-        fotosUpload.push(novaFoto);
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
       console.log(
-        `📸 [FotoController] ${fotosUpload.length} foto(s) enviada(s) por ${gerente?.nome}`
+        `📸 [FotoController] ${resultado.dados?.length} foto(s) enviada(s) por ${gerente?.nome}`
       );
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: fotosUpload.map((foto) => ({
-          id: foto.id,
-          titulo: foto.titulo,
-          categoria: foto.categoria,
-          urlFoto: foto.urlFoto,
-        })),
-        mensagem: `${fotosUpload.length} foto(s) enviada(s) com sucesso!`,
-      };
-
-      res.status(201).json(response);
+      // 3. RETORNAR sucesso
+      return ResponseUtil.criado(
+        res,
+        resultado.dados,
+        `${resultado.dados?.length} foto(s) enviada(s) com sucesso!`
+      );
     } catch (error) {
-      console.error("❌ Erro ao fazer upload:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao fazer upload da foto",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error("❌ [FotoController] Erro no upload:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao fazer upload da foto",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // 📋 GET /api/fotos - Listar todas as fotos (para admin)
+  /**
+   * GET /api/fotos - Listar fotos (admin)
+   */
   public static async listarFotos(
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> {
     try {
-      const { categoria, status, ano, limite, pagina } = req.query;
+      const { categoria, status, ano, edicao, page, limit } = req.query;
 
-      // Construir filtros
-      const filtros: any = {};
+      console.log("📋 [FotoController] Listando fotos admin");
 
-      if (categoria) {
-        filtros.categoria = categoria;
+      // CHAMAR Service para listar
+      const resultado = await FotoService.listarFotos(
+        { categoria, status, ano, edicao },
+        {
+          page: page ? parseInt(page as string) : undefined,
+          limit: limit ? parseInt(limit as string) : undefined,
+        }
+      );
+
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
-      if (status) {
-        filtros.status = status;
-      } else {
-        // Por padrão, mostrar apenas fotos ativas
-        filtros.status = StatusFoto.ATIVO;
-      }
-
-      if (ano) {
-        filtros.ano = parseInt(ano as string);
-      }
-
-      // Paginação
-      const limitePorPagina = parseInt(limite as string) || 20;
-      const paginaAtual = parseInt(pagina as string) || 1;
-      const offset = (paginaAtual - 1) * limitePorPagina;
-
-      const { count, rows: fotos } = await Foto.findAndCountAll({
-        where: filtros,
-        order: [
-          ["categoria", "ASC"],
-          ["ordem", "ASC"],
-          ["createdAt", "DESC"],
-        ],
-        limit: limitePorPagina,
-        offset,
-      });
-
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          fotos: fotos.map((foto) => ({
-            id: foto.id,
-            titulo: foto.titulo,
-            descricao: foto.descricao,
-            stats: foto.stats,
-            categoria: foto.categoria,
-            edicao: foto.edicao,
-            ano: foto.ano,
-            ordem: foto.ordem,
-            status: foto.status,
-            urlFoto: foto.urlFoto,
-            createdAt: foto.createdAt,
-          })),
-          total: count,
-          pagina: paginaAtual,
-          totalPaginas: Math.ceil(count / limitePorPagina),
-          limitePorPagina,
-        },
-      };
-
-      res.json(response);
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        `${resultado.dados?.fotos?.length || 0} fotos encontradas`
+      );
     } catch (error) {
-      console.error("❌ Erro ao listar fotos:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao listar fotos",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error("❌ [FotoController] Erro ao listar fotos:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao listar fotos",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // 🌐 GET /api/fotos/galeria/:categoria - Listar fotos por categoria (para frontend público)
+  /**
+   * GET /api/fotos/galeria/:categoria - Listar fotos por categoria (público)
+   */
   public static async listarPorCategoria(
     req: Request,
     res: Response
@@ -259,190 +167,146 @@ export class FotoController {
     try {
       const { categoria } = req.params;
 
-      // Validar categoria
-      if (!Object.values(CategoriaFoto).includes(categoria as CategoriaFoto)) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Categoria inválida",
-        };
-        res.status(400).json(response);
-        return;
+      console.log("🖼️ [FotoController] Galeria pública categoria:", categoria);
+
+      // 1. VALIDAR categoria usando Validator
+      const validacao = FotoValidator.validarCategoria(categoria);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          validacao.errors[0],
+          validacao.detalhes
+        );
       }
 
-      const fotos = await Foto.findAll({
-        where: {
-          categoria,
-          status: StatusFoto.ATIVO,
-        },
-        order: [
-          ["ordem", "ASC"],
-          ["createdAt", "DESC"],
-        ],
-        attributes: [
-          "id",
-          "titulo",
-          "descricao",
-          "stats",
-          "edicao",
-          "ano",
-          "nomeArquivo",
-        ],
-      });
+      // 2. LISTAR fotos usando Service
+      const resultado = await FotoService.listarPorCategoria(
+        categoria as CategoriaFoto
+      );
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: fotos.map((foto) => ({
-          id: foto.id,
-          titulo: foto.titulo,
-          descricao: foto.descricao,
-          stats: foto.stats,
-          edicao: foto.edicao,
-          ano: foto.ano,
-          urlFoto: foto.urlFoto,
-        })),
-      };
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
 
-      res.json(response);
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        `${resultado.dados?.total || 0} fotos da categoria ${categoria}`
+      );
     } catch (error) {
-      console.error("❌ Erro ao buscar fotos por categoria:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao buscar fotos",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error("❌ [FotoController] Erro na galeria:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao carregar galeria",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
-
-  // ✏️ PUT /api/fotos/:id - Editar dados da foto
+  /**
+   * PUT /api/fotos/:id - Editar foto
+   */
   public static async editarFoto(
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const {
-        titulo,
-        descricao,
-        stats,
-        categoria,
-        edicao,
-        ano,
-        ordem,
-        status,
-      } = req.body;
-
-      const foto = await Foto.findByPk(id);
-
-      if (!foto) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Foto não encontrada",
-        };
-        res.status(404).json(response);
-        return;
-      }
-
-      // Atualizar campos permitidos
-      const dadosAtualizacao: any = {};
-
-      if (titulo) dadosAtualizacao.titulo = titulo;
-      if (descricao !== undefined) dadosAtualizacao.descricao = descricao;
-      if (stats !== undefined) dadosAtualizacao.stats = stats;
-      if (categoria) dadosAtualizacao.categoria = categoria;
-      if (edicao !== undefined) dadosAtualizacao.edicao = edicao;
-      if (ano) dadosAtualizacao.ano = parseInt(ano);
-      if (ordem !== undefined) dadosAtualizacao.ordem = parseInt(ordem);
-      if (status) dadosAtualizacao.status = status;
-
-      await foto.update(dadosAtualizacao);
+      const dadosAtualizacao = req.body;
+      const gerente = req.gerente;
 
       console.log(
-        `📝 [FotoController] Foto ${id} editada por ${req.gerente?.nome}`
+        `📝 [FotoController] Editando foto ${id} por ${gerente?.nome}`
       );
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          id: foto.id,
-          titulo: foto.titulo,
-          categoria: foto.categoria,
-          urlFoto: foto.urlFoto,
-        },
-        mensagem: "Foto editada com sucesso!",
-      };
+      // 1. VALIDAR dados usando Validator
+      const validacao = FotoValidator.validarDadosEdicao(dadosAtualizacao);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          validacao.errors[0],
+          validacao.detalhes
+        );
+      }
 
-      res.json(response);
+      // 2. EDITAR foto usando Service
+      const resultado = await FotoService.editarFoto(
+        parseInt(id),
+        dadosAtualizacao
+      );
+
+      if (!resultado.sucesso) {
+        if (resultado.erro === "Foto não encontrada") {
+          return ResponseUtil.naoEncontrado(res, resultado.erro);
+        }
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
+
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "Foto editada com sucesso!"
+      );
     } catch (error) {
-      console.error("❌ Erro ao editar foto:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao editar foto",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error("❌ [FotoController] Erro ao editar foto:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao editar foto",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // 🗑️ DELETE /api/fotos/:id - Deletar foto
+  /**
+   * DELETE /api/fotos/:id - Deletar foto
+   */
   public static async deletarFoto(
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> {
     try {
       const { id } = req.params;
-
-      const foto = await Foto.findByPk(id);
-
-      if (!foto) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Foto não encontrada",
-        };
-        res.status(404).json(response);
-        return;
-      }
-
-      // Deletar arquivo do sistema
-      try {
-        if (fs.existsSync(foto.caminhoArquivo)) {
-          fs.unlinkSync(foto.caminhoArquivo);
-        }
-      } catch (fileError) {
-        console.warn("⚠️ Erro ao deletar arquivo físico:", fileError);
-      }
-
-      // Deletar registro do banco
-      await foto.destroy();
+      const gerente = req.gerente;
 
       console.log(
-        `🗑️ [FotoController] Foto ${id} deletada por ${req.gerente?.nome}`
+        `🗑️ [FotoController] Deletando foto ${id} por ${gerente?.nome}`
       );
 
-      const response: IApiResponse = {
-        sucesso: true,
-        mensagem: "Foto deletada com sucesso!",
-      };
+      // CHAMAR Service para deletar
+      const resultado = await FotoService.deletarFoto(parseInt(id));
 
-      res.json(response);
+      if (!resultado.sucesso) {
+        if (resultado.erro === "Foto não encontrada") {
+          return ResponseUtil.naoEncontrado(res, resultado.erro);
+        }
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
+
+      return ResponseUtil.sucesso(res, null, "Foto deletada com sucesso!");
     } catch (error) {
-      console.error("❌ Erro ao deletar foto:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao deletar foto",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error("❌ [FotoController] Erro ao deletar foto:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao deletar foto",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // 🔄 PUT /api/fotos/:id/reordenar - Alterar ordem de exibição
+  /**
+   * PUT /api/fotos/:id/reordenar - Reordenar foto
+   */
   public static async reordenarFoto(
     req: AuthenticatedRequest,
     res: Response
@@ -450,45 +314,51 @@ export class FotoController {
     try {
       const { id } = req.params;
       const { novaOrdem } = req.body;
+      const gerente = req.gerente;
 
-      if (typeof novaOrdem !== "number") {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Nova ordem deve ser um número",
-        };
-        res.status(400).json(response);
-        return;
+      console.log(
+        `🔄 [FotoController] Reordenando foto ${id} por ${gerente?.nome}`
+      );
+
+      // 1. VALIDAR nova ordem usando Validator
+      const validacao = FotoValidator.validarNovaOrdem(novaOrdem);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          validacao.errors[0],
+          validacao.detalhes
+        );
       }
 
-      const foto = await Foto.findByPk(id);
+      // 2. REORDENAR usando Service
+      const resultado = await FotoService.reordenarFoto(
+        parseInt(id),
+        novaOrdem
+      );
 
-      if (!foto) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Foto não encontrada",
-        };
-        res.status(404).json(response);
-        return;
+      if (!resultado.sucesso) {
+        if (resultado.erro === "Foto não encontrada") {
+          return ResponseUtil.naoEncontrado(res, resultado.erro);
+        }
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
-      await foto.update({ ordem: novaOrdem });
-
-      const response: IApiResponse = {
-        sucesso: true,
-        mensagem: "Ordem alterada com sucesso!",
-      };
-
-      res.json(response);
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "Ordem alterada com sucesso!"
+      );
     } catch (error) {
-      console.error("❌ Erro ao reordenar foto:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao reordenar foto",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error("❌ [FotoController] Erro ao reordenar foto:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro ao reordenar foto",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 }
