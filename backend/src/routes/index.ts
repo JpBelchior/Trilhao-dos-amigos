@@ -8,6 +8,7 @@ import gerenteRoutes from "./Gerente/gerente";
 import campeoesRoutes from "./Campeoes/campeoes";
 import entregaRoutes from "./Entregas/entregas";
 import fotoRoutes from "./Fotos/fotos";
+import camisetasExtrasRoutes from "./CamisasExtras/camisetasExtrasRoutes";
 
 const router = Router();
 
@@ -25,10 +26,14 @@ router.get("/", (req, res) => {
       campeoes: "/api/campeoes",
       entrega: "/api/entrega",
       fotos: "/api/fotos",
+      camisetasExtras: "/api/camisetas-extras",
     },
     timestamp: new Date().toISOString(),
   });
 });
+
+// Rotas de camisetas extras
+router.use("/camisetas-extras", camisetasExtrasRoutes);
 
 // Rotas do estoque
 router.use("/estoque", estoqueRoutes);

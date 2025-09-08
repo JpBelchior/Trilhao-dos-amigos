@@ -8,9 +8,6 @@ import {
   Edit3,
   Save,
   X,
-  AlertCircle,
-  CheckCircle,
-  Search,
   RefreshCw,
   Loader2,
 } from "lucide-react";
@@ -29,7 +26,7 @@ const EstoqueAdmin = () => {
   const [estoque, setEstoque] = useState({});
   const [participantesReservados, setParticipantesReservados] = useState([]);
   const [resumoEstoque, setResumoEstoque] = useState({});
-
+  const [sincronizandoEstoque, setSincronizandoEstoque] = useState(false);
   // Estados para edição
   const [editando, setEditando] = useState(null);
   const [novaQuantidade, setNovaQuantidade] = useState("");
@@ -92,6 +89,41 @@ const EstoqueAdmin = () => {
     });
   };
 
+  const sincronizarEstoque = async () => {
+    if (sincronizandoEstoque) return;
+
+    try {
+      setSincronizandoEstoque(true);
+      console.log("🔄 Iniciando sincronização do estoque...");
+
+      const response = await fetchAuth(
+        "http://localhost:8000/api/estoque/sincronizar",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        console.log("✅ Sincronização concluída:", data.dados);
+
+        // Recarregar dados
+        await carregarDados();
+      } else {
+        throw new Error(data.erro || "Erro na sincronização");
+      }
+    } catch (error) {
+      console.error("❌ Erro na sincronização:", error);
+      alert(`❌ Erro na sincronização: ${error.message}`);
+    } finally {
+      setSincronizandoEstoque(false);
+    }
+  };
+
   const carregarDados = async () => {
     try {
       setLoading(true);
@@ -142,74 +174,6 @@ const EstoqueAdmin = () => {
     }
   };
 
-  // Função para entrega de camiseta principal
-  const toggleEntregaCamisetaPrincipal = async (participanteId) => {
-    const buttonKey = `principal_${participanteId}`;
-
-    if (loadingButtons[buttonKey]) return;
-
-    try {
-      setLoadingButtons((prev) => ({ ...prev, [buttonKey]: true }));
-
-      const response = await fetchAuth(
-        `http://localhost:8000/api/entrega/participante/${participanteId}/camiseta-principal`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.sucesso) {
-          await carregarDados();
-        }
-      }
-    } catch (error) {
-      console.error("❌ Erro ao alterar entrega principal:", error);
-    } finally {
-      setLoadingButtons((prev) => {
-        const newState = { ...prev };
-        delete newState[buttonKey];
-        return newState;
-      });
-    }
-  };
-
-  // Função para entrega de camiseta extra
-  const toggleEntregaCamisetaExtra = async (camisetaExtraId) => {
-    const buttonKey = `extra_${camisetaExtraId}`;
-
-    if (loadingButtons[buttonKey]) return;
-
-    try {
-      setLoadingButtons((prev) => ({ ...prev, [buttonKey]: true }));
-
-      const response = await fetchAuth(
-        `http://localhost:8000/api/entrega/camiseta-extra/${camisetaExtraId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.sucesso) {
-          await carregarDados();
-        }
-      }
-    } catch (error) {
-      console.error("❌ Erro ao alterar entrega extra:", error);
-    } finally {
-      setLoadingButtons((prev) => {
-        const newState = { ...prev };
-        delete newState[buttonKey];
-        return newState;
-      });
-    }
-  };
-
   const iniciarEdicao = (tamanho, tipo, quantidadeAtual) => {
     setEditando({ tamanho, tipo });
     setNovaQuantidade(quantidadeAtual.toString());
@@ -249,14 +213,6 @@ const EstoqueAdmin = () => {
       console.error("❌ Erro ao atualizar estoque:", error);
     }
   };
-
-  // Filtrar participantes por nome
-  const participantesFiltrados = participantesReservados.filter(
-    (participante) => {
-      if (!filtroNome.trim()) return true;
-      return participante.nome.toLowerCase().includes(filtroNome.toLowerCase());
-    }
-  );
 
   // Filtrar dados do estoque por tipo
   const getEstoqueFiltrado = () => {
@@ -330,6 +286,29 @@ const EstoqueAdmin = () => {
             >
               <RefreshCw className="mr-2" size={20} />
               Atualizar
+            </button>
+
+            {/* ✅ NOVO BOTÃO DE SINCRONIZAÇÃO */}
+            <button
+              onClick={sincronizarEstoque}
+              disabled={sincronizandoEstoque}
+              className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
+                sincronizandoEstoque
+                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
+              }`}
+            >
+              {sincronizandoEstoque ? (
+                <>
+                  <Loader2 className="mr-2 animate-spin" size={20} />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  <Package className="mr-2" size={20} />
+                  Sincronizar Estoque
+                </>
+              )}
             </button>
           </div>
         </div>

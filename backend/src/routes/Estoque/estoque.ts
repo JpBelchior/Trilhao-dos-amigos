@@ -1,4 +1,4 @@
-// src/routes/estoque.ts
+// backend/src/routes/Estoque/estoque.ts
 import { Router } from "express";
 import { EstoqueController } from "../../controllers/EstoqueController";
 
@@ -9,6 +9,9 @@ router.get("/", EstoqueController.obterEstoque);
 
 // GET /api/estoque/resumo - Resumo geral do estoque
 router.get("/resumo", EstoqueController.obterResumo);
+
+//  POST /api/estoque/sincronizar - Sincronizar todo estoque com dados reais
+router.post("/sincronizar", EstoqueController.sincronizarEstoque);
 
 // GET /api/estoque/:tamanho/:tipo - Verificar disponibilidade específica
 router.get("/:tamanho/:tipo", EstoqueController.verificarDisponibilidade);

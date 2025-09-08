@@ -170,13 +170,21 @@ const useAdminParticipantes = () => {
         participanteId
       );
 
+      // 1. Primeiro, buscar dados do participante para pegar o numeroInscricao
+      const participante = participantes.find((p) => p.id === participanteId);
+
+      if (!participante) {
+        throw new Error("Participante não encontrado");
+      }
+
       const response = await fetchAuth(
         `http://localhost:8000/api/participantes/${participanteId}/pagamento`,
         {
           method: "PUT",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            status: "confirmado",
-            comprovante: `Confirmado manualmente pelo admin: ${observacoes}`,
+            numeroInscricao: participante.numeroInscricao,
+            pagamentoId: `admin_confirmation_${Date.now()}`, // ID único para confirmação manual
           }),
         }
       );

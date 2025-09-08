@@ -150,14 +150,6 @@ const AdminParticipantes = () => {
             </button>
 
             <button
-              onClick={exportarLista}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
-            >
-              <Download className="mr-2" size={20} />
-              Exportar
-            </button>
-
-            <button
               onClick={recarregarDados}
               disabled={loading}
               className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
@@ -226,7 +218,7 @@ const AdminParticipantes = () => {
             indiceInicio={indiceInicio}
             selecionarParticipante={selecionarParticipante}
             confirmarPagamento={confirmarPagamento}
-            excluirParticipante={excluirParticipante} // NOVA FUNÇÃO
+            excluirParticipante={excluirParticipante}
             operacaoLoading={operacaoLoading}
           />
         </div>
@@ -312,7 +304,7 @@ const AdminParticipantes = () => {
         {/* RODAPÉ COM INFORMAÇÕES ÚTEIS */}
         <div className="mt-12 bg-green-900/30 rounded-2xl p-6 border border-green-400/30">
           <h4 className="text-lg font-bold text-green-400 mb-3">
-            💡 Dicas de Gerenciamento
+            Dicas de Gerenciamento
           </h4>
           <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
             <div>

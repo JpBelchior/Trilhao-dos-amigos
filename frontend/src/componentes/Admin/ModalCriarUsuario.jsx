@@ -85,7 +85,6 @@ const ModalCriarUsuario = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
     { value: "M", label: "M" },
     { value: "G", label: "G" },
     { value: "GG", label: "GG" },
-    { value: "XG", label: "XG" },
   ];
 
   const tiposOptions = [
@@ -185,19 +184,6 @@ const ModalCriarUsuario = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
     }
     if (!formData.modeloMoto.trim()) {
       setErro("Modelo da moto é obrigatório");
-      return false;
-    }
-
-    // Validar email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErro("Email inválido");
-      return false;
-    }
-
-    // Validar CPF (básico)
-    if (formData.cpf.replace(/\D/g, "").length !== 11) {
-      setErro("CPF deve ter 11 dígitos");
       return false;
     }
 
