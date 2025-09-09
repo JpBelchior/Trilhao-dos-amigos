@@ -1,15 +1,11 @@
-// backend/src/controllers/GerenteController.ts
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { Gerente } from "../models";
-import {
-  IApiResponse,
-  ILoginGerenteDTO,
-  ICriarGerenteDTO,
-  IGerenteResponse,
-} from "../types/models";
+import { ICriarGerenteDTO, ILoginGerenteDTO } from "../types/models";
 
-// Interface para Request com gerente autenticado
+// Importações SOLID
+import { GerenteValidator } from "../validators/GerenteValidator";
+import { GerenteService } from "../Service/GerenteService";
+import { ResponseUtil } from "../utils/responseUtil";
+
 export interface AuthenticatedRequest extends Request {
   gerente?: {
     id: number;
@@ -19,250 +15,229 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export class GerenteController {
-  // POST /api/gerente/login - Fazer login
+  /**
+   * POST /api/gerente/login - Fazer login
+   */
   public static async login(req: Request, res: Response): Promise<void> {
     try {
-      const { email, senha }: ILoginGerenteDTO = req.body;
+      const dadosLogin: ILoginGerenteDTO = req.body;
 
-      console.log("🔐 [GerenteController] Tentativa de login:", email);
-
-      // Validações básicas
-      if (!email || !senha) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Email e senha são obrigatórios",
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      // Buscar gerente pelo email
-      const gerente = await Gerente.buscarPorEmail(email);
-
-      if (!gerente) {
-        console.log("❌ Gerente não encontrado:", email);
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Credenciais inválidas",
-        };
-        res.status(401).json(response);
-        return;
-      }
-
-      // Verificar senha
-      const senhaValida = await gerente.verificarSenha(senha);
-
-      if (!senhaValida) {
-        console.log("❌ Senha inválida para gerente:", email);
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Credenciais inválidas",
-        };
-        res.status(401).json(response);
-        return;
-      }
-
-      // Gerar JWT Token
-      const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
-      const token = jwt.sign(
-        {
-          id: gerente.id,
-          email: gerente.email,
-          nome: gerente.nome,
-          tipo: "gerente", // Identificar tipo de usuário
-        },
-        jwtSecret,
-        {
-          expiresIn: "8h", // Token expira em 8 horas
-        }
+      console.log(
+        "🔐 [GerenteController] Solicitação de login:",
+        dadosLogin.email
       );
 
-      console.log("✅ Login realizado com sucesso:", {
-        id: gerente.id,
-        nome: gerente.nome,
-        email: gerente.email,
-      });
+      // 1. VALIDAR dados usando Validator
+      const validacao = GerenteValidator.validarDadosLogin(dadosLogin);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados inválidos",
+          validacao.detalhes
+        );
+      }
 
-      // Resposta de sucesso (SEM incluir a senha)
-      const response: IApiResponse<{
-        gerente: IGerenteResponse;
-        token: string;
-        expiresIn: string;
-      }> = {
-        sucesso: true,
-        dados: {
-          gerente: {
-            id: gerente.id!,
-            nome: gerente.nome,
-            email: gerente.email,
-            createdAt: gerente.createdAt,
-          },
-          token,
-          expiresIn: "8h",
-        },
-        mensagem: "Login realizado com sucesso",
-      };
+      // 2. CHAMAR Service
+      const resultado = await GerenteService.fazerLogin(dadosLogin);
 
-      res.json(response);
+      if (!resultado.sucesso) {
+        return ResponseUtil.naoAutorizado(res, resultado.erro!);
+      }
+
+      // 3. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "Login realizado com sucesso"
+      );
     } catch (error) {
       console.error("💥 [GerenteController] Erro no login:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro interno do servidor",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // POST /api/gerente/criar - Criar novo gerente (apenas para setup inicial)
+  /**
+   * POST /api/gerente/criar - Criar novo gerente
+   */
   public static async criarGerente(req: Request, res: Response): Promise<void> {
     try {
-      const { nome, email, senha }: ICriarGerenteDTO = req.body;
+      const dadosCriacao: ICriarGerenteDTO = req.body;
 
-      console.log("👤 [GerenteController] Criando novo gerente:", email);
+      console.log(
+        "👤 [GerenteController] Solicitação de criação:",
+        dadosCriacao.email
+      );
 
-      // Validações
-      if (!nome || !email || !senha) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Nome, email e senha são obrigatórios",
-        };
-        res.status(400).json(response);
-        return;
+      // 1. VALIDAR dados usando Validator
+      const validacao = GerenteValidator.validarDadosCriacao(dadosCriacao);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados inválidos",
+          validacao.detalhes
+        );
       }
 
-      if (senha.length < 6) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Senha deve ter pelo menos 6 caracteres",
-        };
-        res.status(400).json(response);
-        return;
+      // 2. CHAMAR Service
+      const resultado = await GerenteService.criarGerente(dadosCriacao);
+
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroValidacao(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
-      // Verificar se já existe gerente com este email
-      const gerenteExistente = await Gerente.buscarPorEmail(email);
-
-      if (gerenteExistente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Email já está em uso",
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      // Criar gerente com senha hash
-      const novoGerente = await Gerente.criarGerente({
-        nome,
-        email,
-        senha,
-      });
-
-      console.log("✅ Gerente criado com sucesso:", {
-        id: novoGerente.id,
-        nome: novoGerente.nome,
-        email: novoGerente.email,
-      });
-
-      // Resposta de sucesso (SEM incluir a senha)
-      const response: IApiResponse<IGerenteResponse> = {
-        sucesso: true,
-        dados: {
-          id: novoGerente.id!,
-          nome: novoGerente.nome,
-          email: novoGerente.email,
-          createdAt: novoGerente.createdAt,
-        },
-        mensagem: "Gerente criado com sucesso",
-      };
-
-      res.status(201).json(response);
+      // 3. RETORNAR sucesso (status 201 para criação)
+      return ResponseUtil.criado(
+        res,
+        resultado.dados,
+        "Gerente criado com sucesso"
+      );
     } catch (error) {
       console.error("💥 [GerenteController] Erro ao criar gerente:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao criar gerente",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // GET /api/gerente/perfil - Obter dados do gerente logado
+  /**
+   * GET /api/gerente/perfil - Obter dados do gerente logado
+   */
   public static async obterPerfil(
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> {
     try {
-      // O middleware já validou o token e colocou os dados em req.gerente
       const gerente = req.gerente;
 
       if (!gerente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não autenticado",
-        };
-        res.status(401).json(response);
-        return;
+        return ResponseUtil.naoAutorizado(res, "Gerente não autenticado");
       }
 
-      // Buscar dados completos do gerente no banco
-      const gerenteCompleto = await Gerente.findByPk(gerente.id);
+      console.log("👤 [GerenteController] Solicitação de perfil:", gerente.id);
 
-      if (!gerenteCompleto) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não encontrado",
-        };
-        res.status(404).json(response);
-        return;
+      // 1. CHAMAR Service (sem validação adicional necessária)
+      const resultado = await GerenteService.obterPerfil(gerente.id);
+
+      if (!resultado.sucesso) {
+        return ResponseUtil.naoEncontrado(res, resultado.erro!);
       }
 
-      const response: IApiResponse<IGerenteResponse> = {
-        sucesso: true,
-        dados: {
-          id: gerenteCompleto.id!,
-          nome: gerenteCompleto.nome,
-          email: gerenteCompleto.email,
-          createdAt: gerenteCompleto.createdAt,
-        },
-        mensagem: "Perfil do gerente",
-      };
-
-      res.json(response);
+      // 2. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "Perfil carregado com sucesso"
+      );
     } catch (error) {
       console.error("💥 [GerenteController] Erro ao obter perfil:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao obter perfil",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // POST /api/gerente/logout - Fazer logout (informativo)
-  public static async logout(req: Request, res: Response): Promise<void> {
-    // Como estamos usando JWT, o logout é feito no frontend removendo o token
-    // Esta rota é apenas informativa
+  /**
+   * PUT /api/gerente/perfil - Atualizar dados do gerente logado
+   */
+  public static async atualizarPerfil(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const gerente = req.gerente;
+      const dadosAtualizacao = req.body;
 
-    const response: IApiResponse = {
-      sucesso: true,
-      mensagem: "Logout realizado com sucesso",
-    };
+      if (!gerente) {
+        return ResponseUtil.naoAutorizado(res, "Gerente não autenticado");
+      }
 
-    res.json(response);
+      console.log(
+        "🔄 [GerenteController] Solicitação de atualização:",
+        gerente.id
+      );
+
+      // 1. VALIDAR dados usando Validator
+      const validacao =
+        GerenteValidator.validarDadosAtualizacao(dadosAtualizacao);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados inválidos",
+          validacao.detalhes
+        );
+      }
+
+      // 2. CHAMAR Service
+      const resultado = await GerenteService.atualizarPerfil(
+        gerente.id,
+        dadosAtualizacao
+      );
+
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroValidacao(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
+
+      // 3. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "Perfil atualizado com sucesso"
+      );
+    } catch (error) {
+      console.error("💥 [GerenteController] Erro ao atualizar perfil:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
+    }
   }
 
-  // GET /api/gerente/verificar-token - Verificar se token é válido
+  /**
+   * POST /api/gerente/logout - Fazer logout (informativo)
+   */
+  public static async logout(req: Request, res: Response): Promise<void> {
+    try {
+      console.log("👋 [GerenteController] Solicitação de logout");
+
+      // 1. CHAMAR Service (logout é apenas informativo)
+      const resultado = GerenteService.logout();
+
+      // 2. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        "Logout realizado com sucesso"
+      );
+    } catch (error) {
+      console.error("💥 [GerenteController] Erro no logout:", error);
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
+    }
+  }
+
+  /**
+   * GET /api/gerente/verificar-token - Verificar se token é válido
+   */
   public static async verificarToken(
     req: AuthenticatedRequest,
     res: Response
@@ -271,223 +246,29 @@ export class GerenteController {
       // O middleware já validou o token
       const gerente = req.gerente;
 
+      console.log("🔍 [GerenteController] Verificação de token:", gerente?.id);
+
       if (!gerente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Token inválido",
-        };
-        res.status(401).json(response);
-        return;
+        return ResponseUtil.naoAutorizado(res, "Token inválido");
       }
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
+      // Token válido - retornar dados do gerente
+      return ResponseUtil.sucesso(
+        res,
+        {
           id: gerente.id,
           nome: gerente.nome,
           email: gerente.email,
         },
-        mensagem: "Token válido",
-      };
-
-      res.json(response);
+        "Token válido"
+      );
     } catch (error) {
       console.error("💥 [GerenteController] Erro ao verificar token:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao verificar token",
-      };
-
-      res.status(500).json(response);
-    }
-  }
-  // ADICIONAR esta função ao final do arquivo backend/src/controllers/GerenteController.ts
-
-  // ✅ NOVA FUNÇÃO: PUT /api/gerente/perfil - Atualizar dados do gerente logado
-  public static async atualizarPerfil(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
-      const gerente = req.gerente;
-      const { nome, email, senhaAtual, novaSenha, confirmarSenha } = req.body;
-
-      console.log(
-        "🔄 [GerenteController] Atualizando perfil do gerente:",
-        gerente?.id
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
       );
-
-      if (!gerente) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não autenticado",
-        };
-        res.status(401).json(response);
-        return;
-      }
-
-      // Buscar dados completos do gerente no banco
-      const gerenteCompleto = await Gerente.findByPk(gerente.id);
-      if (!gerenteCompleto) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Gerente não encontrado",
-        };
-        res.status(404).json(response);
-        return;
-      }
-
-      // ✅ VALIDAÇÕES
-      const dadosParaAtualizar: any = {};
-      let emailAlterado = false;
-
-      // 1. Validar nome se fornecido
-      if (nome !== undefined) {
-        // Só atualizar se for diferente do atual
-        if (nome.trim() !== gerenteCompleto.nome) {
-          dadosParaAtualizar.nome = nome.trim();
-        }
-      }
-
-      // 2. Validar email se fornecido
-      if (email !== undefined) {
-        const emailNormalizado = email.trim().toLowerCase();
-
-        // Verificar se é diferente do atual
-        if (emailNormalizado !== gerenteCompleto.email.toLowerCase()) {
-          // Verificar se o novo email já existe
-          const emailJaExiste = await Gerente.buscarPorEmail(emailNormalizado);
-          if (emailJaExiste && emailJaExiste.id !== gerenteCompleto.id) {
-            const response: IApiResponse = {
-              sucesso: false,
-              erro: "Este email já está sendo usado",
-            };
-            res.status(400).json(response);
-            return;
-          }
-
-          dadosParaAtualizar.email = emailNormalizado;
-          emailAlterado = true;
-        }
-      }
-
-      // 3. Validar mudança de senha se fornecida
-      if (novaSenha) {
-        // Verificar se senha atual está correta
-        const senhaAtualValida = await gerenteCompleto.verificarSenha(
-          senhaAtual
-        );
-        if (!senhaAtualValida) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Senha atual incorreta",
-          };
-          res.status(400).json(response);
-          return;
-        }
-
-        // Verificar se nova senha é válida
-        if (novaSenha.length < 6) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Nova senha deve ter pelo menos 6 caracteres",
-          };
-          res.status(400).json(response);
-          return;
-        }
-
-        // Verificar confirmação de senha
-        if (novaSenha !== confirmarSenha) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Confirmação de senha não confere",
-          };
-          res.status(400).json(response);
-          return;
-        }
-
-        // Verificar se nova senha é diferente da atual
-        const novaSenhaIgualAtual = await gerenteCompleto.verificarSenha(
-          novaSenha
-        );
-        if (novaSenhaIgualAtual) {
-          const response: IApiResponse = {
-            sucesso: false,
-            erro: "Nova senha deve ser diferente da senha atual",
-          };
-          res.status(400).json(response);
-          return;
-        }
-
-        // Hash da nova senha
-        dadosParaAtualizar.senha = await Gerente.hashSenha(novaSenha);
-      }
-
-      // Verificar se há algo para atualizar
-      if (Object.keys(dadosParaAtualizar).length === 0) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Nenhuma alteração foi enviada",
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      // ✅ SALVAR NO BANCO
-      await gerenteCompleto.update(dadosParaAtualizar);
-
-      console.log("✅ Perfil atualizado:", {
-        id: gerenteCompleto.id,
-        nome: gerenteCompleto.nome,
-        email: gerenteCompleto.email,
-        alteracoes: Object.keys(dadosParaAtualizar),
-      });
-
-      // ✅ GERAR NOVO TOKEN SE EMAIL FOI ALTERADO
-      let novoToken = null;
-      if (emailAlterado) {
-        const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
-        novoToken = jwt.sign(
-          {
-            id: gerenteCompleto.id,
-            email: gerenteCompleto.email,
-            nome: gerenteCompleto.nome,
-            tipo: "gerente",
-          },
-          jwtSecret,
-          {
-            expiresIn: "8h",
-          }
-        );
-        console.log("🔑 Novo token JWT gerado devido alteração de email");
-      }
-
-      // ✅ RESPOSTA DE SUCESSO
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          gerente: {
-            id: gerenteCompleto.id!,
-            nome: gerenteCompleto.nome,
-            email: gerenteCompleto.email,
-            createdAt: gerenteCompleto.createdAt,
-          },
-          alteracoes: Object.keys(dadosParaAtualizar),
-          novoToken: novoToken, // Incluir novo token se email foi alterado
-        },
-        mensagem: "Perfil atualizado com sucesso",
-      };
-
-      res.json(response);
-    } catch (error) {
-      console.error("💥 [GerenteController] Erro ao atualizar perfil:", error);
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao atualizar perfil",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-      res.status(500).json(response);
     }
   }
 }

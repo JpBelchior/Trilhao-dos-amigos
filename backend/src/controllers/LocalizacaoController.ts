@@ -1,47 +1,53 @@
-// backend/src/controllers/LocalizacaoController.ts
 import { Request, Response } from "express";
-import { IApiResponse } from "../types/models";
-import { IBGEService } from "../Service/IBGEService";
+
+// Importações SOLID
+import { LocalizacaoValidator } from "../validators/LocalizacaoValidator";
+import { LocalizacaoService } from "../Service/LocalizacaoService";
+import { ResponseUtil } from "../utils/responseUtil";
 
 export class LocalizacaoController {
-  // GET /api/localizacao/estados - Listar estados
+  /**
+   * GET /api/localizacao/estados - Listar estados*/
   public static async listarEstados(
     req: Request,
     res: Response
   ): Promise<void> {
     try {
-      console.log("📍 [LocalizacaoController] Buscando estados do IBGE");
+      console.log("📍 [LocalizacaoController] Solicitação de lista de estados");
 
-      const estados = await IBGEService.buscarEstados();
+      // 1. CHAMAR Service (sem validação necessária para GET simples)
+      const resultado = await LocalizacaoService.listarEstados();
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          estados: estados.map((estado) => ({
-            sigla: estado.sigla,
-            nome: estado.nome,
-          })),
-          total: estados.length,
-          fonte: "IBGE",
-        },
-        mensagem: `${estados.length} estados carregados`,
-      };
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
 
-      res.json(response);
+      // 2. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        `${resultado.dados?.total} estados carregados`
+      );
     } catch (error) {
-      console.error("❌ Erro ao listar estados:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao carregar estados",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error(
+        "💥 [LocalizacaoController] Erro ao listar estados:",
+        error
+      );
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // GET /api/localizacao/cidades/:estado - Listar cidades por estado
+  /**
+   * GET /api/localizacao/cidades/:estado - Listar cidades por estado
+   */
   public static async listarCidadesPorEstado(
     req: Request,
     res: Response
@@ -49,50 +55,53 @@ export class LocalizacaoController {
     try {
       const { estado } = req.params;
 
-      console.log(`📍 [LocalizacaoController] Buscando cidades do ${estado}`);
+      console.log(
+        `📍 [LocalizacaoController] Solicitação de cidades para ${estado}`
+      );
 
-      // Validar estado primeiro
-      const estadoValido = await IBGEService.validarEstado(estado);
-      if (!estadoValido) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Estado inválido",
-          detalhes: `"${estado}" não é um estado brasileiro válido`,
-        };
-        res.status(400).json(response);
-        return;
+      // 1. VALIDAR parâmetro usando Validator
+      const validacao = LocalizacaoValidator.validarEstado(estado);
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Parâmetro inválido",
+          validacao.detalhes
+        );
       }
 
-      const municipios = await IBGEService.buscarMunicipiosPorEstado(estado);
+      // 2. CHAMAR Service
+      const resultado = await LocalizacaoService.listarCidadesPorEstado(estado);
 
-      const cidades = municipios.map((municipio) => municipio.nome).sort();
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroValidacao(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          estado: estado.toUpperCase(),
-          cidades,
-          total: cidades.length,
-          fonte: "IBGE",
-        },
-        mensagem: `${cidades.length} cidades encontradas para ${estado}`,
-      };
-
-      res.json(response);
+      // 3. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        `${resultado.dados?.total} cidades encontradas para ${estado}`
+      );
     } catch (error) {
-      console.error("❌ Erro ao listar cidades:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao carregar cidades",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error(
+        "💥 [LocalizacaoController] Erro ao listar cidades:",
+        error
+      );
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // GET /api/localizacao/buscar-cidades?nome=:nome&estado=:estado - Buscar cidades por nome
+  /**
+   * GET /api/localizacao/buscar-cidades - Buscar cidades por nome
+   */
   public static async buscarCidades(
     req: Request,
     res: Response
@@ -100,52 +109,59 @@ export class LocalizacaoController {
     try {
       const { nome, estado } = req.query;
 
-      if (!nome || typeof nome !== "string") {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Nome da cidade é obrigatório",
-          detalhes: "Parâmetro 'nome' deve ser fornecido",
-        };
-        res.status(400).json(response);
-        return;
-      }
-
       console.log(
-        `🔍 [LocalizacaoController] Buscando cidades com nome "${nome}"`
+        `🔍 [LocalizacaoController] Busca de cidades: nome="${nome}", estado="${estado}"`
       );
 
-      const cidades = await IBGEService.buscarCidadesPorNome(
+      // 1. VALIDAR parâmetros usando Validator
+      const validacao = LocalizacaoValidator.validarBuscaCidades({
         nome,
+        estado,
+      });
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Parâmetros inválidos",
+          validacao.detalhes
+        );
+      }
+
+      // 2. CHAMAR Service
+      const resultado = await LocalizacaoService.buscarCidades(
+        nome as string,
         estado as string
       );
 
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          termo_busca: nome,
-          estado: estado || "todos",
-          cidades,
-          total: cidades.length,
-          fonte: "IBGE",
-        },
-        mensagem: `${cidades.length} cidades encontradas`,
-      };
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroInterno(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
+      }
 
-      res.json(response);
+      // 3. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        `${resultado.dados?.total} cidades encontradas`
+      );
     } catch (error) {
-      console.error("❌ Erro ao buscar cidades:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao buscar cidades",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error(
+        "💥 [LocalizacaoController] Erro ao buscar cidades:",
+        error
+      );
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 
-  // POST /api/localizacao/validar - Validar estado e cidade
+  /**
+   * POST /api/localizacao/validar - Validar estado e cidade
+   */
   public static async validarLocalizacao(
     req: Request,
     res: Response
@@ -153,64 +169,53 @@ export class LocalizacaoController {
     try {
       const { estado, cidade } = req.body;
 
-      console.log(`✅ [LocalizacaoController] Validando: ${cidade}/${estado}`);
+      console.log(
+        `✅ [LocalizacaoController] Validação solicitada: ${cidade}/${estado}`
+      );
 
-      if (!estado || !cidade) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Estado e cidade são obrigatórios",
-          detalhes: "Ambos os campos devem ser fornecidos",
-        };
-        res.status(400).json(response);
-        return;
+      // 1. VALIDAR dados usando Validator
+      const validacao = LocalizacaoValidator.validarDadosLocalizacao({
+        estado,
+        cidade,
+      });
+      if (!validacao.isValid) {
+        return ResponseUtil.erroValidacao(
+          res,
+          "Dados inválidos",
+          validacao.detalhes
+        );
       }
 
-      // Validar estado
-      const estadoValido = await IBGEService.validarEstado(estado);
-      if (!estadoValido) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Estado inválido",
-          detalhes: `"${estado}" não é um estado brasileiro válido`,
-        };
-        res.status(400).json(response);
-        return;
+      // 2. CHAMAR Service
+      const resultado = await LocalizacaoService.validarLocalizacao(
+        estado,
+        cidade
+      );
+
+      if (!resultado.sucesso) {
+        return ResponseUtil.erroValidacao(
+          res,
+          resultado.erro!,
+          resultado.detalhes
+        );
       }
 
-      // Validar cidade
-      const cidadeValida = await IBGEService.validarCidade(cidade, estado);
-      if (!cidadeValida) {
-        const response: IApiResponse = {
-          sucesso: false,
-          erro: "Cidade inválida",
-          detalhes: `"${cidade}" não existe no estado ${estado}`,
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      const response: IApiResponse = {
-        sucesso: true,
-        dados: {
-          estado: estado.toUpperCase(),
-          cidade,
-          valido: true,
-          fonte: "IBGE",
-        },
-        mensagem: `${cidade}/${estado} é uma localização válida`,
-      };
-
-      res.json(response);
+      // 3. RETORNAR sucesso
+      return ResponseUtil.sucesso(
+        res,
+        resultado.dados,
+        `${cidade}/${estado} é uma localização válida`
+      );
     } catch (error) {
-      console.error("❌ Erro ao validar localização:", error);
-
-      const response: IApiResponse = {
-        sucesso: false,
-        erro: "Erro ao validar localização",
-        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
-      };
-
-      res.status(500).json(response);
+      console.error(
+        "💥 [LocalizacaoController] Erro ao validar localização:",
+        error
+      );
+      return ResponseUtil.erroInterno(
+        res,
+        "Erro interno do servidor",
+        error instanceof Error ? error.message : "Erro desconhecido"
+      );
     }
   }
 }

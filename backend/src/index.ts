@@ -39,7 +39,7 @@ app.use(
 
 app.use("/api", edicaoRoutes);
 
-app.use(cors()); // ✅ CORS simples e permissivo para todas as rotas
+app.use(cors());
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.json());
