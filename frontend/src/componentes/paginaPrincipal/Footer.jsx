@@ -1,8 +1,11 @@
 // src/componentes/Footer.jsx
 import React from "react";
 import { Mountain } from "lucide-react";
+import { useEdicao } from "../../hooks/useEdicao";
 
 const Footer = () => {
+  const { edicaoAtual } = useEdicao();
+
   return (
     <footer className="bg-black border-t border-yellow-400/20 py-12">
       <div className="container mx-auto px-6">
@@ -22,7 +25,8 @@ const Footer = () => {
             <span>📧 contato@trilhao.com.br</span>
           </div>
           <div className="mt-8 text-xs text-gray-600">
-            © 2025 Trilhão Itamonte. Todos os direitos reservados.
+            © {edicaoAtual?.ano || new Date().getFullYear()} Trilhão Itamonte.
+            Todos os direitos reservados.
           </div>
         </div>
       </div>

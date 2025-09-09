@@ -398,7 +398,7 @@ const GerenciarFotos = () => {
           <div className="flex gap-3">
             <button
               onClick={() => carregarFotos()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
+              className="bg-yellow-500 hover:bg-yellow-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
               disabled={loading}
             >
               <RefreshCw size={20} className={loading ? "animate-spin" : ""} />

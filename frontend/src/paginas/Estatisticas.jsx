@@ -1,13 +1,15 @@
 // frontend/src/paginas/Estatisticas.jsx
 import React, { useState, useEffect } from "react";
-import { BarChart3, Users, TrendingUp } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GraficosParticipantes from "../componentes/inscritos/Graficos";
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
+import { useEdicao } from "../hooks/useEdicao";
 
 const Estatisticas = () => {
   const navigate = useNavigate();
+  const { edicaoAtual, loading: edicaoLoading } = useEdicao();
 
   // Estados principais
   const [participantes, setParticipantes] = useState([]);
@@ -171,7 +173,9 @@ const Estatisticas = () => {
             ESTATÍSTICAS DO <span className="text-yellow-400">TRILHÃO</span>
           </h1>
           <p className="text-gray-400 text-xl">
-            Vamos conferir as curiosidades e números da edição de 2025!
+            {edicaoLoading
+              ? "Carregando..."
+              : `Vamos conferir as curiosidades e números da edição de ${edicaoAtual?.ano}!`}{" "}
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>

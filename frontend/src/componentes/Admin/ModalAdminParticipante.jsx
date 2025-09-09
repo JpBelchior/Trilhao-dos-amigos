@@ -1,4 +1,3 @@
-// frontend/src/componentes/Admin/ModalAdminParticipante.jsx
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -18,7 +17,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-// IMPORTAR COMPONENTES REUTILIZÁVEIS
 import {
   InputTexto,
   InputSelect,
@@ -76,7 +74,7 @@ const ModalAdminParticipante = ({
   // ======= CARREGAR ESTOQUE =======
   const carregarEstoque = async () => {
     try {
-      console.log("🔍 [Estoque] Carregando estoque...");
+      console.log(" [Estoque] Carregando estoque...");
       const response = await fetch("http://localhost:8000/api/estoque");
       const data = await response.json();
 
@@ -187,7 +185,7 @@ const ModalAdminParticipante = ({
       isTemporary: true, // Flag para identificar como temporária
     };
 
-    console.log("➕ [Camiseta] Adicionando temporariamente:", novaCamiseta);
+    console.log("[Camiseta] Adicionando temporariamente:", novaCamiseta);
 
     // Adicionar à lista temporária
     setCamisetasAdicionadas((prev) => [...prev, novaCamiseta]);
@@ -207,14 +205,14 @@ const ModalAdminParticipante = ({
 
     if (camiseta?.isTemporary) {
       // Se é temporária, apenas remove das listas
-      console.log("➖ [Camiseta] Removendo temporária:", camisetaId);
+      console.log(" [Camiseta] Removendo temporária:", camisetaId);
       setCamisetasAdicionadas((prev) =>
         prev.filter((c) => c.id !== camisetaId)
       );
       setCamisetasExtras((prev) => prev.filter((c) => c.id !== camisetaId));
     } else {
       // Se é original, marca para remoção
-      console.log("➖ [Camiseta] Marcando para remoção:", camisetaId);
+      console.log(" [Camiseta] Marcando para remoção:", camisetaId);
       setCamisetasRemovidas((prev) => [...prev, camisetaId]);
       setCamisetasExtras((prev) => prev.filter((c) => c.id !== camisetaId));
     }
@@ -543,7 +541,7 @@ const ModalAdminParticipante = ({
           <div className="mt-8 border-t border-gray-600 pt-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white flex items-center">
-                <ShirtIcon className="mr-3 text-purple-400" size={24} />
+                <ShirtIcon className="mr-3 text-yellow-400" size={24} />
                 Camisetas Extras
               </h3>
               <span className="text-gray-300">
@@ -556,7 +554,7 @@ const ModalAdminParticipante = ({
 
             {/* ======= FORM PARA ADICIONAR CAMISETA  ======= */}
             {modoEdicao && (
-              <div className="bg-purple-900/30 rounded-xl p-6 mb-6 border border-purple-400/30">
+              <div className="bg-yellow-900/30 rounded-xl p-6 mb-6 border border-yellow-400/30">
                 <h4 className="text-white font-semibold mb-4">
                   Nova Camiseta Extra
                 </h4>
@@ -573,7 +571,7 @@ const ModalAdminParticipante = ({
                           tamanho: e.target.value,
                         }))
                       }
-                      className="w-full bg-gray-800 text-white rounded-xl px-4 py-3 border border-gray-600 focus:border-purple-400 focus:outline-none transition-colors"
+                      className="w-full bg-gray-800 text-white rounded-xl px-4 py-3 border border-gray-600 focus:border-yellow-400 focus:outline-none transition-colors"
                     >
                       {TamanhoCamiseta.map((tamanho) => {
                         const disponivel = verificarDisponibilidade(
@@ -601,7 +599,7 @@ const ModalAdminParticipante = ({
                           tipo: e.target.value,
                         }))
                       }
-                      className="w-full bg-gray-800 text-white rounded-xl px-4 py-3 border border-gray-600 focus:border-purple-400 focus:outline-none transition-colors"
+                      className="w-full bg-gray-800 text-white rounded-xl px-4 py-3 border border-gray-600 focus:border-yellow-400 focus:outline-none transition-colors"
                     >
                       {Object.entries(TipoCamiseta).map(([key, label]) => {
                         const disponivel = verificarDisponibilidade(

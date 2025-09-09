@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import { testConnection, syncDatabase } from "./config/db";
 import apiRoutes from "./routes";
+import edicaoRoutes from "./routes/Edicao/edicao";
 
 // Importar modelos para garantir que sejam carregados
 import "./models";
@@ -35,6 +36,8 @@ app.use(
     crossOriginResourcePolicy: { policy: "cross-origin" }, // ✅ Permitir recursos cross-origin apenas
   })
 );
+
+app.use("/api", edicaoRoutes);
 
 app.use(cors()); // ✅ CORS simples e permissivo para todas as rotas
 

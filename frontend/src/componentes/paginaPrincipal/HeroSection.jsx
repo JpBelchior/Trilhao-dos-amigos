@@ -1,10 +1,10 @@
 // src/componentes/paginaPrincipal/HeroSection.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useEdicao } from "../../hooks/useEdicao";
 import { Flashlight, Signpost, Trophy, Zap } from "lucide-react";
 
 const HeroSection = ({ isVisible, scrollY }) => {
-  const navigate = useNavigate();
+  const { edicaoAtual, loading } = useEdicao();
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -38,7 +38,9 @@ const HeroSection = ({ isVisible, scrollY }) => {
             <div className="text-sm text-gray-300">Trilha Off-Road</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg border border-green-400/30 rounded-2xl p-4">
-            <div className="text-3xl font-black text-green-400">9º</div>
+            <div className="text-3xl font-black text-green-400">
+              {loading ? "..." : `${edicaoAtual?.numeroEdicao}º`}
+            </div>
             <div className="text-sm text-gray-300">Edição</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg border border-yellow-400/30 rounded-2xl p-4">

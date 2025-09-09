@@ -9,6 +9,7 @@ import campeoesRoutes from "./Campeoes/campeoes";
 import entregaRoutes from "./Entregas/entregas";
 import fotoRoutes from "./Fotos/fotos";
 import camisetasExtrasRoutes from "./CamisasExtras/camisetasExtrasRoutes";
+import edicaoRoutes from "./Edicao/edicao";
 
 const router = Router();
 
