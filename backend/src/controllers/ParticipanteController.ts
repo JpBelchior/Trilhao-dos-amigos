@@ -186,7 +186,6 @@ export class ParticipanteController {
 
   /**
    * DELETE /api/participantes/:id - Excluir participante (Admin)
-   * RESPONSABILIDADE: Apenas orquestração (SRP)
    */
   public static async excluirParticipante(
     req: AuthenticatedRequest,
@@ -200,16 +199,16 @@ export class ParticipanteController {
         `🗑️ [ParticipanteController] Gerente ${gerente?.nome} excluindo participante ${id}`
       );
 
-      // CHAMAR Service
-      const sucesso = await ParticipanteService.excluirParticipantePendente(
+      // CHAMAR Service com método MANUAL (permite qualquer status)
+      const resultado = await ParticipanteService.excluirParticipante(
         parseInt(id)
       );
 
-      if (!sucesso) {
+      if (!resultado.sucesso) {
         return ResponseUtil.erroValidacao(
           res,
-          "Não foi possível excluir o participante",
-          "Participante não encontrado ou não está mais pendente"
+          resultado.erro || "Não foi possível excluir o participante",
+          "Participante não encontrado"
         );
       }
 
@@ -230,14 +229,12 @@ export class ParticipanteController {
       );
     }
   }
-
   // =================================================================
   // MÉTODOS INTERNOS (para usar em outros controllers)
   // =================================================================
 
   /**
    * Confirmar participante (método interno para PagamentoController)
-   * RESPONSABILIDADE: Apenas orquestração (SRP)
    */
   public static async confirmarParticipante(
     numeroInscricao: string,
@@ -273,7 +270,7 @@ export class ParticipanteController {
     participanteId: number
   ): Promise<boolean> {
     try {
-      // CHAMAR Service
+      // CHAMAR Service com método AUTOMÁTICO (só pendentes)
       return await ParticipanteService.excluirParticipantePendente(
         participanteId
       );

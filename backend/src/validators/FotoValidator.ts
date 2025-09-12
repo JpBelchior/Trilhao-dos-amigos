@@ -144,8 +144,6 @@ export class FotoValidator {
     return { isValid: true, errors: [] };
   }
 
-  // * Validar título único por categoria (opcional)
-
   //* Validar dados completos para upload
 
   public static validarUploadCompleto(

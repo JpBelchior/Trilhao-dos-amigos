@@ -1,4 +1,3 @@
-// frontend/src/componentes/SimpleImage.jsx
 import React, { useState, useRef } from "react";
 import { useImageRetry } from "../hooks/useImageRetry";
 

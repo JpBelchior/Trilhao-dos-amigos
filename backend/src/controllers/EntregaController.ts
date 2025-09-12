@@ -1,4 +1,3 @@
-// backend/src/controllers/EntregaController.ts
 import { Request, Response } from "express";
 import { Participante, CamisetaExtra } from "../models";
 import { StatusEntrega, IApiResponse } from "../types/models";

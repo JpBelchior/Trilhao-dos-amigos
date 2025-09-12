@@ -8,18 +8,15 @@ import {
   useLocation,
 } from "react-router-dom";
 
-// 🎯 CONTEXT DE AUTENTICAÇÃO
+//  CONTEXT DE AUTENTICAÇÃO
 import { AuthProvider } from "./context/AuthContext";
 
 // COMPONENTES DE PROTEÇÃO
 import ProtectedRoute from "./componentes/ProtectedRoute";
 
-// 🎯 DASHBOARD ADMINISTRATIVO
+//  DASHBOARD ADMINISTRATIVO
 import AdminDashboard from "./paginas/Admin/Dashboard";
 import PerfilGerente from "./paginas/Admin/PerfilGerente";
-
-// ✅ IMPORT DO ADMIN PARTICIPANTES - VERIFICAR SE ESTE ARQUIVO EXISTE
-// Se o arquivo não existir, comente esta linha temporariamente
 import AdminParticipantes from "./paginas/Admin/AdminParticipantes";
 
 // COMPONENTES NORMAIS DO SITE

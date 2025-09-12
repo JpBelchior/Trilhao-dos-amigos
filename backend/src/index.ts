@@ -193,7 +193,7 @@ const startServer = async () => {
       const gerente = await Gerente.criarGerente({
         nome: "Administrador Trilhão",
         email: "admin@trilhao.com",
-        senha: "admin123", //  ALTERAR EM PRODUÇÃO
+        senha: "admin123",
       });
 
       res.json({

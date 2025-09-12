@@ -37,8 +37,8 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
   // Se está logado, mostrar o conteúdo protegido
-  console.log("✅ [ProtectedRoute] Acesso autorizado para:", gerente?.nome);
-  console.log("✅ [ProtectedRoute] Renderizando página:", location.pathname);
+  console.log(" [ProtectedRoute] Acesso autorizado para:", gerente?.nome);
+  console.log(" [ProtectedRoute] Renderizando página:", location.pathname);
   return children;
 };
 export default ProtectedRoute;

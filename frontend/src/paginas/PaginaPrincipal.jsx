@@ -5,7 +5,6 @@ import React, { useState, useEffect } from "react";
 import HeroSection from "../componentes/paginaPrincipal/HeroSection";
 import StatsSection from "../componentes/paginaPrincipal/StatsSection";
 import CTASection from "../componentes/paginaPrincipal/CTASection";
-import Footer from "../componentes/paginaPrincipal/Footer";
 
 const TrilhaoHomepage = () => {
   const [isVisible, setIsVisible] = useState(false);

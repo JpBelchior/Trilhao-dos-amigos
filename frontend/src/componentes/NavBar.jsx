@@ -1,4 +1,3 @@
-// frontend/src/componentes/NavBar.jsx
 import React from "react";
 import { Mountain, UserPlus, Users, BarChart3 } from "lucide-react";
 import { useNavbarFunctions } from "../hooks/useNavbarFunctions";

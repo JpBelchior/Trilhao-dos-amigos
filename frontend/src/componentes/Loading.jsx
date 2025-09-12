@@ -1,9 +1,7 @@
-// frontend/src/componentes/comum/LoadingComponent.jsx
 import React from "react";
 import { Loader2 } from "lucide-react";
 
 /**
- * Componente de loading simples para toda a aplicação
  * @param {string} loading - Mensagem de loading
  * @param {string} className - Classes CSS adicionais
  */

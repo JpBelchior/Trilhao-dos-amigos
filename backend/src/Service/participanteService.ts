@@ -160,6 +160,24 @@ export class ParticipanteService {
   /**
    * Criar participante PENDENTE
    */
+
+  public static async verificarCPFExistente(cpf: string): Promise<boolean> {
+    const cpfLimpo = cpf.replace(/\D/g, ""); // Remove caracteres não numéricos
+
+    const participanteExistente = await Participante.findOne({
+      where: {
+        cpf: {
+          [Op.or]: [
+            cpfLimpo, // CPF sem formatação
+            cpf.trim(), // CPF como veio (com ou sem formatação)
+          ],
+        },
+      },
+    });
+
+    return !!participanteExistente;
+  }
+
   public static async criarParticipante(
     dados: ICriarParticipanteDTO
   ): Promise<CriarParticipanteResult> {
@@ -179,7 +197,18 @@ export class ParticipanteService {
         };
       }
 
-      // 2. Verificar disponibilidade no estoque
+      // 🆕 2. Verificar se CPF já existe (NOVA VERIFICAÇÃO)
+      const cpfExiste = await this.verificarCPFExistente(dados.cpf);
+      if (cpfExiste) {
+        await transaction.rollback();
+        return {
+          sucesso: false,
+          erro: "CPF já cadastrado",
+          detalhes: "Este CPF já está sendo usado por outro participante",
+        };
+      }
+
+      // 3. Verificar disponibilidade no estoque
       const estoqueDisponivel = await this.verificarDisponibilidadeEstoque(
         dados.tamanhoCamiseta,
         dados.tipoCamiseta,
@@ -195,15 +224,15 @@ export class ParticipanteService {
         };
       }
 
-      // 3. Gerar número de inscrição
+      // 4. Gerar número de inscrição
       const numeroInscricao = await this.gerarNumeroInscricao();
 
-      // 4. Calcular valor total
+      // 5. Calcular valor total
       const valorTotal = this.calcularValorInscricao(
         dados.camisetasExtras || []
       );
 
-      // 5. Criar participante
+      // 6. Criar participante (AGORA SEM RISCO DE CPF DUPLICADO)
       const participante = await Participante.create(
         {
           numeroInscricao,
@@ -226,7 +255,7 @@ export class ParticipanteService {
         { transaction }
       );
 
-      // 6. Criar camisetas extras se houver
+      // 7. Criar camisetas extras se houver
       if (dados.camisetasExtras && dados.camisetasExtras.length > 0) {
         const camisetasExtrasData = dados.camisetasExtras.map((extra) => ({
           participanteId: participante.id,
@@ -239,7 +268,7 @@ export class ParticipanteService {
         await CamisetaExtra.bulkCreate(camisetasExtrasData, { transaction });
       }
 
-      // 7. Reservar camisetas no estoque
+      // 8. Reservar camisetas no estoque
       await this.reservarCamisetas(
         dados.tamanhoCamiseta,
         dados.tipoCamiseta,
@@ -435,15 +464,12 @@ export class ParticipanteService {
     }
   }
 
-  /**
-   * Excluir participante pendente
-   */
   public static async excluirParticipantePendente(
     participanteId: number
   ): Promise<boolean> {
     try {
       console.log(
-        "🗑️ [ParticipanteService] Excluindo participante pendente:",
+        "🗑️ [ParticipanteService] Excluindo participante pendente (automático):",
         participanteId
       );
 
@@ -454,7 +480,7 @@ export class ParticipanteService {
         return false;
       }
 
-      // Só excluir se ainda estiver pendente
+      // Só excluir se ainda estiver pendente (REGRA AUTOMÁTICA)
       if (participante.statusPagamento !== StatusPagamento.PENDENTE) {
         console.log("⚠️ Participante não está mais pendente:", {
           id: participante.id,
@@ -467,16 +493,65 @@ export class ParticipanteService {
       await participante.destroy();
 
       console.log(
-        "✅ [ParticipanteService] Participante excluído:",
+        "✅ [ParticipanteService] Participante pendente excluído automaticamente:",
         participante.numeroInscricao
       );
       return true;
     } catch (error) {
       console.error(
-        "💥 [ParticipanteService] Erro ao excluir participante:",
+        "💥 [ParticipanteService] Erro ao excluir participante pendente:",
         error
       );
       return false;
+    }
+  }
+
+  /**
+   * Excluir participante (MANUAL - para gerentes)
+   * Permite excluir participante independente do status
+   */
+  public static async excluirParticipante(
+    participanteId: number
+  ): Promise<{ sucesso: boolean; erro?: string }> {
+    try {
+      console.log(
+        "🗑️ [ParticipanteService] Excluindo participante (ação do gerente):",
+        participanteId
+      );
+
+      const participante = await Participante.findByPk(participanteId);
+
+      if (!participante) {
+        console.log("👻 Participante não encontrado:", participanteId);
+        return { sucesso: false, erro: "Participante não encontrado" };
+      }
+
+      // Log do status para debug
+      console.log("📊 Status do participante:", {
+        id: participante.id,
+        status: participante.statusPagamento,
+        nome: participante.nome,
+        numeroInscricao: participante.numeroInscricao,
+      });
+
+      // GERENTE PODE EXCLUIR QUALQUER PARTICIPANTE
+      await participante.destroy();
+
+      console.log(
+        "✅ [ParticipanteService] Participante excluído pelo gerente:",
+        participante.numeroInscricao
+      );
+
+      return { sucesso: true };
+    } catch (error) {
+      console.error(
+        "💥 [ParticipanteService] Erro ao excluir participante:",
+        error
+      );
+      return {
+        sucesso: false,
+        erro: error instanceof Error ? error.message : "Erro desconhecido",
+      };
     }
   }
 }
