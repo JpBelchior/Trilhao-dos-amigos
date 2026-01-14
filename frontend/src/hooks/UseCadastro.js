@@ -1,3 +1,4 @@
+// frontend/src/hooks/UseCadastro.js
 import { useState, useEffect } from "react";
 
 // Enums (devem ser iguais ao backend)
@@ -35,8 +36,8 @@ const useCadastro = () => {
     cidade: "",
     estado: "",
 
-    // Dados da moto
-    modeloMoto: "",
+    // Dados da moto (agora apenas marca)
+    modeloMoto: "", // Agora armazena a marca (ex: "Honda")
     categoriaMoto: "",
 
     // Camiseta grátis
@@ -101,7 +102,7 @@ const useCadastro = () => {
     return valorBase + valorExtras;
   };
 
-  // Adicionar camiseta extra
+  // ✅ Adicionar camiseta extra (PERMITE DUPLICATAS)
   const adicionarCamisetaExtra = () => {
     const disponivel = verificarDisponibilidade(
       camisetaExtra.tamanho,
@@ -113,18 +114,7 @@ const useCadastro = () => {
       return;
     }
 
-    // Verificar se já foi adicionada a mesma camiseta
-    const jaExiste = formData.camisetasExtras.some(
-      (extra) =>
-        extra.tamanho === camisetaExtra.tamanho &&
-        extra.tipo === camisetaExtra.tipo
-    );
-
-    if (jaExiste) {
-      alert("Esta camiseta já foi adicionada!");
-      return;
-    }
-
+    // ✅ REMOVIDO o bloqueio de duplicatas - agora permite adicionar a mesma camiseta várias vezes
     setFormData((prev) => ({
       ...prev,
       camisetasExtras: [...prev.camisetasExtras, { ...camisetaExtra }],
@@ -141,28 +131,25 @@ const useCadastro = () => {
     }));
   };
 
-  // Validações por step
+  // ✅ Validações por step (AJUSTADO PARA 2 STEPS)
   const validarStep = (stepNumber) => {
     switch (stepNumber) {
       case 1:
+        // Step 1: Dados pessoais + Dados da moto
         return (
           formData.nome.trim() &&
           formData.cpf.trim() &&
           formData.email.trim() &&
           formData.telefone.trim() &&
           formData.cidade.trim() &&
-          formData.estado.trim()
-        );
-
-      case 2:
-        return (
-          formData.modeloMoto.trim() &&
+          formData.estado.trim() &&
+          formData.modeloMoto.trim() && // Marca da moto
           formData.categoriaMoto &&
           Object.values(CategoriaMoto).includes(formData.categoriaMoto)
         );
 
-      case 3:
-        // Verificar se camiseta grátis está disponível
+      case 2:
+        // Step 2: Camisetas - Verificar se camiseta grátis está disponível
         const disponivel = verificarDisponibilidade(
           formData.tamanhoCamiseta,
           formData.tipoCamiseta
@@ -174,9 +161,9 @@ const useCadastro = () => {
     }
   };
 
-  // Navegar para próximo step
+  // ✅ Navegar para próximo step (AJUSTADO PARA 2 STEPS)
   const proximoStep = () => {
-    if (validarStep(step) && step < 3) {
+    if (validarStep(step) && step < 2) {
       setStep(step + 1);
     }
   };
@@ -190,63 +177,39 @@ const useCadastro = () => {
 
   // ✅ SUBMETER INSCRIÇÃO - Criar participante PENDENTE no backend
   const submeterInscricao = async () => {
-    if (!validarStep(3)) {
-      return {
-        sucesso: false,
-        erro: "Dados incompletos ou camiseta indisponível",
-      };
-    }
-
     setLoading(true);
 
     try {
-      console.log("📝 Enviando dados para o backend:", formData);
+      console.log("📤 Submetendo inscrição ao backend...");
 
-      // Preparar dados no formato que o backend espera
-      const dadosEnvio = {
-        // Dados pessoais
-        nome: formData.nome.trim(),
-        cpf: formData.cpf.trim(),
-        email: formData.email.trim(),
-        telefone: formData.telefone.trim(),
-        cidade: formData.cidade.trim(),
-        estado: formData.estado.trim(),
-
-        // Dados da moto
-        modeloMoto: formData.modeloMoto.trim(),
-        categoriaMoto: formData.categoriaMoto,
-
-        // Camiseta grátis
-        tamanhoCamiseta: formData.tamanhoCamiseta,
-        tipoCamiseta: formData.tipoCamiseta,
-
-        // Camisetas extras (apenas tamanho e tipo)
-        camisetasExtras: formData.camisetasExtras.map((extra) => ({
-          tamanho: extra.tamanho,
-          tipo: extra.tipo,
-        })),
-
-        // Observações
-        observacoes: formData.observacoes?.trim() || "",
-      };
-
-      console.log("📤 Dados preparados para envio:", dadosEnvio);
-
-      // Fazer requisição para o backend
       const response = await fetch("http://localhost:8000/api/participantes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(dadosEnvio),
+        body: JSON.stringify({
+          nome: formData.nome,
+          cpf: formData.cpf,
+          email: formData.email,
+          telefone: formData.telefone,
+          cidade: formData.cidade,
+          estado: formData.estado,
+          modeloMoto: formData.modeloMoto, 
+          categoriaMoto: formData.categoriaMoto,
+          tamanhoCamiseta: formData.tamanhoCamiseta,
+          tipoCamiseta: formData.tipoCamiseta,
+          camisetasExtras: formData.camisetasExtras,
+          observacoes: formData.observacoes,
+        }),
       });
 
       const data = await response.json();
 
-      console.log("📡 Resposta do backend:", data);
-
       if (!response.ok || !data.sucesso) {
-        throw new Error(data.erro || "Erro ao criar inscrição");
+        return {
+          sucesso: false,
+          erro: data.erro || "Erro ao criar inscrição",
+        };
       }
 
       // ✅ Participante criado como PENDENTE com sucesso

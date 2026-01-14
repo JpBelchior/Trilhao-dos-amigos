@@ -1,4 +1,4 @@
-// src/paginas/Cadastro.jsx
+// frontend/src/paginas/Cadastro.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { CreditCard, Loader2 } from "lucide-react";
@@ -7,8 +7,7 @@ import { CreditCard, Loader2 } from "lucide-react";
 import useCadastro from "../hooks/UseCadastro";
 
 // Importar componentes dos steps
-import StepDadosPessoais from "../componentes/Cadastro/DadosPessoais";
-import StepDadosMoto from "../componentes/Cadastro/DadosMoto";
+import StepDadosIniciais from "../componentes/Cadastro/DadosIniciais";
 import StepCamisetas from "../componentes/Cadastro/Camisetas";
 
 const Cadastro = () => {
@@ -37,7 +36,7 @@ const Cadastro = () => {
 
   //  Finalizar cadastro (cria participante pendente)
   const finalizarCadastro = async () => {
-    console.log(" Finalizando cadastro - criando participante pendente...");
+    console.log("🎯 Finalizando cadastro - criando participante pendente...");
 
     const resultado = await submeterInscricao();
 
@@ -69,10 +68,10 @@ const Cadastro = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto"></div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Bar - AJUSTADO PARA 2 STEPS */}
         <div className="max-w-4xl mx-auto mb-8">
-          <div className="flex justify-between items-center">
-            {[1, 2, 3].map((stepNum) => (
+          <div className="flex justify-center items-center gap-8">
+            {[1, 2].map((stepNum) => (
               <div key={stepNum} className="flex items-center">
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center font-bold ${
@@ -83,9 +82,9 @@ const Cadastro = () => {
                 >
                   {stepNum}
                 </div>
-                {stepNum < 3 && (
+                {stepNum < 2 && (
                   <div
-                    className={`w-24 h-1 mx-4 ${
+                    className={`w-32 h-1 mx-4 ${
                       step > stepNum ? "bg-green-500" : "bg-gray-600"
                     }`}
                   ></div>
@@ -93,10 +92,9 @@ const Cadastro = () => {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-400">
-            <span>Dados Pessoais</span>
-            <span>Moto</span>
-            <span>Camisetas</span>
+          <div className="flex justify-center gap-32 mt-4 text-sm text-gray-400">
+            <span className="text-center">Informações Gerais</span>
+            <span className="text-center">Escolha de Camisetas</span>
           </div>
         </div>
 
@@ -104,21 +102,14 @@ const Cadastro = () => {
         <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
           {/* Renderizar step atual */}
           {step === 1 && (
-            <StepDadosPessoais
-              formData={formData}
-              atualizarFormData={atualizarFormData}
-            />
-          )}
-
-          {step === 2 && (
-            <StepDadosMoto
+            <StepDadosIniciais
               formData={formData}
               atualizarFormData={atualizarFormData}
               CategoriaMoto={CategoriaMoto}
             />
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <StepCamisetas
               formData={formData}
               atualizarFormData={atualizarFormData}
@@ -143,7 +134,7 @@ const Cadastro = () => {
               </button>
             )}
 
-            {step < 3 ? (
+            {step < 2 ? (
               <button
                 onClick={proximoStep}
                 disabled={!validarStep(step)}

@@ -1,6 +1,8 @@
 // src/componentes/paginaPrincipal/HallFamaSection.jsx
 import React, { useState, useEffect } from "react";
-import { Mountain, Trophy, Star, Award, Loader2 } from "lucide-react";
+import { Mountain, Trophy, Star, Award } from "lucide-react";
+import LoadingComponent from "../Loading";
+import ErroComponent from "../Erro";
 
 const HallFamaSection = () => {
   const [campeoes, setCampeoes] = useState([]);
@@ -93,41 +95,17 @@ const HallFamaSection = () => {
 
   // Função para formatar distância que faltou
   const calcularDistanciaFaltou = (altura) => {
-    // Assumindo que o topo é 50m (ajuste conforme necessário)
     const ALTURA_TOPO = 100;
     const faltou = ALTURA_TOPO - altura;
     return faltou > 0 ? `${faltou.toFixed(1)}m` : "CONQUISTOU!";
   };
 
   if (loading) {
-    return (
-      <section className="py-20 bg-black">
-        <div className="container mx-auto px-6 text-center">
-          <Loader2
-            className="animate-spin mx-auto mb-4 text-yellow-400"
-            size={48}
-          />
-          <p className="text-white text-xl">Carregando Hall da Fama...</p>
-        </div>
-      </section>
-    );
+    return <LoadingComponent loading="Carregando Hall da Fama..." />;
   }
-
   if (erro) {
     return (
-      <section className="py-20 bg-black">
-        <div className="container mx-auto px-6 text-center">
-          <div className="bg-red-900/30 border border-red-400/30 rounded-xl p-6 max-w-md mx-auto">
-            <p className="text-red-400 text-lg">{erro}</p>
-            <button
-              onClick={carregarCampeoes}
-              className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-            >
-              Tentar Novamente
-            </button>
-          </div>
-        </div>
-      </section>
+      <ErroComponent mensagem={erro} onTentarNovamente={carregarCampeoes} />
     );
   }
 
@@ -137,12 +115,11 @@ const HallFamaSection = () => {
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-black text-white mb-4">
-            HALL DA <span className="text-yellow-400">FAMA</span>
-          </h2>
+          <h6 className="text-4xl md:text-5xl font-black text-yellow-400 mb-4">
+            Hall da Fama
+          </h6>
           <p className="text-gray-400 text-xl max-w-3xl mx-auto">
-            Os corajosos que chegaram mais perto do topo no{" "}
-            <span className="text-yellow-400 font-bold">Morro do Desafio</span>
+            Os corajosos que chegaram mais perto do topo no Morro do Desafio!
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>

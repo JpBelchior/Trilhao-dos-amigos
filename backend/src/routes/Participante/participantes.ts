@@ -16,6 +16,8 @@ router.get("/:id", ParticipanteController.buscarParticipante);
 // PUT /api/participantes/:id/pagamento - Confirmar pagamento
 router.put("/:id/pagamento", ParticipanteController.confirmarPagamento);
 
+router.post("/validar", ParticipanteController.validarDados);
+
 router.put(
   "/:id",
   verificarAutenticacao,

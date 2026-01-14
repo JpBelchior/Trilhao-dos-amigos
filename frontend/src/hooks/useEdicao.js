@@ -1,7 +1,6 @@
-// frontend/src/hooks/useEdicao.js
 import { useState, useEffect } from "react";
+import { apiClient } from "../services/api";
 
-// Cache simples - evita múltiplas chamadas
 let cacheEdicao = null;
 
 export const useEdicao = () => {
@@ -17,27 +16,32 @@ export const useEdicao = () => {
     // Buscar da API
     const buscarEdicao = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/edicao-atual");
-        const data = await response.json();
+        console.log("🔄 [useEdicao] Buscando edição atual...");
+
+        const data = await apiClient.get("/edicao-atual");
 
         if (data.sucesso) {
           cacheEdicao = data.dados;
           setEdicaoAtual(data.dados);
+          console.log("✅ [useEdicao] Edição carregada:", data.dados);
         }
       } catch (error) {
-        console.error("Erro ao buscar edição:", error);
+        console.error("❌ [useEdicao] Erro ao buscar edição:", error);
 
         // Fallback: calcular aqui mesmo
         const ano = new Date().getFullYear();
         const numero = ano - 2017 + 1;
 
-        cacheEdicao = {
+        const dadosFallback = {
           ano,
           numeroEdicao: numero,
           edicao: `${numero}ª Edição`,
         };
 
-        setEdicaoAtual(cacheEdicao);
+        cacheEdicao = dadosFallback;
+        setEdicaoAtual(dadosFallback);
+
+        console.log("🔧 [useEdicao] Usando dados fallback:", dadosFallback);
       } finally {
         setLoading(false);
       }

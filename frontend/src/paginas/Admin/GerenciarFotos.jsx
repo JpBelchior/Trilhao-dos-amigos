@@ -630,6 +630,26 @@ const GerenciarFotos = () => {
                   ))}
                 </select>
               </div>
+              {uploadData.categoria === "edicoes_anteriores" && (
+              <div>
+                <label className="block text-white font-medium mb-2">
+                  Edição * (obrigatória)
+                </label>
+                <input
+                  type="text"
+                  value={uploadData.edicao}
+                  onChange={(e) =>
+                    setUploadData((prev) => ({
+                      ...prev,
+                      edicao: e.target.value,
+                    }))
+                  }
+                  className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 border border-gray-600 focus:border-green-400"
+                  placeholder="Ex: 8ª Edição"
+                  required
+                />
+              </div>
+            )}
 
               {/* Arquivos */}
               <div>

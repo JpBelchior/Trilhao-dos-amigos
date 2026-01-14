@@ -18,7 +18,7 @@ const EdicoesAnteriores = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
       </div>
-
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
       {/* Gallery Section - Fotos das edições anteriores */}
       <GallerySection />
 

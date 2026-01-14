@@ -482,4 +482,77 @@ export class ParticipanteController {
       );
     }
   }
+  // Adicionar este método no ParticipanteController.ts
+
+/**
+ * POST /api/participantes/validar - Validar dados ANTES de criar participante
+ * RESPONSABILIDADE: Validar CPF/email duplicados sem criar registro
+ */
+public static async validarDados(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const dadosParticipante: ICriarParticipanteDTO = req.body;
+
+    console.log(
+      "🔍 [ParticipanteController] Validando dados:",
+      dadosParticipante.email
+    );
+
+    // 1. VALIDAR formato dos dados usando Validator
+    const validacao = await ParticipanteValidator.validarCriacao(
+      dadosParticipante
+    );
+    if (!validacao.isValid) {
+      return ResponseUtil.erroValidacao(
+        res,
+        "Dados inválidos",
+        validacao.detalhes
+      );
+    }
+
+    // 2. Verificar se EMAIL já existe
+    const emailExiste = await ParticipanteService.verificarEmailExistente(
+      dadosParticipante.email
+    );
+    if (emailExiste) {
+      return ResponseUtil.erroValidacao(
+        res,
+        "Email já cadastrado",
+        "Este email já está sendo usado por outro participante. Use outro email ou faça login se já tem cadastro."
+      );
+    }
+
+    // 3. Verificar se CPF já existe
+    const cpfExiste = await ParticipanteService.verificarCPFExistente(
+      dadosParticipante.cpf
+    );
+    if (cpfExiste) {
+      return ResponseUtil.erroValidacao(
+        res,
+        "CPF já cadastrado",
+        "Este CPF já está sendo usado por outro participante. Verifique seus dados ou entre em contato com o suporte."
+      );
+    }
+
+    // 4. Se tudo OK, retornar sucesso
+    console.log("✅ [ParticipanteController] Dados válidos!");
+    return ResponseUtil.sucesso(
+      res,
+      { valido: true },
+      "Dados validados com sucesso"
+    );
+  } catch (error) {
+    console.error(
+      "💥 [ParticipanteController] Erro ao validar dados:",
+      error
+    );
+    return ResponseUtil.erroInterno(
+      res,
+      "Erro ao validar dados",
+      error instanceof Error ? error.message : "Erro desconhecido"
+    );
+  }
+}
 }
