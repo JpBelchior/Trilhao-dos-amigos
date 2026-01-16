@@ -7,6 +7,7 @@ import fs from "fs";
 import { testConnection, syncDatabase } from "./config/db";
 import apiRoutes from "./routes";
 import edicaoRoutes from "./routes/Edicao/edicao";
+import { apiLimiter } from "./middleware/rateLimiter";
 
 // Importar modelos para garantir que sejam carregados
 import "./models";
@@ -31,15 +32,135 @@ if (!fs.existsSync(fotosDir)) {
 }
 
 // Middlewares
+// ========================================
+// CONFIGURAÇÃO DE SEGURANÇA COM HELMET
+// ========================================
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // ✅ Permitir recursos cross-origin apenas
+    // Content Security Policy - Define quais recursos podem ser carregados
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"], // Apenas recursos do próprio domínio por padrão
+        scriptSrc: ["'self'"], // Scripts apenas do próprio domínio
+        styleSrc: ["'self'", "'unsafe-inline'"], // Estilos (permite inline para Tailwind)
+        imgSrc: ["'self'", "data:", "https:", "blob:"], // Imagens de qualquer HTTPS + data URIs
+        fontSrc: ["'self'", "data:"], // Fontes
+        connectSrc: ["'self'", "https://api.mercadopago.com"], // APIs permitidas
+        frameSrc: ["'none'"], // Não permite iframes
+        objectSrc: ["'none'"], // Não permite <object>, <embed>, <applet>
+        upgradeInsecureRequests: [], // Força HTTPS em produção
+      },
+    },
+
+    // Cross-Origin Resource Policy - Permite compartilhar recursos entre origens
+    crossOriginResourcePolicy: { 
+      policy: "cross-origin" 
+    },
+
+    // Cross-Origin Embedder Policy - Desabilitado para permitir uploads
+    crossOriginEmbedderPolicy: false,
+
+    // Cross-Origin Opener Policy - Isolamento de contexto de navegação
+    crossOriginOpenerPolicy: { 
+      policy: "same-origin-allow-popups" 
+    },
+
+    // DNS Prefetch Control - Controla DNS prefetching
+    dnsPrefetchControl: { 
+      allow: false 
+    },
+
+    // Frame Guard - Previne clickjacking
+    frameguard: { 
+      action: "deny" // Não permite que o site seja embutido em iframes
+    },
+
+    // Hide Powered By - Remove header X-Powered-By
+    hidePoweredBy: true,
+
+    // HSTS - Força HTTPS (apenas em produção)
+    hsts: process.env.NODE_ENV === 'production' ? {
+      maxAge: 31536000, // 1 ano em segundos
+      includeSubDomains: true, // Aplica a subdomínios também
+      preload: true, // Permite inclusão na lista de pré-carregamento dos browsers
+    } : false, // Desabilitado em desenvolvimento
+
+    // IE No Open - Previne IE de executar downloads não confiáveis
+    ieNoOpen: true,
+
+    // No Sniff - Previne MIME type sniffing
+    noSniff: true,
+
+    // Origin Agent Cluster - Isola documentos de mesma origem
+    originAgentCluster: true,
+
+    // Permitted Cross Domain Policies - Restringe Adobe Flash/PDF
+    permittedCrossDomainPolicies: { 
+      permittedPolicies: "none" 
+    },
+
+    // Referrer Policy - Controla informação enviada no header Referer
+    referrerPolicy: { 
+      policy: "strict-origin-when-cross-origin" 
+    },
+
+    // X-XSS-Protection - Proteção contra XSS (legado, mas ainda útil)
+    xssFilter: true,
   })
 );
 
 app.use("/api", edicaoRoutes);
 
-app.use(cors());
+const corsOptions = {
+  // Origens permitidas (frontend)
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      'http://localhost:5173',      // Frontend em desenvolvimento (Vite)
+      'http://localhost:3000',      // Frontend em desenvolvimento (React padrão)
+      'http://127.0.0.1:3001',      // Alternativa localhost
+      process.env.FRONTEND_URL,     // URL de produção (configurável no .env)
+    ].filter(Boolean); // Remove undefined
+
+    // Permitir requisições sem origin (ex: Postman, apps mobile)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    // Verificar se a origin está na lista permitida
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ [CORS] Origem bloqueada: ${origin}`);
+      callback(new Error('Origem não permitida pelo CORS'));
+    }
+  },
+
+  // Permitir envio de credenciais (cookies, Authorization header)
+  credentials: true,
+
+  // Métodos HTTP permitidos
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+
+  // Headers permitidos nas requisições
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+  ],
+
+  // Headers que o frontend pode acessar na resposta
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+
+  // Tempo que o browser pode cachear a resposta do preflight (OPTIONS)
+  maxAge: 600, // 10 minutos
+};
+
+app.use(cors(corsOptions));
+
+app.use("/api", apiLimiter);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.json());

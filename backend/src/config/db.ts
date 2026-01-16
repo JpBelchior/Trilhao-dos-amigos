@@ -8,23 +8,23 @@ dotenv.config();
 // Criação da conexão com o banco
 const sequelize = new Sequelize({
   // Dados de conexão
-  host: process.env.DB_HOST || "localhost",
-  username: process.env.DB_USER || "root",
-  password: process.env.DB_PASS || "",
-  database: process.env.DB_NAME || "trilhao_db",
+  host: process.env.DB_HOST!,
+  username: process.env.DB_USER!,
+  password: process.env.DB_PASS || "", 
+  database: process.env.DB_NAME!,
   dialect: "mysql",
   port: parseInt(process.env.DB_PORT || "3306"),
 
   // Configurações de performance
   pool: {
-    max: 10, // Máximo 10 conexões simultâneas
-    min: 0, // Mínimo 0 conexões
-    acquire: 30000, // Tempo limite para pegar uma conexão (30s)
-    idle: 10000, // Tempo para fechar conexão inativa (10s)
+    max: 10,
+    min: 0, 
+    acquire: 30000, 
+    idle: 10000, 
   },
 
   // Configurações gerais
-  logging: process.env.NODE_ENV === "development" ? console.log : false, // Log apenas em desenvolvimento
+  logging: process.env.NODE_ENV === "development" ? console.log : false, 
   timezone: "-03:00", // Fuso horário do Brasil (Brasília)
 
   define: {

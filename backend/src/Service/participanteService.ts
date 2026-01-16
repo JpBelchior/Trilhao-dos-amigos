@@ -11,6 +11,7 @@ import {
   TamanhoCamiseta,
   TipoCamiseta,
 } from "../types/models";
+import { Sanitizer } from "../utils/sanitizer";
 import { Op } from "sequelize";
 
 export interface CriarParticipanteResult {
@@ -232,24 +233,26 @@ export class ParticipanteService {
         dados.camisetasExtras || []
       );
 
-      // 6. Criar participante (AGORA SEM RISCO DE CPF DUPLICADO)
+      // 6. Criar participante 
+      const dadosSanitizados = Sanitizer.sanitizeParticipanteData(dados);
+
       const participante = await Participante.create(
         {
           numeroInscricao,
-          nome: dados.nome.trim(),
-          cpf: dados.cpf.replace(/\D/g, ""), // Remove caracteres não numéricos
-          email: dados.email.toLowerCase().trim(),
-          telefone: dados.telefone.replace(/\D/g, ""), // Remove caracteres não numéricos
-          cidade: dados.cidade.trim(),
-          estado: dados.estado.toUpperCase().trim(),
-          modeloMoto: dados.modeloMoto.trim(),
-          categoriaMoto: dados.categoriaMoto,
-          tamanhoCamiseta: dados.tamanhoCamiseta,
-          tipoCamiseta: dados.tipoCamiseta,
+          nome: dadosSanitizados.nome,
+          cpf: dadosSanitizados.cpf,
+          email: dadosSanitizados.email,
+          telefone: dadosSanitizados.telefone,
+          cidade: dadosSanitizados.cidade,
+          estado: dadosSanitizados.estado,
+          modeloMoto: dadosSanitizados.modeloMoto,
+          categoriaMoto: dadosSanitizados.categoriaMoto,
+          tamanhoCamiseta: dadosSanitizados.tamanhoCamiseta,
+          tipoCamiseta: dadosSanitizados.tipoCamiseta,
           valorInscricao: valorTotal,
           statusPagamento: StatusPagamento.PENDENTE,
           statusEntregaCamiseta: StatusEntrega.NAO_ENTREGUE,
-          observacoes: dados.observacoes?.trim() || undefined,
+          observacoes: dadosSanitizados.observacoes || undefined,
           dataInscricao: new Date(),
         },
         { transaction }

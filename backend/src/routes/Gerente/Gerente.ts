@@ -2,13 +2,14 @@
 import { Router } from "express";
 import { GerenteController } from "../../controllers/GerenteController";
 import { verificarAutenticacao } from "../../middleware/authMiddleware";
+import { authLimiter } from "../../middleware/rateLimiter";
 
 const router = Router();
 
 // ============ ROTAS PÚBLICAS (sem autenticação) ============
 
 // POST /api/gerente/login - Fazer login
-router.post("/login", GerenteController.login);
+router.post("/login", authLimiter, GerenteController.login);
 
 // POST /api/gerente/logout - Fazer logout (informativo)
 router.post("/logout", GerenteController.logout);

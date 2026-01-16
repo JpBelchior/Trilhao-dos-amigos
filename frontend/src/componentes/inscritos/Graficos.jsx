@@ -23,10 +23,6 @@ const GraficosParticipantes = ({ participantes = [] }) => {
     "#3b82f6", // azul
     "#f97316", // laranja
     "#8b5cf6", // roxo
-    "#06b6d4", // ciano
-    "#f59e0b", // âmbar
-    "#10b981", // esmeralda
-    "#6366f1", // índigo
   ];
 
   const coresMotos = {
@@ -40,11 +36,6 @@ const GraficosParticipantes = ({ participantes = [] }) => {
     "#ef4444",
     "#3b82f6",
     "#f97316",
-    "#8b5cf6",
-    "#06b6d4",
-    "#f59e0b",
-    "#10b981",
-    "#6366f1",
   ];
 
   useEffect(() => {
@@ -69,13 +60,13 @@ const GraficosParticipantes = ({ participantes = [] }) => {
 
     const cidadesOrdenadas = Object.entries(contagemCidades)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 10); // Top 10 cidades
+      .slice(0, 5); // Top 5 cidades
 
     const totalCidades = cidadesOrdenadas.reduce(
       (sum, [, count]) => sum + count,
       0
     );
-    const outrasCount = participantes.length - totalCidades;
+
 
     const dadosCidadesProcessados = cidadesOrdenadas.map(
       ([cidade, count], index) => ({
@@ -87,14 +78,6 @@ const GraficosParticipantes = ({ participantes = [] }) => {
       })
     );
 
-    if (outrasCount > 0) {
-      dadosCidadesProcessados.push({
-        name: "Outras",
-        value: outrasCount,
-        percentage: ((outrasCount / participantes.length) * 100).toFixed(1),
-        color: "#94a3b8",
-      });
-    }
 
     // 2. Processar dados por categoria de moto
     const contagemMotos = {};
@@ -127,7 +110,7 @@ const GraficosParticipantes = ({ participantes = [] }) => {
 
     const estadosOrdenados = Object.entries(contagemEstados)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 8); // Top 8 estados
+      .slice(0, 5); // Top 5 estados
 
     const totalEstados = estadosOrdenados.reduce(
       (sum, [, count]) => sum + count,
@@ -296,7 +279,7 @@ const GraficosParticipantes = ({ participantes = [] }) => {
         {/* Gráfico de Cidades */}
         <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
           <h3 className="text-xl font-bold text-center text-white mb-4">
-            Cidades (Top 10)
+            Cidades (Top 5)
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">

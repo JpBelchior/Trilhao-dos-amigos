@@ -55,7 +55,17 @@ export const verificarAutenticacao = (
     const token = tokenParts[1];
 
     // 3. Verificar e decodificar o JWT
-    const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error("❌ [ERRO CRÍTICO] JWT_SECRET não configurado no .env");
+      const response: IApiResponse = {
+        sucesso: false,
+        erro: "Configuração de segurança inválida",
+        detalhes: "Sistema não configurado corretamente. Contate o administrador.",
+      };
+      res.status(500).json(response);
+      return;
+    }
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
 
@@ -142,7 +152,11 @@ export const verificarAutenticacaoOpcional = (
 
     if (tokenParts.length === 2 && tokenParts[0] === "Bearer") {
       const token = tokenParts[1];
-      const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        next(); // Continua sem autenticação se JWT_SECRET não estiver configurado
+        return;
+      }
 
       try {
         const decoded = jwt.verify(token, jwtSecret) as JWTPayload;

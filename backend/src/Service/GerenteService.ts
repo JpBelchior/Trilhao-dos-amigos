@@ -6,6 +6,8 @@ import {
   IGerenteResponse,
 } from "../types/models";
 
+
+
 export interface GerenteResult {
   sucesso: boolean;
   dados?: any;
@@ -47,8 +49,16 @@ export class GerenteService {
         };
       }
 
-      // Gerar JWT Token (exatamente como era no código antigo)
-      const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
+      // Gerar JWT Token 
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        console.error("❌ [ERRO CRÍTICO] JWT_SECRET não configurado");
+        return {
+          sucesso: false,
+          erro: "Configuração de segurança inválida",
+          detalhes: "Sistema não configurado corretamente. Contate o administrador.",
+        };
+      }
       const token = jwt.sign(
         {
           id: gerente.id,
@@ -284,7 +294,15 @@ export class GerenteService {
       // ✅ GERAR NOVO TOKEN SE EMAIL FOI ALTERADO
       let novoToken = null;
       if (emailAlterado) {
-        const jwtSecret = process.env.JWT_SECRET || "trilhao_secret_key_2025";
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+          console.error("❌ [ERRO CRÍTICO] JWT_SECRET não configurado");
+          return {
+            sucesso: false,
+            erro: "Configuração de segurança inválida",
+            detalhes: "Sistema não configurado corretamente. Contate o administrador.",
+          };
+        }
         novoToken = jwt.sign(
           {
             id: gerenteCompleto.id,

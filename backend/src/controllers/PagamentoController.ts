@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { PagamentoValidator } from "../validators/PagamentoValidator";
 import { PagamentoService } from "../Service/pagamentoService";
 import { ResponseUtil } from "../utils/responseUtil";
+import { MercadoPagoValidator } from "../utils/mercadoPagoValidator";
 
 export class PagamentoController {
   /**
@@ -158,6 +159,9 @@ export class PagamentoController {
   /**
    * POST /api/pagamento/webhook - Receber notificações do Mercado Pago
    */
+  /**
+ * POST /api/pagamento/webhook - Receber notificações do Mercado Pago
+ */
   public static async receberWebhook(
     req: Request,
     res: Response
@@ -165,16 +169,43 @@ export class PagamentoController {
     try {
       console.log("🔔 [PagamentoController] Webhook recebido do MP:", req.body);
 
-      // 1. VALIDAR dados do webhook usando Validator
+      // 1. VALIDAR ASSINATURA (segurança!)
+      const assinaturaValida = MercadoPagoValidator.validarAssinaturaWebhook(
+        req.body,
+        req.headers
+      );
+
+      if (!assinaturaValida) {
+        console.warn("⚠️ [Webhook] Assinatura inválida - requisição rejeitada");
+        // Ainda retorna 200 para não gerar reenvios
+        res.status(200).json({ 
+          received: false, 
+          erro: "Assinatura inválida" 
+        });
+        return;
+      }
+
+      // 2. VALIDAR TIMESTAMP (prevenir replay attacks)
+      const timestampValido = MercadoPagoValidator.validarTimestamp(req.headers);
+
+      if (!timestampValido) {
+        console.warn("⚠️ [Webhook] Timestamp inválido - possível replay attack");
+        res.status(200).json({ 
+          received: false, 
+          erro: "Timestamp inválido" 
+        });
+        return;
+      }
+
+      // 3. VALIDAR dados do webhook usando Validator
       const validacao = PagamentoValidator.validarWebhook(req.body);
       if (!validacao.isValid) {
-        // Para webhooks, sempre responder 200 mesmo com erro para evitar reenvios
-        console.warn("⚠️ Webhook inválido:", validacao.detalhes);
+        console.warn("⚠️ Webhook com dados inválidos:", validacao.detalhes);
         res.status(200).json({ received: false, erro: validacao.detalhes });
         return;
       }
 
-      // 2. PROCESSAR webhook usando Service
+      // 4. PROCESSAR webhook usando Service
       const resultado = await PagamentoService.processarWebhook(req.body);
 
       if (resultado.sucesso) {
@@ -189,7 +220,7 @@ export class PagamentoController {
         console.warn("⚠️ Erro ao processar webhook:", resultado.erro);
       }
 
-      // 3. SEMPRE responder 200 para evitar reenvios do Mercado Pago
+      // 5. SEMPRE responder 200 para evitar reenvios do Mercado Pago
       res.status(200).json({
         received: true,
         participanteConfirmado: resultado.participanteConfirmado || false,
@@ -210,7 +241,7 @@ export class PagamentoController {
     }
   }
 
-  /**
+    /**
    * PUT /api/pagamento/status/:id - Simular status de pagamento (desenvolvimento)
    */
   public static async simularStatusPagamento(

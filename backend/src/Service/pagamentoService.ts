@@ -8,12 +8,16 @@ import { ParticipanteController } from "../controllers/ParticipanteController";
 // CONFIGURAÇÃO MERCADO PAGO COM VALIDAÇÃO
 // ========================================
 
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || "";
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 
-if (!MP_ACCESS_TOKEN || MP_ACCESS_TOKEN === "") {
+if (!MP_ACCESS_TOKEN) {
   console.error("❌ [ERRO CRÍTICO] MP_ACCESS_TOKEN não configurado no .env");
   console.error("   Configure MP_ACCESS_TOKEN no arquivo .env");
+  console.error("   A aplicação não pode processar pagamentos sem essa configuração");
+  process.exit(1); // Encerra a aplicação
 }
+
+console.log("✅ Mercado Pago configurado corretamente");
 
 const client = new MercadoPagoConfig({
   accessToken: MP_ACCESS_TOKEN,

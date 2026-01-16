@@ -1,11 +1,12 @@
 // src/routes/Pagamento/pagamento.ts
 import { Router } from "express";
 import { PagamentoController } from "../../controllers/PagamentoController";
+import { paymentLimiter } from "../../middleware/rateLimiter";
 
 const router = Router();
 
 // POST /api/pagamento/criar-pix - Criar pagamento PIX
-router.post("/criar-pix", PagamentoController.criarPagamentoPix);
+router.post("/criar-pix", paymentLimiter, PagamentoController.criarPagamentoPix);
 
 // GET /api/pagamento/status/:id - Consultar status do pagamento
 router.get("/status/:id", PagamentoController.consultarStatusPagamento);
