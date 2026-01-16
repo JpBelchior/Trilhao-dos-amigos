@@ -1,113 +1,23 @@
-// frontend/src/paginas/LoginGerente.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// frontend/src/paginas/Login.jsx - APENAS UI
+import React from "react";
 import { Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import ErroComponent from "../componentes/Erro";
-import { useAuth } from "../context/AuthContext";
+import useLogin from "../hooks/useLogin";
 
 const LoginGerente = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
+  
+  const {
+    formData,
+    mostrarSenha,
+    loading,
+    erro,
+    atualizarFormData,
+    submeterLogin,
+    toggleMostrarSenha,
+    tentarNovamente,
+    voltarParaHome,
+  } = useLogin();
 
-  // Estados do formulário
-  const [formData, setFormData] = useState({
-    email: "",
-    senha: "",
-  });
-
-  // Estados da UI
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState(null);
-
-  // Atualizar dados do formulário
-  const atualizarFormData = (campo, valor) => {
-    setFormData((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-    // Limpar erro quando usuário começar a digitar
-    if (erro) setErro(null);
-  };
-
-  // Validar formulário
-  const validarFormulario = () => {
-    if (!formData.email.trim()) {
-      setErro("Email é obrigatório");
-      return false;
-    }
-
-    if (!formData.email.includes("@")) {
-      setErro("Email inválido");
-      return false;
-    }
-
-    if (!formData.senha.trim()) {
-      setErro("Senha é obrigatória");
-      return false;
-    }
-
-    if (formData.senha.length < 6) {
-      setErro("Senha deve ter pelo menos 6 caracteres");
-      return false;
-    }
-
-    return true;
-  };
-
-  // Submeter login
-  const submeterLogin = async (e) => {
-    e.preventDefault();
-    if (!validarFormulario()) {
-      return;
-    }
-    setLoading(true);
-    setErro(null);
-    try {
-      console.log("🔑 Tentando fazer login como gerente:", formData.email);
-      // Usar o login do AuthContext ao invés de fetch direto
-      const resultado = await login(
-        formData.email.trim().toLowerCase(),
-        formData.senha
-      );
-
-      if (!resultado.sucesso) {
-        throw new Error(resultado.erro || "Erro ao fazer login");
-      }
-
-      console.log("✅ Login realizado com sucesso:", resultado.dados);
-
-      // 🎯 REDIRECIONAMENTO CORRIGIDO
-      console.log("🔄 Redirecionando para /admin...");
-
-      // Verificar se veio de alguma página específica
-      const destination = location.state?.from || "/admin";
-      console.log("🎯 Destino do redirecionamento:", destination);
-
-      // Fazer o redirecionamento
-      navigate(destination, { replace: true });
-
-      console.log("✅ Navigate executado para:", destination);
-    } catch (error) {
-      console.error("❌ Erro no login:", error);
-      setErro(error.message || "Erro de conexão");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Alternar visibilidade da senha
-  const toggleMostrarSenha = () => {
-    setMostrarSenha(!mostrarSenha);
-  };
-
-  // Tentar novamente (limpar erro)
-  const tentarNovamente = () => {
-    setErro(null);
-    setFormData({ email: "", senha: "" });
-  };
-
-  // Se há erro, mostrar componente de erro
   if (erro && !loading) {
     return (
       <ErroComponent
@@ -125,55 +35,55 @@ const LoginGerente = () => {
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+          <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-yellow-400/50">
             <Shield className="text-black" size={40} />
           </div>
           <h1 className="text-5xl font-black text-white mb-4">
             ÁREA <span className="text-yellow-400">RESTRITA</span>
           </h1>
           <p className="text-gray-400 text-xl">
-            Login para gerentes do Trilhão dos Amigos
+            Acesso exclusivo para gerentes autorizados
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
 
-        {/* Formulário de Login */}
-        <div className="max-w-md mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30">
+        {/* Formulário */}
+        <div className="max-w-md mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
           <form onSubmit={submeterLogin} className="space-y-6">
-            {/* Campo Email */}
+            {/* Email */}
             <div>
-              <label className="block text-gray-300 mb-2 font-semibold">
-                Email do Gerente *
+              <label className="block text-white font-semibold mb-2">
+                Email
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => atualizarFormData("email", e.target.value)}
+                placeholder="e-mail"
+                className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-yellow-400 focus:outline-none transition-colors"
                 disabled={loading}
-                className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                placeholder="gerente@trilhao.com"
               />
             </div>
 
-            {/* Campo Senha */}
+            {/* Senha */}
             <div>
-              <label className="block text-gray-300 mb-2 font-semibold">
-                Senha *
+              <label className="block text-white font-semibold mb-2">
+                Senha
               </label>
               <div className="relative">
                 <input
                   type={mostrarSenha ? "text" : "password"}
                   value={formData.senha}
                   onChange={(e) => atualizarFormData("senha", e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 focus:border-yellow-400 focus:outline-none transition-colors"
                   disabled={loading}
-                  className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 text-white focus:border-yellow-400 focus:outline-none transition-all disabled:opacity-50"
-                  placeholder="Digite sua senha"
                 />
                 <button
                   type="button"
                   onClick={toggleMostrarSenha}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                   disabled={loading}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
                 >
                   {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -209,7 +119,7 @@ const LoginGerente = () => {
           {/* Link para voltar */}
           <div className="mt-8 text-center">
             <button
-              onClick={() => navigate("/")}
+              onClick={voltarParaHome}
               className="text-gray-400 hover:text-white transition-colors underline"
             >
               ← Voltar à Página Principal

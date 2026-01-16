@@ -37,7 +37,7 @@ const Cadastro = () => {
     CategoriaMoto,
   } = useCadastro();
 
-  // 🆕 Função para avançar step COM validação e feedback de erro
+  
   const handleProximoStep = async () => {
     setErroValidacao(null); // Limpar erro anterior
 
