@@ -1,5 +1,6 @@
 // frontend/src/paginas/Pagamento.jsx - VERSÃO REFATORADA
 import React, { useState, useEffect } from "react";
+import { useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   CreditCard,
@@ -36,19 +37,22 @@ const Pagamento = () => {
   // Dados vindos do cadastro
   const { dadosInscricao, valorTotal } = location.state || {};
 
+  const jaGerouPix = useRef(false);
   // ========================================
   // VALIDAÇÃO INICIAL
   // ========================================
-  useEffect(() => {
-    if (!dadosInscricao || !valorTotal) {
-      alert("Dados da inscrição não encontrados. Refaça o cadastro.");
-      navigate("/cadastro");
-      return;
-    }
+useEffect(() => {
+  if (!dadosInscricao || !valorTotal) {
+    alert("Dados da inscrição não encontrados. Refaça o cadastro.");
+    navigate("/cadastro");
+    return;
+  }
 
-    // Gerar PIX automaticamente ao carregar a página
-    gerarPix();
-  }, []); // Apenas uma vez ao montar
+  if (jaGerouPix.current) return; // 🔒 BLOQUEIO
+  jaGerouPix.current = true;
+
+  gerarPix();
+}, []);
 
   // ========================================
   // TIMER DE EXPIRAÇÃO
@@ -75,16 +79,15 @@ const Pagamento = () => {
   // ========================================
   // POLLING AUTOMÁTICO DE STATUS
   // ========================================
-  useEffect(() => {
-    if (!dadosPix || statusPagamento !== "pending") return;
-
-    // Verificar a cada 5 segundos
-    const intervalo = setInterval(() => {
-      verificarStatusSilencioso();
-    }, 5000);
-
-    return () => clearInterval(intervalo);
-  }, [dadosPix, statusPagamento]);
+useEffect(() => {
+  if (!dadosPix || statusPagamento !== "pending") return;
+  
+  const intervalo = setInterval(() => {
+    verificarStatusSilencioso();
+  }, 5000);
+  
+  return () => clearInterval(intervalo);
+}, [dadosPix?.pagamentoId]);
 
   // ========================================
   // FUNÇÕES

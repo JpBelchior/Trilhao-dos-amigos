@@ -1,7 +1,7 @@
-// frontend/src/paginas/Cadastro.jsx
-import React from "react";
+// frontend/src/paginas/Cadastro.jsx - VERSÃO CORRIGIDA
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, AlertTriangle, X } from "lucide-react";
 
 // Importar hook customizado
 import useCadastro from "../hooks/UseCadastro";
@@ -12,6 +12,9 @@ import StepCamisetas from "../componentes/Cadastro/Camisetas";
 
 const Cadastro = () => {
   const navigate = useNavigate();
+
+  // 🆕 Estado para exibir erros de validação
+  const [erroValidacao, setErroValidacao] = useState(null);
 
   // Usar hook customizado
   const {
@@ -34,9 +37,30 @@ const Cadastro = () => {
     CategoriaMoto,
   } = useCadastro();
 
-  //  Finalizar cadastro (cria participante pendente)
+  // 🆕 Função para avançar step COM validação e feedback de erro
+  const handleProximoStep = async () => {
+    setErroValidacao(null); // Limpar erro anterior
+
+    const resultado = await proximoStep();
+
+    if (resultado?.erro) {
+      // Exibir erro ao usuário
+      setErroValidacao({
+        titulo: resultado.erro,
+        detalhes: resultado.detalhes,
+      });
+      return;
+    }
+
+    // Se sucesso, limpar erro
+    setErroValidacao(null);
+  };
+
+  // Finalizar cadastro (cria participante pendente)
   const finalizarCadastro = async () => {
     console.log("🎯 Finalizando cadastro - criando participante pendente...");
+
+    setErroValidacao(null); // Limpar erros
 
     const resultado = await submeterInscricao();
 
@@ -45,15 +69,19 @@ const Cadastro = () => {
         "✅ Participante criado como PENDENTE, redirecionando para pagamento"
       );
 
-      // Redirecionar para página de pagamento com os dados do participante criado
+      // Redirecionar para página de pagamento
       navigate("/pagamento", {
         state: {
-          dadosInscricao: resultado.dados, // Dados do participante já criado no banco
+          dadosInscricao: resultado.dados,
           valorTotal: calcularValorTotal(),
         },
       });
     } else {
-      alert(resultado.erro);
+      // Exibir erro
+      setErroValidacao({
+        titulo: resultado.erro,
+        detalhes: "Por favor, verifique seus dados e tente novamente.",
+      });
     }
   };
 
@@ -68,7 +96,7 @@ const Cadastro = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto"></div>
         </div>
 
-        {/* Progress Bar - AJUSTADO PARA 2 STEPS */}
+        {/* Progress Bar */}
         <div className="max-w-4xl mx-auto mb-8">
           <div className="flex justify-center items-center gap-8">
             {[1, 2].map((stepNum) => (
@@ -97,6 +125,35 @@ const Cadastro = () => {
             <span className="text-center">Escolha de Camisetas</span>
           </div>
         </div>
+
+        {/* 🆕 ALERTA DE ERRO DE VALIDAÇÃO */}
+        {erroValidacao && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <div className="bg-red-900/30 border border-red-400/50 rounded-xl p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start">
+                  <AlertTriangle className="text-red-400 mr-3 mt-1" size={20} />
+                  <div>
+                    <h3 className="text-red-300 font-bold mb-1">
+                      {erroValidacao.titulo}
+                    </h3>
+                    {erroValidacao.detalhes && (
+                      <p className="text-red-200 text-sm">
+                        {erroValidacao.detalhes}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setErroValidacao(null)}
+                  className="text-red-300 hover:text-red-100 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Formulário */}
         <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
@@ -128,7 +185,8 @@ const Cadastro = () => {
             {step > 1 && (
               <button
                 onClick={stepAnterior}
-                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                disabled={loading}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50"
               >
                 Voltar
               </button>
@@ -136,15 +194,22 @@ const Cadastro = () => {
 
             {step < 2 ? (
               <button
-                onClick={proximoStep}
-                disabled={!validarStep(step)}
-                className={`ml-auto font-bold py-3 px-6 rounded-xl transition-all ${
-                  validarStep(step)
+                onClick={handleProximoStep}
+                disabled={!validarStep(step) || loading}
+                className={`ml-auto font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
+                  validarStep(step) && !loading
                     ? "bg-green-500 hover:bg-green-600 text-white"
                     : "bg-gray-600 text-gray-400 cursor-not-allowed"
                 }`}
               >
-                Próximo
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={20} />
+                    Validando...
+                  </>
+                ) : (
+                  "Próximo"
+                )}
               </button>
             ) : (
               <div className="ml-auto space-y-4">

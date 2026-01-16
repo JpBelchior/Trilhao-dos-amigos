@@ -200,6 +200,8 @@ export class PagamentoService {
         });
       } catch (mpError: any) {
         console.error(`❌ ${logPrefix} Erro do Mercado Pago:`, mpError);
+        console.log("🔥 TOKEN MP EM USO:", process.env.MP_ACCESS_TOKEN);
+        console.log("🌍 NODE_ENV:", process.env.NODE_ENV);
 
         // Extrair mensagem de erro do MP
         const mensagemErro =
