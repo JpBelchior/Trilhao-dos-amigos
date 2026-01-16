@@ -54,7 +54,7 @@ export class PagamentoValidator {
     }
 
     // Verificar formato: trilhao_NUMERO_TIMESTAMP
-    const formatoValido = /^trilhao_[A-Z0-9]+_\d+$/.test(externalReference);
+    const formatoValido = /^trilhao_[A-Z0-9]+_\d+_[a-z0-9]+$/.test(externalReference);
 
     if (!formatoValido) {
       return {

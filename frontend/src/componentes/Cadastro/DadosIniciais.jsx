@@ -1,4 +1,3 @@
-// frontend/src/componentes/Cadastro/DadosIniciais.jsx
 import React from "react";
 import { User, Bike } from "lucide-react";
 import { InputTexto } from "../form";

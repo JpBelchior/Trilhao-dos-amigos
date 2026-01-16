@@ -1,4 +1,3 @@
-// src/componentes/paginaPrincipal/HallFamaSection.jsx
 import React, { useState, useEffect } from "react";
 import { Mountain, Trophy, Star, Award } from "lucide-react";
 import LoadingComponent from "../Loading";
@@ -20,8 +19,6 @@ const HallFamaSection = () => {
       setLoading(true);
       setErro(null);
 
-      console.log("🏆 Carregando campeões da API...");
-
       // Buscar todos os campeões
       const campeoesResponse = await fetch(
         "http://localhost:8000/api/campeoes"
@@ -36,9 +33,6 @@ const HallFamaSection = () => {
 
       if (campeoesData.sucesso) {
         setCampeoes(campeoesData.dados.campeoes);
-        console.log(
-          `✅ ${campeoesData.dados.campeoes.length} campeões carregados`
-        );
       }
 
       if (melhorData.sucesso) {

@@ -1,4 +1,3 @@
-// src/componentes/paginaPrincipal/HeroSection.jsx
 import React from "react";
 import { useEdicao } from "../../hooks/useEdicao";
 import { Flashlight, Signpost, Trophy, Zap } from "lucide-react";
@@ -62,7 +61,7 @@ const HeroSection = ({ isVisible, scrollY }) => {
             - o qual ninguem alcançou o topo.
           </p>
           <p className="text-yellow-300 font-bold text-xl">
-            <Signpost className="inline mr-2" size={24} />8 EDIÇÕES • DEZENAS DE
+            <Signpost className="inline mr-2" size={24} />9    EDIÇÕES • DEZENAS DE
             PILOTOS • NOVOS DESAFIOS TODO ANO
             <Signpost className="inline ml-2" size={24} />
           </p>

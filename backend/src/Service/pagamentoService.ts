@@ -1,4 +1,4 @@
-// backend/src/Service/pagamentoService.ts - VERSÃO REESTRUTURADA
+// backend/src/Service/pagamentoService.ts - VERSÃO COMPLETA COM SIMULAÇÃO
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { Participante } from "../models";
 import { StatusPagamento } from "../types/models";
@@ -317,32 +317,41 @@ export class PagamentoService {
    * Consultar status do pagamento no MP
    */
   public static async consultarStatus(
-    pagamentoId: string
-  ): Promise<ConsultarStatusResult> {
-    try {
-      console.log(`🔍 [Status] Consultando pagamento: ${pagamentoId}`);
+  pagamentoId: string
+): Promise<ConsultarStatusResult> {
+  try {
+    console.log(`🔍 [Status] Consultando pagamento: ${pagamentoId}`);
 
-      const pagamento = await payment.get({ id: pagamentoId });
+    const pagamento = await payment.get({ id: pagamentoId });
 
-      console.log(`📊 [Status] Recebido:`, {
-        id: pagamento.id,
-        status: pagamento.status,
-        statusDetail: pagamento.status_detail,
-      });
+    console.log(`📊 [Status] Recebido:`, {
+      id: pagamento.id,
+      status: pagamento.status,
+      statusDetail: pagamento.status_detail,
+    });
 
-      // Verificar se foi aprovado
-      const foiAprovado =
-        pagamento.status === "approved" &&
-        pagamento.status_detail === "accredited";
+    // Verificar se foi aprovado
+    const foiAprovado =
+      pagamento.status === "approved" &&
+      pagamento.status_detail === "accredited";
 
-      let participanteConfirmado = false;
+    let participanteConfirmado = false;
 
-      // Se aprovado, confirmar participante
-      if (foiAprovado && pagamento.external_reference) {
-        console.log(`✅ [Status] Pagamento aprovado! Confirmando participante...`);
+    // Se aprovado, confirmar participante
+    if (foiAprovado && pagamento.external_reference) {
+      console.log(`✅ [Status] Pagamento aprovado! Confirmando participante...`);
 
+      // ✅ CORREÇÃO: Extrair o número de inscrição
+      const partes = pagamento.external_reference.split('_');
+      const numeroInscricao = partes[1];
+      
+      console.log(`🔍 [Status] External Reference: ${pagamento.external_reference}`);
+      console.log(`🔍 [Status] Número de inscrição: ${numeroInscricao}`);
+
+      if (numeroInscricao) {
+        // ✅ Passar apenas o número de inscrição
         const resultado = await ParticipanteController.confirmarParticipante(
-          pagamento.external_reference,
+          numeroInscricao, // ✅ CORRETO
           {
             id: pagamento.id!.toString(),
             external_reference: pagamento.external_reference,
@@ -352,31 +361,126 @@ export class PagamentoService {
 
         participanteConfirmado = resultado.sucesso || false;
       }
-
-      return {
-        sucesso: true,
-        dados: {
-          id: pagamento.id,
-          status: pagamento.status,
-          statusDetail: pagamento.status_detail,
-          approved: foiAprovado,
-          valor: pagamento.transaction_amount,
-          dataAprovacao: pagamento.date_approved,
-        },
-        participanteConfirmado,
-      };
-    } catch (error) {
-      console.error(`❌ [Status] Erro ao consultar:`, error);
-
-      return {
-        sucesso: false,
-        erro: "Erro ao consultar status",
-        detalhes:
-          error instanceof Error ? error.message : "Erro desconhecido",
-      };
     }
-  }
 
+    return {
+      sucesso: true,
+      dados: {
+        id: pagamento.id,
+        status: pagamento.status,
+        statusDetail: pagamento.status_detail,
+        approved: foiAprovado,
+        valor: pagamento.transaction_amount,
+        dataAprovacao: pagamento.date_approved,
+      },
+      participanteConfirmado,
+    };
+  } catch (error) {
+    console.error(`❌ [Status] Erro ao consultar:`, error);
+
+    return {
+      sucesso: false,
+      erro: "Erro ao consultar status",
+      detalhes:
+        error instanceof Error ? error.message : "Erro desconhecido",
+    };
+  }
+}
+
+  // ========================================
+  // SIMULAR STATUS (DESENVOLVIMENTO)
+  // ========================================
+
+  /**
+   * Simular status de pagamento para desenvolvimento/testes
+   * NÃO consulta o Mercado Pago - apenas simula localmente
+   */
+  // backend/src/Service/pagamentoService.ts
+
+/**
+ * Simular status de pagamento para desenvolvimento/testes
+ * NÃO consulta o Mercado Pago - apenas simula localmente
+ */
+public static async simularStatus(
+  pagamentoId: string,
+  status: string,
+  externalReference?: string,
+  dateApproved?: string
+): Promise<ConsultarStatusResult> {
+  try {
+    console.log(`🧪 [Simular] Simulando status para pagamento: ${pagamentoId}`);
+    console.log(`🧪 [Simular] Status: ${status}`);
+    console.log(`🧪 [Simular] External Reference: ${externalReference}`);
+
+    // Verificar se é aprovação
+    const foiAprovado = status === "approved";
+
+    let participanteConfirmado = false;
+
+    // Se aprovado E tem external_reference, confirmar participante
+    if (foiAprovado && externalReference) {
+      console.log(`✅ [Simular] Simulando aprovação! Confirmando participante...`);
+
+      // ✅ CORREÇÃO: Extrair o número de inscrição do external_reference
+      // Formato: trilhao_TRI2026006_timestamp_random
+      const partes = externalReference.split('_');
+      const numeroInscricao = partes[1]; // TRI2026006
+      
+      console.log(`🔍 [Simular] External Reference completo: ${externalReference}`);
+      console.log(`🔍 [Simular] Número de inscrição extraído: ${numeroInscricao}`);
+
+      if (!numeroInscricao) {
+        console.error(`❌ [Simular] Não foi possível extrair o número de inscrição`);
+        return {
+          sucesso: false,
+          erro: "Número de inscrição não encontrado no external_reference",
+        };
+      }
+
+      // ✅ Passar o NÚMERO DE INSCRIÇÃO, não o external_reference completo
+      const resultado = await ParticipanteController.confirmarParticipante(
+        numeroInscricao, // ✅ CORRETO: "TRI2026006"
+        {
+          id: pagamentoId,
+          external_reference: externalReference, // Mantém o completo aqui para log
+          date_approved: dateApproved || new Date().toISOString(),
+        }
+      );
+
+      participanteConfirmado = resultado.sucesso || false;
+
+      if (participanteConfirmado) {
+        console.log(`🎉 [Simular] Participante confirmado com sucesso!`);
+      } else {
+        console.warn(`⚠️ [Simular] Falha ao confirmar participante:`, resultado.erro);
+      }
+    }
+
+    // Retornar dados simulados
+    return {
+      sucesso: true,
+      dados: {
+        id: pagamentoId,
+        status: status,
+        statusDetail: status === "approved" ? "accredited" : "pending",
+        approved: foiAprovado,
+        valor: 0, // Não temos acesso ao valor na simulação
+        dataAprovacao: foiAprovado ? (dateApproved || new Date().toISOString()) : null,
+        simulado: true, // Flag para indicar que foi simulado
+      },
+      participanteConfirmado,
+    };
+  } catch (error) {
+    console.error(`❌ [Simular] Erro ao simular status:`, error);
+
+    return {
+      sucesso: false,
+      erro: "Erro ao simular status",
+      detalhes:
+        error instanceof Error ? error.message : "Erro desconhecido",
+    };
+  }
+}
   // ========================================
   // PROCESSAR WEBHOOK
   // ========================================

@@ -1,4 +1,3 @@
-// frontend/src/paginas/Cadastro.jsx - VERSÃO CORRIGIDA
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreditCard, Loader2, AlertTriangle, X } from "lucide-react";

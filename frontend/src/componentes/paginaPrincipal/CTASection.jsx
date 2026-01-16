@@ -1,4 +1,3 @@
-// src/componentes/paginaPrincipal/CTASection.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Trophy } from "lucide-react";

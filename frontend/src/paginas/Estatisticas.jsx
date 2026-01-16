@@ -1,159 +1,30 @@
-// frontend/src/paginas/Estatisticas.jsx
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { BarChart3 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+
+
 import GraficosParticipantes from "../componentes/inscritos/Graficos";
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
+
 import { useEdicao } from "../hooks/useEdicao";
+import useEstatisticas from "../hooks/useEstatisticas";
 
 const Estatisticas = () => {
-  const navigate = useNavigate();
   const { edicaoAtual, loading: edicaoLoading } = useEdicao();
 
-  // Estados principais
-  const [participantes, setParticipantes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);
+  const {
+    // Estados
+    participantes,
+    loading,
+    erro,
 
-  // Estatísticas detalhadas
-  const [estatisticas, setEstatisticas] = useState({
-    total: 0,
-    nacionais: 0,
-    importadas: 0,
-    percentualNacionais: 0,
-    percentualImportadas: 0,
-    cidades: [],
-    estados: [],
-    totalCidades: 0,
-    totalEstados: 0,
-    cidadeMaisParticipantes: null,
-    estadoMaisParticipantes: null,
-    motosPopulares: [],
-  });
+    // Estatísticas
+    estatisticas,
 
-  // Carregar dados
-  useEffect(() => {
-    carregarDados();
-  }, []);
+    // Funções
+    carregarDados,
+  } = useEstatisticas();
 
-  const carregarDados = async () => {
-    try {
-      setLoading(true);
-      setErro(null);
-
-      const response = await fetch(
-        "http://localhost:8000/api/participantes?status=confirmado"
-      );
-      const data = await response.json();
-
-      if (data.sucesso) {
-        const participantesData = data.dados.participantes || [];
-        const participantesConfirmados = participantesData.filter(
-          (p) => p.statusPagamento === "confirmado"
-        );
-
-        setParticipantes(participantesConfirmados);
-        calcularEstatisticasDetalhadas(participantesConfirmados);
-        console.log(
-          "✅ Dados carregados para estatísticas:",
-          participantesConfirmados.length
-        );
-      } else {
-        throw new Error(data.erro || "Erro ao carregar dados");
-      }
-    } catch (error) {
-      console.error("❌ Erro ao carregar dados:", error);
-      setErro(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calcularEstatisticasDetalhadas = (dados) => {
-    const total = dados.length;
-    const nacionais = dados.filter(
-      (p) => p.categoriaMoto === "nacional"
-    ).length;
-    const importadas = dados.filter(
-      (p) => p.categoriaMoto === "importada"
-    ).length;
-
-    // Percentuais
-    const percentualNacionais =
-      total > 0 ? ((nacionais / total) * 100).toFixed(1) : 0;
-    const percentualImportadas =
-      total > 0 ? ((importadas / total) * 100).toFixed(1) : 0;
-
-    // Contagem por cidade
-    const contagemCidades = {};
-    dados.forEach((p) => {
-      const chave = `${p.cidade}/${p.estado}`;
-      contagemCidades[chave] = (contagemCidades[chave] || 0) + 1;
-    });
-
-    // Contagem por estado
-    const contagemEstados = {};
-    dados.forEach((p) => {
-      contagemEstados[p.estado] = (contagemEstados[p.estado] || 0) + 1;
-    });
-
-    // Contagem por modelo de moto
-    const contagemMotos = {};
-    dados.forEach((p) => {
-      const modelo = p.modeloMoto.toLowerCase();
-      // Simplificar o nome da moto para agrupar melhor
-      let modeloSimplificado = modelo;
-      if (modelo.includes("bros")) modeloSimplificado = "Honda Bros";
-      else if (modelo.includes("lander")) modeloSimplificado = "Yamaha Lander";
-      else if (modelo.includes("ktm")) modeloSimplificado = "KTM";
-      else if (modelo.includes("crosser"))
-        modeloSimplificado = "Yamaha Crosser";
-      else if (modelo.includes("xre")) modeloSimplificado = "Honda XRE";
-      else if (modelo.includes("crf")) modeloSimplificado = "Honda CRF";
-      else if (modelo.includes("wr")) modeloSimplificado = "Yamaha WR";
-      else if (modelo.includes("husqvarna")) modeloSimplificado = "Husqvarna";
-
-      contagemMotos[modeloSimplificado] =
-        (contagemMotos[modeloSimplificado] || 0) + 1;
-    });
-
-    // Encontrar cidade e estado com mais participantes
-    const cidadeMaisParticipantes = Object.entries(contagemCidades).sort(
-      ([, a], [, b]) => b - a
-    )[0] || [null, 0];
-
-    const estadoMaisParticipantes = Object.entries(contagemEstados).sort(
-      ([, a], [, b]) => b - a
-    )[0] || [null, 0];
-
-    // Top 5 motos mais populares
-    const motosPopulares = Object.entries(contagemMotos)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([modelo, quantidade]) => ({ modelo, quantidade }));
-
-    setEstatisticas({
-      total,
-      nacionais,
-      importadas,
-      percentualNacionais,
-      percentualImportadas,
-      cidades: Object.keys(contagemCidades).sort(),
-      estados: Object.keys(contagemEstados).sort(),
-      totalCidades: Object.keys(contagemCidades).length,
-      totalEstados: Object.keys(contagemEstados).length,
-      cidadeMaisParticipantes: {
-        nome: cidadeMaisParticipantes[0],
-        quantidade: cidadeMaisParticipantes[1],
-      },
-      estadoMaisParticipantes: {
-        nome: estadoMaisParticipantes[0],
-        quantidade: estadoMaisParticipantes[1],
-      },
-      motosPopulares,
-    });
-  };
 
   if (loading) {
     return <LoadingComponent loading="Calculando estatísticas..." />;
@@ -166,7 +37,8 @@ const Estatisticas = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
       <div className="container mx-auto px-6">
-        {/* Header */}
+        
+        {/* ========== HEADER ========== */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-white mb-4">
             <BarChart3 className="inline mr-4 text-yellow-400" size={40} />
@@ -175,15 +47,18 @@ const Estatisticas = () => {
           <p className="text-gray-400 text-xl">
             {edicaoLoading
               ? "Carregando..."
-              : `Vamos conferir as curiosidades e números da edição de ${edicaoAtual?.ano}!`}{" "}
+              : `Vamos conferir as curiosidades e números da edição de ${edicaoAtual?.ano}!`}
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
 
-        {/* Seção Única de Estatísticas Completas */}
+        {/* ========== SEÇÃO DE ESTATÍSTICAS ========== */}
         <div className="max-w-6xl mx-auto mb-12">
-          {/* Estatísticas Básicas */}
+          
+          {/* ========== ESTATÍSTICAS BÁSICAS ========== */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">
+            
+            {/* Card: Total */}
             <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
               <div className="text-4xl font-black text-green-400 mb-2">
                 {estatisticas.total}
@@ -191,6 +66,7 @@ const Estatisticas = () => {
               <div className="text-gray-300">Total de Participantes</div>
             </div>
 
+            {/* Card: Nacionais */}
             <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
               <div className="text-4xl font-black text-green-400 mb-2">
                 {estatisticas.nacionais}
@@ -201,6 +77,7 @@ const Estatisticas = () => {
               </div>
             </div>
 
+            {/* Card: Importadas */}
             <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-yellow-400/30 text-center">
               <div className="text-4xl font-black text-yellow-400 mb-2">
                 {estatisticas.importadas}
@@ -211,6 +88,7 @@ const Estatisticas = () => {
               </div>
             </div>
 
+            {/* Card: Cidades */}
             <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
               <div className="text-4xl font-black text-green-400 mb-2">
                 {estatisticas.totalCidades}
@@ -218,6 +96,7 @@ const Estatisticas = () => {
               <div className="text-gray-300">Cidades Distintas</div>
             </div>
 
+            {/* Card: Estados */}
             <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
               <div className="text-4xl font-black text-green-400 mb-2">
                 {estatisticas.totalEstados}
@@ -226,12 +105,14 @@ const Estatisticas = () => {
             </div>
           </div>
 
+          {/* ========== GRÁFICOS ========== */}
           <div className="max-w-6xl mx-auto mb-5">
             <GraficosParticipantes participantes={participantes} />
           </div>
 
-          {/* Destaques Principais */}
+          {/* ========== DESTAQUES PRINCIPAIS ========== */}
           <div className="grid md:grid-cols-2 gap-8 mb-12">
+            
             {/* Cidade Campeã */}
             <div className="bg-gradient-to-r from-yellow-900/40 to-black/60 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30">
               <h3 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
@@ -265,7 +146,7 @@ const Estatisticas = () => {
             </div>
           </div>
 
-          {/* Top Motos */}
+          {/* ========== TOP MOTOS ========== */}
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30 mb-12">
             <h3 className="text-2xl font-bold text-yellow-400 mb-6 text-center">
               MOTOS MAIS POPULARES

@@ -1,4 +1,3 @@
-// frontend/src/componentes/Admin/CompactParticipantCard.jsx
 import React, { useState } from "react";
 import {
   ChevronDown,

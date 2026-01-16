@@ -1,4 +1,3 @@
-// src/componentes/paginaPrincipal/StatsSection.jsx
 import React from "react";
 import { Users, Mountain, Trophy, Target, Gift } from "lucide-react";
 

@@ -33,6 +33,7 @@ import LoginGerente from "./paginas/Login";
 import Footer from "./componentes/paginaPrincipal/Footer";
 import EstoqueAdmin from "./paginas/Admin/Estoque";
 import GerenciarFotos from "./paginas/Admin/GerenciarFotos";
+import PagamentoConfirmado from "./paginas/PagamentoConfirmado";
 // Componente interno que tem acesso ao useLocation
 function AppContent() {
   const location = useLocation();
@@ -62,6 +63,7 @@ function AppContent() {
           <Route path="/edicoes-anteriores" element={<EdicoesAnteriores />} />
           <Route path="/provas" element={<Provas />} />
           <Route path="/informacoes-local" element={<InformacoesLocal />} />
+          <Route path="/pagamento-confirmado" element={<PagamentoConfirmado />} />
 
           {/* ================================ */}
           {/* AUTENTICAÇÃO */}

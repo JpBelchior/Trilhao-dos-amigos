@@ -1,4 +1,3 @@
-// frontend/src/componentes/graficos/GraficosParticipantes.jsx
 import React, { useState, useEffect } from "react";
 import {
   PieChart,

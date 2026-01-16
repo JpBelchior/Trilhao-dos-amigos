@@ -1,4 +1,3 @@
-// frontend/src/paginas/EdicoesAnteriores.jsx
 import React from "react";
 import GallerySection from "../componentes/paginaPrincipal/GallerySection";
 import HallFamaSection from "../componentes/paginaPrincipal/HallFamaSection";

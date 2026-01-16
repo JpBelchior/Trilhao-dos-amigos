@@ -1,4 +1,3 @@
-// frontend/src/componentes/Admin/ListaParticipantes.jsx
 import React from "react";
 import { Users } from "lucide-react";
 import CompactParticipantCard from "./ompactParticipantCard";

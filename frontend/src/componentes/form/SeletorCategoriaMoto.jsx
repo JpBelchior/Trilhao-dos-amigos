@@ -1,4 +1,3 @@
-// frontend/src/componentes/Form/SeletorCategoriaMoto.jsx
 import React from "react";
 import { Bike } from "lucide-react";
 

@@ -1,4 +1,3 @@
-// frontend/src/componentes/paginaPrincipal/GallerySection.jsx - FINAL
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import SimpleImage from "../SimpleImage";
@@ -18,17 +17,12 @@ const GallerySection = () => {
       setLoading(true);
       setErro("");
 
-      console.log(
-        "📸 [GallerySection] Carregando fotos de edições anteriores..."
-      );
-
+      
       const data = await apiClient.get("/fotos/galeria/edicoes_anteriores");
 
       if (data.sucesso && data.dados.fotos) {
         setFotos(data.dados.fotos);
-        console.log(
-          `✅ [GallerySection] ${data.dados.fotos.length} fotos carregadas`
-        );
+       
       } else {
         console.warn("⚠️ [GallerySection] Nenhuma foto encontrada");
         setFotos([]);

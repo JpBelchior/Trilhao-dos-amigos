@@ -1,4 +1,3 @@
-// frontend/src/componentes/Cadastro/Camisetas.jsx
 import React from "react";
 import { Shirt, AlertCircle, Gift, Plus, Trash2 } from "lucide-react";
 import { InputTextarea } from "../form";
@@ -21,9 +20,6 @@ const StepCamisetas = ({
         Escolha de Camisetas
       </h2>
 
-      {/* ====================================== */}
-      {/* CAMISETA GRÁTIS - INCLUÍDA NA INSCRIÇÃO */}
-      {/* ====================================== */}
       <div className="bg-green-900/30 rounded-2xl p-6 border-2 border-green-400/50">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-green-400 flex items-center">
@@ -114,10 +110,6 @@ const StepCamisetas = ({
           </div>
         )}
       </div>
-
-      {/* ====================================== */}
-      {/* CAMISETAS EXTRAS - OPCIONAL */}
-      {/* ====================================== */}
       <div className="bg-yellow-900/30 rounded-2xl p-6 border-2 border-yellow-400/50">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-yellow-400 flex items-center">

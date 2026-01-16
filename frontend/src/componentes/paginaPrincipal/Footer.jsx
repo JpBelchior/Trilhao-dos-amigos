@@ -1,4 +1,3 @@
-// src/componentes/Footer.jsx
 import React from "react";
 import { Mountain } from "lucide-react";
 import { useEdicao } from "../../hooks/useEdicao";

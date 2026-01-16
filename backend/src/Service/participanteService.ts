@@ -198,7 +198,7 @@ export class ParticipanteService {
         };
       }
 
-      // 🆕 2. Verificar se CPF já existe (NOVA VERIFICAÇÃO)
+     
       const cpfExiste = await this.verificarCPFExistente(dados.cpf);
       if (cpfExiste) {
         await transaction.rollback();
@@ -298,6 +298,10 @@ export class ParticipanteService {
           valorInscricao: participante.valorInscricao,
           statusPagamento: participante.statusPagamento,
           dataInscricao: participante.dataInscricao,
+          cidade: participante.cidade, 
+          estado: participante.estado, 
+          modeloMoto: participante.modeloMoto, 
+          categoriaMoto: participante.categoriaMoto, 
         },
       };
     } catch (error) {

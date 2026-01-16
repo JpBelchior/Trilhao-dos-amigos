@@ -106,9 +106,9 @@ export class Sanitizer {
       cpf: this.sanitizeCPF(data.cpf),
       email: this.sanitizeEmail(data.email),
       telefone: this.sanitizeTelefone(data.telefone),
-      cidade: this.sanitizeString(data.cidade),
-      estado: this.sanitizeString(data.estado).toUpperCase().substring(0, 2),
-      modeloMoto: this.sanitizeString(data.modeloMoto),
+      cidade: data.cidade,
+      estado: data.estado,
+      modeloMoto: data.modeloMoto,
       categoriaMoto: data.categoriaMoto, // Enum, não precisa sanitizar
       tamanhoCamiseta: data.tamanhoCamiseta, // Enum, não precisa sanitizar
       tipoCamiseta: data.tipoCamiseta, // Enum, não precisa sanitizar

@@ -1,4 +1,3 @@
-// frontend/src/paginas/Admin/AdminParticipantes.jsx
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,6 @@ import ModalCriarUsuario from "../../componentes/Admin/ModalCriarUsuario";
 const AdminParticipantes = () => {
   const navigate = useNavigate();
 
-  // USAR HOOK CUSTOMIZADO QUE CRIAMOS
   const {
     // Estados principais
     participantes,

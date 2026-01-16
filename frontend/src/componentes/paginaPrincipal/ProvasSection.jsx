@@ -1,4 +1,3 @@
-// src/componentes/paginaPrincipal/ProvasSection.jsx
 import React from "react";
 import {
   MapPin,

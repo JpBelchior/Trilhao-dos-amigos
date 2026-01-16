@@ -1,42 +1,41 @@
-// src/componentes/paginaPrincipal/EstruturaSection.jsx
 import React from "react";
 import { MapPin, Utensils, Calendar } from "lucide-react";
 
 const EstruturaSection = () => {
   const alimentacao = [
-    { item: "🍖 Churrasquinho", preco: "R$ 8" },
-    { item: "🌭 Cachorro-quente", preco: "R$ 6" },
-    { item: "🥪 Sanduíche Natural", preco: "R$ 10" },
-    { item: "🧊 Bebidas Geladas", preco: "R$ 4" },
-    { item: "☕ Café da Roça", preco: "R$ 3" },
-    { item: "🍰 Doces Caseiros", preco: "R$ 5" },
+    { item: " Churrasquinho", preco: "R$ 8" },
+    { item: " Cachorro-quente", preco: "R$ 6" },
+    { item: " Sanduíche Natural", preco: "R$ 10" },
+    { item: " Bebidas Geladas", preco: "R$ 4" },
+    { item: " Café da Roça", preco: "R$ 3" },
+    { item: " Doces Caseiros", preco: "R$ 5" },
   ];
 
   const infraestrutura = [
-    { icon: "🏕️", item: "Área de Camping", color: "text-green-400" },
-    { icon: "🚿", item: "Banheiros Completos", color: "text-yellow-400" },
-    { icon: "🅿️", item: "Estacionamento", color: "text-green-400" },
-    { icon: "🏥", item: "Primeiros Socorros", color: "text-yellow-400" },
-    { icon: "🔧", item: "Oficina Básica", color: "text-green-400" },
-    { icon: "🎵", item: "Som Ambiente", color: "text-yellow-400" },
-    { icon: "🏆", item: "Palco de Premiação", color: "text-green-400" },
+    {  item: "Área de Camping", color: "text-green-400" },
+    {  item: "Banheiros Completos", color: "text-yellow-400" },
+    {  item: "Estacionamento", color: "text-green-400" },
+    {  item: "Primeiros Socorros", color: "text-yellow-400" },
+    {  item: "Oficina Básica", color: "text-green-400" },
+    { item: "Som Ambiente", color: "text-yellow-400" },
+    {  item: "Palco de Premiação", color: "text-green-400" },
   ];
 
   const cronogramaSabado = [
-    { horario: "07:00", atividade: "🚪 Abertura dos portões", destaque: false },
-    { horario: "08:00", atividade: "☕ Café da manhã", destaque: false },
-    { horario: "09:00", atividade: "🔧 Verificação técnica", destaque: false },
-    { horario: "10:30", atividade: "🏁 LARGADA DA TRILHA", destaque: true },
-    { horario: "14:00", atividade: "🍖 Almoço", destaque: false },
-    { horario: "15:30", atividade: "⛰️ PROVA DA SUBIDA", destaque: true },
+    { horario: "07:00", atividade: " Abertura dos portões", destaque: false },
+    { horario: "08:00", atividade: " Café da manhã", destaque: false },
+    { horario: "09:00", atividade: " Verificação técnica", destaque: false },
+    { horario: "10:30", atividade: " LARGADA DA TRILHA", destaque: true },
+    { horario: "14:00", atividade: " Almoço", destaque: false },
+    { horario: "15:30", atividade: " PROVA DA SUBIDA", destaque: true },
   ];
 
   const cronogramaDomingo = [
-    { horario: "08:00", atividade: "☕ Café da manhã", destaque: false },
-    { horario: "09:00", atividade: "👨‍👩‍👧‍👦 Passeio família", destaque: false },
-    { horario: "11:00", atividade: "🏆 PREMIAÇÃO", destaque: true },
-    { horario: "12:00", atividade: "🎉 Confraternização", destaque: false },
-    { horario: "14:00", atividade: "👋 Encerramento", destaque: false },
+    { horario: "08:00", atividade: " Café da manhã", destaque: false },
+    { horario: "09:00", atividade: " Passeio família", destaque: false },
+    { horario: "11:00", atividade: " PREMIAÇÃO", destaque: true },
+    { horario: "12:00", atividade: " Confraternização", destaque: false },
+    { horario: "14:00", atividade: " Encerramento", destaque: false },
   ];
 
   return (
@@ -133,7 +132,7 @@ const EstruturaSection = () => {
               {/* Sábado */}
               <div className="bg-black/40 rounded-2xl p-8 border border-yellow-400/30">
                 <h4 className="text-3xl font-black mb-8 text-yellow-400 text-center">
-                  🔥 SÁBADO
+                 SÁBADO
                 </h4>
                 <div className="space-y-4">
                   {cronogramaSabado.map((item, index) => (
@@ -171,7 +170,7 @@ const EstruturaSection = () => {
               {/* Domingo */}
               <div className="bg-black/40 rounded-2xl p-8 border border-green-400/30">
                 <h4 className="text-3xl font-black mb-8 text-green-400 text-center">
-                  🏆 DOMINGO
+                   DOMINGO
                 </h4>
                 <div className="space-y-4">
                   {cronogramaDomingo.map((item, index) => (

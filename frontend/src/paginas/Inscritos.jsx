@@ -1,5 +1,5 @@
-// frontend/src/paginas/Inscritos.jsx
-import React, { useState, useEffect } from "react";
+// frontend/src/paginas/Inscritos.jsx - VERSÃO REFATORADA COM HOOK
+import React from "react";
 import {
   Users,
   Search,
@@ -8,155 +8,44 @@ import {
   Bike,
   RefreshCw,
   ChevronDown,
-  BarChart3,
 } from "lucide-react";
+
+// Componentes
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
 import ExpandToggleButton from "../componentes/ExpandToggleButton";
+
+import useInscritos from "../hooks/useInscritos";
+
 const Inscritos = () => {
-  // Estados principais
-  const [participantes, setParticipantes] = useState([]);
-  const [participantesFiltrados, setParticipantesFiltrados] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);
 
-  // Estados dos filtros
-  const [filtros, setFiltros] = useState({
-    nome: "",
-    cidade: "",
-    categoriaMoto: "todos",
-  });
+  const {
+    // Estados
+    participantesFiltrados,
+    participantesPagina,
+    loading,
+    erro,
 
-  // Estados para UI
-  const [mostrarFiltros, setMostrarFiltros] = useState(false);
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const itensPorPagina = 20;
+    // Filtros
+    filtros,
+    mostrarFiltros,
+    atualizarFiltro,
+    limparFiltros,
+    toggleFiltros,
 
-  // Estatísticas básicas
-  const [estatisticas, setEstatisticas] = useState({
-    total: 0,
-    nacionais: 0,
-    importadas: 0,
-    cidades: [],
-    estados: [],
-  });
-
-  // Carregar participantes
-  useEffect(() => {
-    carregarParticipantes();
-  }, []);
-
-  // Aplicar filtros
-  useEffect(() => {
-    aplicarFiltros();
-  }, [participantes, filtros]);
-
-  const carregarParticipantes = async () => {
-    try {
-      setLoading(true);
-      setErro(null);
-
-      const response = await fetch(
-        "http://localhost:8000/api/participantes?status=confirmado"
-      );
-      const data = await response.json();
-
-      if (data.sucesso) {
-        const participantesData = data.dados.participantes || [];
-        const participantesConfirmados = participantesData.filter(
-          (p) => p.statusPagamento === "confirmado"
-        );
-
-        setParticipantes(participantesConfirmados);
-        calcularEstatisticas(participantesConfirmados);
-        console.log(
-          "✅ Participantes carregados:",
-          participantesConfirmados.length
-        );
-      } else {
-        throw new Error(data.erro || "Erro ao carregar participantes");
-      }
-    } catch (error) {
-      console.error("❌ Erro ao carregar participantes:", error);
-      setErro(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calcularEstatisticas = (dados) => {
-    const total = dados.length;
-    const nacionais = dados.filter(
-      (p) => p.categoriaMoto === "nacional"
-    ).length;
-    const importadas = dados.filter(
-      (p) => p.categoriaMoto === "importada"
-    ).length;
-    const cidadesUnicas = [...new Set(dados.map((p) => p.cidade))].sort();
-    const estadosUnicos = [...new Set(dados.map((p) => p.estado))].sort();
-
-    setEstatisticas({
-      total,
-      nacionais,
-      importadas,
-      cidades: cidadesUnicas,
-      estados: estadosUnicos,
-    });
-  };
-
-  const aplicarFiltros = () => {
-    let resultado = [...participantes];
-
-    if (filtros.nome.trim()) {
-      resultado = resultado.filter((p) =>
-        p.nome.toLowerCase().includes(filtros.nome.toLowerCase())
-      );
-    }
-
-    if (filtros.cidade.trim()) {
-      resultado = resultado.filter((p) =>
-        p.cidade.toLowerCase().includes(filtros.cidade.toLowerCase())
-      );
-    }
-
-    if (filtros.categoriaMoto !== "todos") {
-      resultado = resultado.filter(
-        (p) => p.categoriaMoto === filtros.categoriaMoto
-      );
-    }
-
-    setParticipantesFiltrados(resultado);
-    setPaginaAtual(1);
-  };
-
-  const atualizarFiltro = (campo, valor) => {
-    setFiltros((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-  };
-
-  const limparFiltros = () => {
-    setFiltros({
-      nome: "",
-      cidade: "",
-      categoriaMoto: "todos",
-    });
-  };
-
-  // Paginação
-  const totalPaginas = Math.ceil(
-    participantesFiltrados.length / itensPorPagina
-  );
-  const indiceInicio = (paginaAtual - 1) * itensPorPagina;
-  const participantesPagina = participantesFiltrados.slice(
+    // Paginação
+    paginaAtual,
+    totalPaginas,
     indiceInicio,
-    indiceInicio + itensPorPagina
-  );
+    irParaPagina,
 
-  const irParaPagina = (pagina) => {
-    setPaginaAtual(Math.max(1, Math.min(pagina, totalPaginas)));
-  };
+    // Estatísticas
+    estatisticas,
+
+    // Funções
+    carregarParticipantes,
+  } = useInscritos();
+
 
   if (loading) {
     return <LoadingComponent loading="Carregando participantes..." />;
@@ -168,10 +57,12 @@ const Inscritos = () => {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
       <div className="container mx-auto px-6">
-        {/* Header */}
+        
+        {/* ========== HEADER ========== */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-white mb-4">
             <Users className="inline mr-4" size={48} />
@@ -184,9 +75,11 @@ const Inscritos = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
 
-        {/* Filtros */}
+        {/* ========== FILTROS ========== */}
         <div className="max-w-6xl mx-auto mb-8">
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
+            
+            {/* Cabeçalho dos Filtros */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <Filter className="text-yellow-400 mr-3" size={24} />
@@ -199,100 +92,85 @@ const Inscritos = () => {
                   {participantesFiltrados.length} encontrados
                 </span>
                 <ExpandToggleButton
-                  isExpanded={mostrarFiltros}
-                  onToggle={() => setMostrarFiltros(!mostrarFiltros)}
-                  label="Filtros"
-                  variant="yellow"
+                  expandido={mostrarFiltros}
+                  onClick={toggleFiltros}
                 />
               </div>
             </div>
 
+            {/* Formulário de Filtros */}
             {mostrarFiltros && (
-              <div className="grid md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-gray-300 text-sm mb-2">
-                    Buscar por Nome
-                  </label>
-                  <div className="relative">
-                    <Search
-                      className="absolute left-3 top-3 text-gray-400"
-                      size={20}
-                    />
+              <div className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
+                  {/* Filtro: Nome */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2 font-semibold">
+                      <Search className="inline mr-2" size={16} />
+                      Nome ou Número de Inscrição
+                    </label>
                     <input
                       type="text"
                       value={filtros.nome}
                       onChange={(e) => atualizarFiltro("nome", e.target.value)}
-                      placeholder="Digite o nome do piloto..."
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white focus:border-green-400 focus:outline-none"
+                      placeholder="Digite o nome..."
+                      className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-green-400 focus:outline-none transition-all"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-gray-300 text-sm mb-2">
-                    Buscar por Cidade
-                  </label>
-                  <div className="relative">
-                    <MapPin
-                      className="absolute left-3 top-3 text-gray-400"
-                      size={20}
-                    />
+                  {/* Filtro: Cidade */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2 font-semibold">
+                      <MapPin className="inline mr-2" size={16} />
+                      Cidade
+                    </label>
                     <input
                       type="text"
                       value={filtros.cidade}
-                      onChange={(e) =>
-                        atualizarFiltro("cidade", e.target.value)
-                      }
-                      placeholder="Digite o nome da cidade..."
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white focus:border-green-400 focus:outline-none"
+                      onChange={(e) => atualizarFiltro("cidade", e.target.value)}
+                      placeholder="Digite a cidade..."
+                      className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-green-400 focus:outline-none transition-all"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-gray-300 text-sm mb-2">
-                    Categoria da Moto
-                  </label>
-                  <div className="relative">
-                    <Bike
-                      className="absolute left-3 top-3 text-gray-400"
-                      size={20}
-                    />
+                  {/* Filtro: Categoria de Moto */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2 font-semibold">
+                      <Bike className="inline mr-2" size={16} />
+                      Categoria da Moto
+                    </label>
                     <select
                       value={filtros.categoriaMoto}
                       onChange={(e) =>
                         atualizarFiltro("categoriaMoto", e.target.value)
                       }
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl pl-10 pr-4 py-3 text-white focus:border-green-400 focus:outline-none appearance-none"
+                      className="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-white focus:border-green-400 focus:outline-none transition-all"
                     >
-                      <option value="todos">Todas as categorias</option>
-                      <option value="nacional">🇧🇷 Motos Nacionais</option>
-                      <option value="importada">🌍 Motos Importadas</option>
+                      <option value="todos">Todas as Categorias</option>
+                      <option value="nacional">🇧🇷 Nacional</option>
+                      <option value="importada">🌍 Importada</option>
                     </select>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {mostrarFiltros &&
-              (filtros.nome ||
-                filtros.cidade ||
-                filtros.categoriaMoto !== "todos") && (
-                <div className="mt-4 text-center">
+                {/* Botão Limpar Filtros */}
+                <div className="flex justify-end">
                   <button
                     onClick={limparFiltros}
                     className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-xl transition-all"
                   >
-                    🗑️ Limpar Todos os Filtros
+                    Limpar Filtros
                   </button>
                 </div>
-              )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Lista de Participantes */}
+        {/* ========== LISTA DE PARTICIPANTES ========== */}
         <div className="max-w-6xl mx-auto">
-          {participantesPagina.length === 0 ? (
+          
+          {/* Sem resultados */}
+          {participantesFiltrados.length === 0 ? (
             <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-12 border border-gray-600/30 text-center">
               <Users className="mx-auto text-gray-400 mb-4" size={64} />
               <h3 className="text-2xl font-bold text-white mb-2">
@@ -304,12 +182,15 @@ const Inscritos = () => {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Cards de Participantes */}
               {participantesPagina.map((participante, index) => (
                 <div
                   key={participante.id}
                   className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all hover:scale-102"
                 >
                   <div className="grid md:grid-cols-3 gap-4 items-center">
+                    
+                    {/* Coluna 1: Nome e Número */}
                     <div>
                       <div className="flex items-center">
                         <div className="bg-yellow-500 text-black font-black w-10 h-10 rounded-full flex items-center justify-center text-sm mr-4">
@@ -326,6 +207,7 @@ const Inscritos = () => {
                       </div>
                     </div>
 
+                    {/* Coluna 2: Cidade e Moto */}
                     <div>
                       <p className="text-gray-400 flex items-center mb-1">
                         <MapPin className="mr-2 text-yellow-400" size={16} />
@@ -336,6 +218,7 @@ const Inscritos = () => {
                       </p>
                     </div>
 
+                    {/* Coluna 3: Categoria */}
                     <div className="text-right">
                       <div
                         className={`inline-flex items-center px-3 py-2 rounded-full text-sm font-bold border-2 ${
@@ -356,9 +239,11 @@ const Inscritos = () => {
             </div>
           )}
 
-          {/* Paginação */}
+          {/* ========== PAGINAÇÃO ========== */}
           {totalPaginas > 1 && (
             <div className="mt-8 flex items-center justify-center space-x-2">
+              
+              {/* Botão Anterior */}
               <button
                 onClick={() => irParaPagina(paginaAtual - 1)}
                 disabled={paginaAtual === 1}
@@ -371,6 +256,7 @@ const Inscritos = () => {
                 ← Anterior
               </button>
 
+              {/* Números de Página */}
               <div className="flex space-x-1">
                 {[...Array(totalPaginas)].map((_, i) => {
                   const pagina = i + 1;
@@ -406,6 +292,7 @@ const Inscritos = () => {
                 })}
               </div>
 
+              {/* Botão Próximo */}
               <button
                 onClick={() => irParaPagina(paginaAtual + 1)}
                 disabled={paginaAtual === totalPaginas}
@@ -420,7 +307,7 @@ const Inscritos = () => {
             </div>
           )}
 
-          {/* Botão Atualizar */}
+          {/* ========== BOTÃO ATUALIZAR ========== */}
           <div className="mt-8 text-center">
             <button
               onClick={carregarParticipantes}

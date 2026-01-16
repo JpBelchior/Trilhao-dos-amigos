@@ -1,7 +1,5 @@
-// frontend/src/paginas/PaginaPrincipal.jsx - Versão Atualizada
 import React, { useState, useEffect } from "react";
 
-// Importando componentes que ficam na página principal
 import HeroSection from "../componentes/paginaPrincipal/HeroSection";
 import StatsSection from "../componentes/paginaPrincipal/StatsSection";
 import CTASection from "../componentes/paginaPrincipal/CTASection";

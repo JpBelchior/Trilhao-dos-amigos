@@ -1,4 +1,3 @@
-// frontend/src/paginas/Provas.jsx
 import React from "react";
 import ProvasSection from "../componentes/paginaPrincipal/ProvasSection";
 

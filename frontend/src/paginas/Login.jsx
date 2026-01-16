@@ -1,4 +1,3 @@
-// frontend/src/paginas/Login.jsx - APENAS UI
 import React from "react";
 import { Shield, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import ErroComponent from "../componentes/Erro";
