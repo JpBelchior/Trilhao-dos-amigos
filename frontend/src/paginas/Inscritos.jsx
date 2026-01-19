@@ -1,4 +1,3 @@
-// frontend/src/paginas/Inscritos.jsx - VERSÃO REFATORADA COM HOOK
 import React from "react";
 import {
   Users,
@@ -31,16 +30,12 @@ const Inscritos = () => {
     mostrarFiltros,
     atualizarFiltro,
     limparFiltros,
-    toggleFiltros,
 
     // Paginação
     paginaAtual,
     totalPaginas,
     indiceInicio,
     irParaPagina,
-
-    // Estatísticas
-    estatisticas,
 
     // Funções
     carregarParticipantes,
@@ -87,22 +82,13 @@ const Inscritos = () => {
                   Filtros de Busca
                 </h3>
               </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-400">
-                  {participantesFiltrados.length} encontrados
-                </span>
-                <ExpandToggleButton
-                  expandido={mostrarFiltros}
-                  onClick={toggleFiltros}
-                />
-              </div>
             </div>
 
             {/* Formulário de Filtros */}
             {mostrarFiltros && (
               <div className="space-y-4">
                 <div className="grid md:grid-cols-3 gap-4">
-                  {/* Filtro: Nome */}
+                
                   <div>
                     <label className="block text-gray-300 text-sm mb-2 font-semibold">
                       <Search className="inline mr-2" size={16} />
@@ -117,7 +103,6 @@ const Inscritos = () => {
                     />
                   </div>
 
-                  {/* Filtro: Cidade */}
                   <div>
                     <label className="block text-gray-300 text-sm mb-2 font-semibold">
                       <MapPin className="inline mr-2" size={16} />
@@ -132,7 +117,6 @@ const Inscritos = () => {
                     />
                   </div>
 
-                  {/* Filtro: Categoria de Moto */}
                   <div>
                     <label className="block text-gray-300 text-sm mb-2 font-semibold">
                       <Bike className="inline mr-2" size={16} />
@@ -152,7 +136,6 @@ const Inscritos = () => {
                   </div>
                 </div>
 
-                {/* Botão Limpar Filtros */}
                 <div className="flex justify-end">
                   <button
                     onClick={limparFiltros}
@@ -169,7 +152,6 @@ const Inscritos = () => {
         {/* ========== LISTA DE PARTICIPANTES ========== */}
         <div className="max-w-6xl mx-auto">
           
-          {/* Sem resultados */}
           {participantesFiltrados.length === 0 ? (
             <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-12 border border-gray-600/30 text-center">
               <Users className="mx-auto text-gray-400 mb-4" size={64} />
@@ -190,7 +172,6 @@ const Inscritos = () => {
                 >
                   <div className="grid md:grid-cols-3 gap-4 items-center">
                     
-                    {/* Coluna 1: Nome e Número */}
                     <div>
                       <div className="flex items-center">
                         <div className="bg-yellow-500 text-black font-black w-10 h-10 rounded-full flex items-center justify-center text-sm mr-4">
@@ -207,7 +188,6 @@ const Inscritos = () => {
                       </div>
                     </div>
 
-                    {/* Coluna 2: Cidade e Moto */}
                     <div>
                       <p className="text-gray-400 flex items-center mb-1">
                         <MapPin className="mr-2 text-yellow-400" size={16} />
@@ -218,7 +198,6 @@ const Inscritos = () => {
                       </p>
                     </div>
 
-                    {/* Coluna 3: Categoria */}
                     <div className="text-right">
                       <div
                         className={`inline-flex items-center px-3 py-2 rounded-full text-sm font-bold border-2 ${
