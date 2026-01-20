@@ -1,4 +1,3 @@
-// frontend/src/hooks/useApiRetry.js
 import { useState, useCallback } from "react";
 
 export const useApiRetry = (maxRetries = 3) => {

@@ -35,3 +35,27 @@ export function anoEhValido(ano) {
     anoNumerico <= anoAtual + 1 // Permite até próximo ano
   );
 }
+
+/**
+ * 
+ * @param {string|number} edicao - Número ou texto da edição
+ * @returns {string|null} - Edição formatada ou null
+ * 
+ * @example
+ */
+export function formatarEdicao(edicao) {
+  if (!edicao) return null;
+  
+  // Se já vem formatado com "Edição", retornar como está
+  if (edicao.toLowerCase().includes('edição') || edicao.toLowerCase().includes('edicao')) {
+    return edicao;
+  }
+  
+  // Extrair apenas os números
+  const numero = edicao.toString().replace(/\D/g, '');
+  
+  if (!numero) return edicao;
+  
+  // Adicionar ordinal correto (ª ou º)
+  return `${numero}ª Edição`;
+}

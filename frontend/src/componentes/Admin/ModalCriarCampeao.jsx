@@ -86,43 +86,38 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
   };
 
   const validarFormulario = () => {
-    // Nome
+   
     if (!formData.nome.trim()) {
       setErro("Nome é obrigatório");
       return false;
     }
 
-    // Resultado
     if (!formData.resultadoAltura || parseFloat(formData.resultadoAltura) <= 0) {
       setErro("Resultado deve ser maior que zero");
       return false;
     }
 
-    // Modelo da Moto
     if (!formData.modeloMoto.trim()) {
       setErro("Modelo da moto é obrigatório");
       return false;
     }
 
-    // Cidade
     if (!formData.cidade.trim()) {
       setErro("Cidade é obrigatória");
       return false;
     }
 
-    // Estado
     if (!formData.estado.trim() || formData.estado.length !== 2) {
       setErro("Estado deve ter 2 letras (ex: MG)");
       return false;
     }
 
-    // Ano
+
     if (!anoEhValido(formData.ano)) {
       setErro("Ano inválido (deve ser entre 2017 e o ano atual)");
       return false;
     }
 
-    // Edição (deve ser calculada automaticamente)
     if (!formData.edicao) {
       setErro("Erro ao calcular edição");
       return false;
@@ -133,7 +128,6 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
 
   const handleSalvar = async () => {
     try {
-      // Validar
       if (!validarFormulario()) {
         return;
       }
@@ -219,9 +213,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
           )}
         </div>
 
-        {/* ======================================== */}
         {/* FORMULÁRIO */}
-        {/* ======================================== */}
         <div className="p-6 space-y-6">
           {/* DADOS PRINCIPAIS */}
           <div className="grid md:grid-cols-2 gap-6">

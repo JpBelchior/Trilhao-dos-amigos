@@ -4,6 +4,7 @@ import SimpleImage from "../SimpleImage";
 import LoadingComponent from "../Loading";
 import { apiClient } from "../../services/api";
 import ErroComponent from "../Erro";
+import { formatarEdicao } from "../../utils/calcularEdicao";
 
 const GallerySection = () => {
   const [fotos, setFotos] = useState([]);
@@ -11,18 +12,16 @@ const GallerySection = () => {
   const [erro, setErro] = useState("");
   const [currentPhoto, setCurrentPhoto] = useState(0);
 
-  // 🔄 Carregar fotos da API com apiClient
+
   const carregarFotos = async () => {
     try {
       setLoading(true);
       setErro("");
 
-      
       const data = await apiClient.get("/fotos/galeria/edicoes_anteriores");
 
       if (data.sucesso && data.dados.fotos) {
         setFotos(data.dados.fotos);
-       
       } else {
         console.warn("⚠️ [GallerySection] Nenhuma foto encontrada");
         setFotos([]);
@@ -107,12 +106,35 @@ const GallerySection = () => {
               loading="lazy"
             />
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
-              <div className="absolute bottom-6 left-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{fotoAtual.titulo}</h3>
+            {/* Overlay com Edição, Título e Descrição */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+              <div className="absolute bottom-6 left-6 text-white max-w-2xl">
+                {/* 🆕 Badge da Edição */}
+                {fotoAtual.edicao && (
+                  <div className="mb-3">
+                    <span className="bg-yellow-500 text-black text-sm font-bold px-4 py-1.5 rounded-full shadow-lg">
+                      {formatarEdicao(fotoAtual.edicao)}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Título */}
+                <h3 className="text-2xl md:text-3xl font-bold mb-2 drop-shadow-lg">
+                  {fotoAtual.titulo}
+                </h3>
+                
+                {/* 🆕 Descrição */}
                 {fotoAtual.descricao && (
-                  <p className="text-gray-300 text-lg">{fotoAtual.descricao}</p>
+                  <p className="text-gray-200 text-base md:text-lg drop-shadow-lg">
+                    {fotoAtual.descricao}
+                  </p>
+                )}
+                
+                {/* Stats (se existir) */}
+                {fotoAtual.stats && (
+                  <p className="text-yellow-400 text-sm md:text-base mt-2 font-semibold drop-shadow-lg">
+                    {fotoAtual.stats}
+                  </p>
                 )}
               </div>
             </div>
@@ -124,12 +146,14 @@ const GallerySection = () => {
               <button
                 onClick={fotoAnterior}
                 className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all transform hover:scale-110"
+                aria-label="Foto anterior"
               >
                 <ChevronLeft size={24} />
               </button>
               <button
                 onClick={proximaFoto}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all transform hover:scale-110"
+                aria-label="Próxima foto"
               >
                 <ChevronRight size={24} />
               </button>
@@ -156,6 +180,7 @@ const GallerySection = () => {
                     ? "border-yellow-400 shadow-lg shadow-yellow-400/25"
                     : "border-transparent hover:border-gray-400"
                 }`}
+                aria-label={`Ver ${foto.titulo}`}
               >
                 <SimpleImage
                   src={construirUrlFoto(foto)}
