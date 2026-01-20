@@ -90,7 +90,6 @@ const AdminDashboard = () => {
   };
   const handleLogout = () => {
     if (confirm("Tem certeza que deseja sair da área administrativa?")) {
-      console.log("👋 [Dashboard] Fazendo logout...");
       logout();
       navigate("/", { replace: true });
     }

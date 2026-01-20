@@ -309,7 +309,6 @@ const startServer = async () => {
       }
 
       // Se não existe, criar gerente padrão
-      console.log("👤 [Setup] Criando gerente padrão...");
 
       const gerente = await Gerente.criarGerente({
         nome: "Administrador Trilhão",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useFiltros } from "./useFiltros";
 
 /**
  * @returns {Object} Estados e funções necessários para o componente
@@ -6,23 +7,10 @@ import { useState, useEffect } from "react";
 export const useInscritos = () => {
 
   const [participantes, setParticipantes] = useState([]);
-  const [participantesFiltrados, setParticipantesFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
-
-
-  const [filtros, setFiltros] = useState({
-    nome: "",
-    cidade: "",
-    categoriaMoto: "todos",
-  });
-
-  
   const [mostrarFiltros, setMostrarFiltros] = useState(true);
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const itensPorPagina = 20;
 
- 
   const [estatisticas, setEstatisticas] = useState({
     total: 0,
     nacionais: 0,
@@ -31,17 +19,56 @@ export const useInscritos = () => {
     estados: [],
   });
 
- 
+
+  const {
+    dadosFiltrados: participantesFiltrados,
+    dadosPagina: participantesPagina,
+    filtros,
+    atualizarFiltro,
+    limparFiltros,
+    temFiltrosAtivos,
+    paginaAtual,
+    totalPaginas,
+    indiceInicio,
+    itensPorPagina,
+    irParaPagina,
+  } = useFiltros(
+    participantes,
+    {
+      // Configuração dos filtros
+      nome: {
+        tipo: "texto",
+        campo: "nome",
+        camposAdicionais: ["numeroInscricao"], 
+      },
+      cidade: {
+        tipo: "texto",
+        campo: "cidade",
+      },
+      categoriaMoto: {
+        tipo: "select",
+        campo: "categoriaMoto",
+        padrao: "todos",
+      },
+    },
+    {
+      itensPorPaginaPadrao: 20,
+      habilitarPaginacao: true,
+    }
+  );
+  
+  // Carregar participantes ao montar
   useEffect(() => {
     carregarParticipantes();
   }, []);
 
-  // Aplicar filtros quando mudarem
-  useEffect(() => {
-    aplicarFiltros();
-  }, [participantes, filtros]);
+  // ========================================
+  // FUNÇÕES - API
+  // ========================================
 
-  
+  /**
+   * 📥 Carregar participantes confirmados
+   */
   const carregarParticipantes = async () => {
     try {
       setLoading(true);
@@ -77,59 +104,9 @@ export const useInscritos = () => {
     }
   };
 
- 
-  const aplicarFiltros = () => {
-    let resultado = [...participantes];
-
-    // Filtro por nome
-    if (filtros.nome.trim()) {
-      const nomeBusca = filtros.nome.toLowerCase().trim();
-      resultado = resultado.filter(
-        (p) =>
-          p.nome.toLowerCase().includes(nomeBusca) ||
-          p.numeroInscricao.toLowerCase().includes(nomeBusca)
-      );
-    }
-
-    // Filtro por cidade
-    if (filtros.cidade.trim()) {
-      const cidadeBusca = filtros.cidade.toLowerCase().trim();
-      resultado = resultado.filter((p) =>
-        p.cidade.toLowerCase().includes(cidadeBusca)
-      );
-    }
-
-    // Filtro por categoria de moto
-    if (filtros.categoriaMoto !== "todos") {
-      resultado = resultado.filter(
-        (p) => p.categoriaMoto === filtros.categoriaMoto
-      );
-    }
-
-    setParticipantesFiltrados(resultado);
-    setPaginaAtual(1); // Resetar para primeira página
-
-    console.log(`🔍 [Inscritos] Filtros aplicados: ${resultado.length} resultados`);
-  };
-
- 
-  const atualizarFiltro = (campo, valor) => {
-    setFiltros((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-  };
-
-  
-  const limparFiltros = () => {
-    setFiltros({
-      nome: "",
-      cidade: "",
-      categoriaMoto: "todos",
-    });
-  };
-
- 
+  /**
+   * 📊 Calcular estatísticas dos participantes
+   */
   const calcularEstatisticas = (dados) => {
     const total = dados.length;
     const nacionais = dados.filter((p) => p.categoriaMoto === "nacional").length;
@@ -156,20 +133,9 @@ export const useInscritos = () => {
     });
   };
 
-
-  const totalPaginas = Math.ceil(participantesFiltrados.length / itensPorPagina);
-  const indiceInicio = (paginaAtual - 1) * itensPorPagina;
-  const participantesPagina = participantesFiltrados.slice(
-    indiceInicio,
-    indiceInicio + itensPorPagina
-  );
-
- 
-  const irParaPagina = (pagina) => {
-    setPaginaAtual(Math.max(1, Math.min(pagina, totalPaginas)));
-  };
-
-
+  // ========================================
+  // FUNÇÕES - UI
+  // ========================================
 
   /**
    * 👁️ Toggle de visibilidade dos filtros
@@ -178,9 +144,6 @@ export const useInscritos = () => {
     setMostrarFiltros((prev) => !prev);
   };
 
-  // ========================================
-  // RETORNO DO HOOK
-  // ========================================
   return {
     // Estados principais
     participantes,
@@ -195,6 +158,7 @@ export const useInscritos = () => {
     atualizarFiltro,
     limparFiltros,
     toggleFiltros,
+    temFiltrosAtivos, 
 
     // Paginação
     paginaAtual,

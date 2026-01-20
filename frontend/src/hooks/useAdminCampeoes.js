@@ -1,16 +1,15 @@
-// frontend/src/hooks/useAdminCampeoes.js
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useFiltros } from "./useFiltros";
 
 /**
  * 🏆 Hook customizado para gerenciamento de campeões
+ * 
+ * @returns {Object} Estados e funções necessários para o componente admin
  */
 export const useAdminCampeoes = () => {
   const { fetchAuth } = useAuth();
 
-  // ========================================
-  // ESTADOS
-  // ========================================
   const [campeoes, setCampeoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
@@ -20,18 +19,6 @@ export const useAdminCampeoes = () => {
   const [modalAberto, setModalAberto] = useState(false);
   const [modalCriarAberto, setModalCriarAberto] = useState(false);
   const [campeaoSelecionado, setCampeaoSelecionado] = useState(null);
-
-  // Filtros
-  const [filtros, setFiltros] = useState({
-    nome: "",
-    categoria: "",
-    ano: "",
-    edicao: "",
-  });
-
-  // Paginação
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const [itensPorPagina, setItensPorPagina] = useState(20);
 
   // Estatísticas
   const [estatisticas, setEstatisticas] = useState({
@@ -43,17 +30,54 @@ export const useAdminCampeoes = () => {
     melhorGeral: null,
   });
 
-  // ========================================
-  // CARREGAR DADOS INICIAL
-  // ========================================
+  const {
+    dadosFiltrados: campeosFiltrados,
+    dadosPagina: campoesPagina,
+    filtros,
+    atualizarFiltro,
+    limparFiltros,
+    temFiltrosAtivos,
+    paginaAtual,
+    totalPaginas,
+    indiceInicio,
+    itensPorPagina,
+    irParaPagina,
+    alterarItensPorPagina,
+  } = useFiltros(
+    campeoes,
+    {
+      nome: {
+        tipo: "texto",
+        campo: "nome",
+      },
+      categoria: {
+        tipo: "select",
+        campo: "categoriaMoto",
+        padrao: "",
+      },
+      ano: {
+        tipo: "numero",
+        campo: "ano",
+      },
+      edicao: {
+        tipo: "texto",
+        campo: "edicao",
+      },
+    },
+    {
+      itensPorPaginaPadrao: 20,
+      habilitarPaginacao: true,
+    }
+  );
+
+  // Carregar campeões ao montar
   useEffect(() => {
     carregarCampeoes();
   }, []);
 
-  // ========================================
-  // FUNÇÕES - API
-  // ========================================
-
+  /**
+   * 📥 Carregar todos os campeões
+   */
   const carregarCampeoes = async () => {
     try {
       setLoading(true);
@@ -81,6 +105,9 @@ export const useAdminCampeoes = () => {
     }
   };
 
+  /**
+   * ➕ Criar novo campeão
+   */
   const criarCampeao = async (dadosCampeao) => {
     try {
       setOperacaoLoading(true);
@@ -111,6 +138,9 @@ export const useAdminCampeoes = () => {
     }
   };
 
+  /**
+   * ✏️ Editar campeão existente
+   */
   const editarCampeao = async (campeaoId, dadosAtualizacao) => {
     try {
       setOperacaoLoading(true);
@@ -150,6 +180,9 @@ export const useAdminCampeoes = () => {
     }
   };
 
+  /**
+   * 🗑️ Excluir campeão
+   */
   const excluirCampeao = async (campeaoId) => {
     try {
       setOperacaoLoading(true);
@@ -181,10 +214,10 @@ export const useAdminCampeoes = () => {
     }
   };
 
-  // ========================================
-  // FUNÇÕES - ESTATÍSTICAS
-  // ========================================
 
+  /**
+   * 📊 Calcular estatísticas dos campeões
+   */
   const calcularEstatisticas = (listaCampeoes) => {
     const nacionais = listaCampeoes.filter((c) => c.categoriaMoto === "nacional");
     const importadas = listaCampeoes.filter((c) => c.categoriaMoto === "importada");
@@ -214,117 +247,83 @@ export const useAdminCampeoes = () => {
       mediaImportada: parseFloat(mediaImportada.toFixed(2)),
       melhorGeral,
     });
-  };
 
-  // ========================================
-  // FUNÇÕES - FILTROS
-  // ========================================
-
-  const campeosFiltrados = campeoes.filter((campeao) => {
-    if (filtros.nome && !campeao.nome.toLowerCase().includes(filtros.nome.toLowerCase())) {
-      return false;
-    }
-
-    if (filtros.categoria && campeao.categoriaMoto !== filtros.categoria) {
-      return false;
-    }
-
-    if (filtros.ano && campeao.ano.toString() !== filtros.ano) {
-      return false;
-    }
-
-    if (filtros.edicao && !campeao.edicao.toLowerCase().includes(filtros.edicao.toLowerCase())) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const atualizarFiltro = (filtro, valor) => {
-    setFiltros((prev) => ({ ...prev, [filtro]: valor }));
-    setPaginaAtual(1);
-  };
-
-  const limparFiltros = () => {
-    setFiltros({
-      nome: "",
-      categoria: "",
-      ano: "",
-      edicao: "",
+    console.log("📊 [AdminCampeoes] Estatísticas calculadas:", {
+      total: listaCampeoes.length,
+      nacionais: nacionais.length,
+      importadas: importadas.length,
     });
-    setPaginaAtual(1);
   };
 
-  // ========================================
-  // FUNÇÕES - PAGINAÇÃO
-  // ========================================
 
-  const totalPaginas = Math.ceil(campeosFiltrados.length / itensPorPagina);
-  const indiceInicio = (paginaAtual - 1) * itensPorPagina;
-  const campoesPagina = campeosFiltrados.slice(
-    indiceInicio,
-    indiceInicio + itensPorPagina
-  );
 
-  const irParaPagina = (pagina) => {
-    setPaginaAtual(Math.max(1, Math.min(pagina, totalPaginas)));
-  };
-
-  const alterarItensPorPagina = (novoValor) => {
-    setItensPorPagina(novoValor);
-    setPaginaAtual(1);
-  };
-
-  // ========================================
-  // FUNÇÕES - MODAL
-  // ========================================
-
+  /**
+   * 📋 Selecionar campeão para edição
+   */
   const selecionarCampeao = (campeao) => {
     setCampeaoSelecionado(campeao);
     setModalAberto(true);
   };
 
+  /**
+   * ➕ Abrir modal de criação
+   */
   const abrirModalCriacao = () => {
     setCampeaoSelecionado(null);
     setModalCriarAberto(true);
   };
 
+  /**
+   * ❌ Fechar modal
+   */
   const fecharModal = () => {
     setCampeaoSelecionado(null);
     setModalAberto(false);
     setModalCriarAberto(false);
   };
 
+  /**
+   * 🔄 Recarregar dados
+   */
   const recarregarDados = async () => {
     await carregarCampeoes();
   };
 
-  // ========================================
-  // RETORNO DO HOOK
-  // ========================================
   return {
+    // Estados principais
     campeoes,
     campeosFiltrados,
     campoesPagina,
     loading,
     erro,
     operacaoLoading,
-    estatisticas,
-    modalAberto,
-    modalCriarAberto,
-    campeaoSelecionado,
-    selecionarCampeao,
-    abrirModalCriacao,
-    fecharModal,
+
+    // Filtros
     filtros,
     atualizarFiltro,
     limparFiltros,
+    temFiltrosAtivos, 
+
+    // Paginação
     paginaAtual,
     totalPaginas,
     indiceInicio,
     itensPorPagina,
     irParaPagina,
     alterarItensPorPagina,
+
+    // Estatísticas
+    estatisticas,
+
+    // Modal
+    modalAberto,
+    modalCriarAberto,
+    campeaoSelecionado,
+    selecionarCampeao,
+    abrirModalCriacao,
+    fecharModal,
+
+    // Ações administrativas
     criarCampeao,
     editarCampeao,
     excluirCampeao,

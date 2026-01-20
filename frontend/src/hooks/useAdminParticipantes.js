@@ -1,34 +1,26 @@
-// frontend/src/hooks/useAdminParticipantes.js
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useFiltros } from "./useFiltros";
 
-const useAdminParticipantes = () => {
+/**
+ * 👥 Hook customizado para gerenciamento administrativo de participantes
+ * 
+ * @returns {Object} Estados e funções necessários para o componente admin
+ */
+export const useAdminParticipantes = () => {
   const { fetchAuth } = useAuth();
 
-  // Estados principais
   const [participantes, setParticipantes] = useState([]);
-  const [participantesFiltrados, setParticipantesFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
-
-  // Estados dos filtros (REUTILIZANDO A LÓGICA QUE JÁ EXISTE DE /inscritos)
-  const [filtros, setFiltros] = useState({
-    nome: "",
-    cidade: "",
-    categoriaMoto: "todos",
-    statusPagamento: "todos",
-  });
-
-  // Estados para ações administrativas
-  const [participanteSelecionado, setParticipanteSelecionado] = useState(null);
-  const [modalAberto, setModalAberto] = useState(false);
   const [operacaoLoading, setOperacaoLoading] = useState(false);
 
-  // Estados para paginação (MELHORADA)
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const [itensPorPagina, setItensPorPagina] = useState(20);
+  // Modal
+  const [modalAberto, setModalAberto] = useState(false);
+  const [modalCriarAberto, setModalCriarAberto] = useState(false);
+  const [participanteSelecionado, setParticipanteSelecionado] = useState(null);
 
-  // Estados para estatísticas
+  // Estatísticas
   const [estatisticas, setEstatisticas] = useState({
     total: 0,
     confirmados: 0,
@@ -37,20 +29,67 @@ const useAdminParticipantes = () => {
     receita: 0,
   });
 
-  // 🔄 CARREGAR PARTICIPANTES (FUNÇÃO PRINCIPAL)
+
+  const {
+    dadosFiltrados: participantesFiltrados,
+    dadosPagina: participantesPagina,
+    filtros,
+    atualizarFiltro,
+    limparFiltros,
+    temFiltrosAtivos,
+    paginaAtual,
+    totalPaginas,
+    indiceInicio,
+    itensPorPagina,
+    irParaPagina,
+    alterarItensPorPagina,
+  } = useFiltros(
+    participantes,
+    {
+      nome: {
+        tipo: "texto",
+        campo: "nome",
+        camposAdicionais: ["numeroInscricao"], 
+      },
+      cidade: {
+        tipo: "texto",
+        campo: "cidade",
+      },
+      categoriaMoto: {
+        tipo: "select",
+        campo: "categoriaMoto",
+        padrao: "todos",
+      },
+      statusPagamento: {
+        tipo: "select",
+        campo: "statusPagamento",
+        padrao: "todos",
+      },
+    },
+    {
+      itensPorPaginaPadrao: 20,
+      habilitarPaginacao: true,
+    }
+  );
+
+
+  // Carregar participantes ao montar
+  useEffect(() => {
+    carregarParticipantes();
+  }, []);
+
+
+  /**
+   * 📥 Carregar todos os participantes
+   */
   const carregarParticipantes = async () => {
     try {
       setLoading(true);
       setErro(null);
 
-      console.log(
-        "📊 [AdminParticipantes] Carregando todos os participantes..."
-      );
+      console.log("👥 [AdminParticipantes] Carregando participantes...");
 
-      // Usar fetchAuth para requisição autenticada
-      const response = await fetchAuth(
-        "http://localhost:8000/api/participantes"
-      );
+      const response = await fetchAuth("http://localhost:8000/api/participantes");
       const data = await response.json();
 
       if (data.sucesso) {
@@ -79,7 +118,185 @@ const useAdminParticipantes = () => {
     }
   };
 
-  // 📊 CALCULAR ESTATÍSTICAS
+  /**
+   * ✅ Confirmar pagamento manualmente
+   */
+  const confirmarPagamento = async (participanteId, observacoes = "") => {
+    try {
+      setOperacaoLoading(true);
+
+      console.log(
+        "💳 [AdminParticipantes] Confirmando pagamento:",
+        participanteId
+      );
+
+      // Buscar dados do participante para pegar o numeroInscricao
+      const participante = participantes.find((p) => p.id === participanteId);
+
+      if (!participante) {
+        throw new Error("Participante não encontrado");
+      }
+
+      const response = await fetchAuth(
+        `http://localhost:8000/api/participantes/${participanteId}/pagamento`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            numeroInscricao: participante.numeroInscricao,
+            pagamentoId: `admin_confirmation_${Date.now()}`,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        // Atualizar participante na lista local
+        setParticipantes((prev) =>
+          prev.map((p) =>
+            p.id === participanteId
+              ? { ...p, statusPagamento: "confirmado" }
+              : p
+          )
+        );
+
+        console.log("✅ [AdminParticipantes] Pagamento confirmado");
+        return { sucesso: true };
+      } else {
+        throw new Error(data.erro || "Erro ao confirmar pagamento");
+      }
+    } catch (error) {
+      console.error("❌ [AdminParticipantes] Erro ao confirmar:", error);
+      return { sucesso: false, erro: error.message };
+    } finally {
+      setOperacaoLoading(false);
+    }
+  };
+
+  /**
+   * ❌ Cancelar participante
+   */
+  const cancelarParticipante = async (participanteId) => {
+    try {
+      setOperacaoLoading(true);
+
+      console.log("🚫 [AdminParticipantes] Cancelando participante:", participanteId);
+
+      const response = await fetchAuth(
+        `http://localhost:8000/api/participantes/${participanteId}/status`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "cancelado" }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        setParticipantes((prev) =>
+          prev.map((p) =>
+            p.id === participanteId
+              ? { ...p, statusPagamento: "cancelado" }
+              : p
+          )
+        );
+
+        console.log("✅ [AdminParticipantes] Participante cancelado");
+        return { sucesso: true };
+      } else {
+        throw new Error(data.erro || "Erro ao cancelar participante");
+      }
+    } catch (error) {
+      console.error("❌ [AdminParticipantes] Erro ao cancelar:", error);
+      return { sucesso: false, erro: error.message };
+    } finally {
+      setOperacaoLoading(false);
+    }
+  };
+
+  /**
+   * 🗑️ Excluir participante
+   */
+  const excluirParticipante = async (participanteId) => {
+    try {
+      setOperacaoLoading(true);
+
+      console.log(
+        "🗑️ [AdminParticipantes] Excluindo participante:",
+        participanteId
+      );
+
+      const response = await fetchAuth(
+        `http://localhost:8000/api/participantes/${participanteId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        setParticipantes((prev) => prev.filter((p) => p.id !== participanteId));
+
+        console.log("✅ [AdminParticipantes] Participante excluído com sucesso");
+        return { sucesso: true };
+      } else {
+        throw new Error(data.erro || "Erro ao excluir participante");
+      }
+    } catch (error) {
+      console.error("❌ [AdminParticipantes] Erro ao excluir:", error);
+      return { sucesso: false, erro: error.message };
+    } finally {
+      setOperacaoLoading(false);
+    }
+  };
+
+  /**
+   * ➕ Criar novo participante
+   */
+  const criarUsuario = async (dadosParticipante) => {
+    try {
+      setOperacaoLoading(true);
+
+      console.log("➕ [AdminParticipantes] Criando participante:", dadosParticipante);
+
+      const response = await fetchAuth(
+        "http://localhost:8000/api/participantes",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dadosParticipante),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        await carregarParticipantes(); // Recarregar lista
+
+        console.log("✅ [AdminParticipantes] Participante criado com sucesso");
+        return {
+          sucesso: true,
+          dados: data.dados,
+          mensagem: "Participante criado com sucesso!",
+        };
+      } else {
+        throw new Error(data.erro || "Erro ao criar participante");
+      }
+    } catch (error) {
+      console.error("❌ [AdminParticipantes] Erro ao criar participante:", error);
+      return { sucesso: false, erro: error.message };
+    } finally {
+      setOperacaoLoading(false);
+    }
+  };
+
+
+  /**
+   * 📊 Calcular estatísticas dos participantes
+   */
   const calcularEstatisticas = (dados) => {
     const total = dados.length;
     const confirmados = dados.filter(
@@ -106,291 +323,39 @@ const useAdminParticipantes = () => {
     });
   };
 
-  // 🔍 APLICAR FILTROS (EXATAMENTE COMO EM /inscritos + STATUS)
-  const aplicarFiltros = () => {
-    let resultado = [...participantes];
 
-    // Filtro por nome (igual ao /inscritos)
-    if (filtros.nome.trim()) {
-      resultado = resultado.filter((p) =>
-        p.nome.toLowerCase().includes(filtros.nome.toLowerCase())
-      );
-    }
-
-    // Filtro por cidade (igual ao /inscritos)
-    if (filtros.cidade.trim()) {
-      resultado = resultado.filter((p) =>
-        p.cidade.toLowerCase().includes(filtros.cidade.toLowerCase())
-      );
-    }
-
-    // Filtro por categoria de moto (igual ao /inscritos)
-    if (filtros.categoriaMoto !== "todos") {
-      resultado = resultado.filter(
-        (p) => p.categoriaMoto === filtros.categoriaMoto
-      );
-    }
-
-    // 🆕 ÚNICO FILTRO NOVO: status de pagamento (admin)
-    if (filtros.statusPagamento !== "todos") {
-      resultado = resultado.filter(
-        (p) => p.statusPagamento === filtros.statusPagamento
-      );
-    }
-
-    setParticipantesFiltrados(resultado);
-    setPaginaAtual(1); // Resetar paginação ao filtrar
-  };
-
-  // 🔧 ATUALIZAR FILTRO
-  const atualizarFiltro = (campo, valor) => {
-    setFiltros((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-  };
-
-  // 🗑️ LIMPAR FILTROS
-  const limparFiltros = () => {
-    setFiltros({
-      nome: "",
-      cidade: "",
-      categoriaMoto: "todos",
-      statusPagamento: "todos",
-    });
-  };
-
-  // ✅ CONFIRMAR PAGAMENTO MANUALMENTE
-  const confirmarPagamento = async (participanteId, observacoes = "") => {
-    try {
-      setOperacaoLoading(true);
-
-      console.log(
-        "💳 [AdminParticipantes] Confirmando pagamento:",
-        participanteId
-      );
-
-      // 1. Primeiro, buscar dados do participante para pegar o numeroInscricao
-      const participante = participantes.find((p) => p.id === participanteId);
-
-      if (!participante) {
-        throw new Error("Participante não encontrado");
-      }
-
-      const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participanteId}/pagamento`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            numeroInscricao: participante.numeroInscricao,
-            pagamentoId: `admin_confirmation_${Date.now()}`, // ID único para confirmação manual
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        // Atualizar participante na lista local
-        setParticipantes((prev) =>
-          prev.map((p) =>
-            p.id === participanteId
-              ? { ...p, statusPagamento: "confirmado" }
-              : p
-          )
-        );
-
-        console.log("✅ [AdminParticipantes] Pagamento confirmado com sucesso");
-        return { sucesso: true };
-      } else {
-        throw new Error(data.erro || "Erro ao confirmar pagamento");
-      }
-    } catch (error) {
-      console.error("❌ [AdminParticipantes] Erro ao confirmar:", error);
-      return { sucesso: false, erro: error.message };
-    } finally {
-      setOperacaoLoading(false);
-    }
-  };
-
-  // ❌ CANCELAR PARTICIPANTE
-  const cancelarParticipante = async (participanteId, motivo = "") => {
-    try {
-      setOperacaoLoading(true);
-
-      console.log(
-        "🗑️ [AdminParticipantes] Cancelando participante:",
-        participanteId
-      );
-
-      const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participanteId}/pagamento`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            status: "cancelado",
-            comprovante: `Cancelado pelo admin: ${motivo}`,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        // Atualizar participante na lista local
-        setParticipantes((prev) =>
-          prev.map((p) =>
-            p.id === participanteId ? { ...p, statusPagamento: "cancelado" } : p
-          )
-        );
-
-        console.log(
-          "✅ [AdminParticipantes] Participante cancelado com sucesso"
-        );
-        return { sucesso: true };
-      } else {
-        throw new Error(data.erro || "Erro ao cancelar participante");
-      }
-    } catch (error) {
-      console.error("❌ [AdminParticipantes] Erro ao cancelar:", error);
-      return { sucesso: false, erro: error.message };
-    } finally {
-      setOperacaoLoading(false);
-    }
-  };
-
-  const criarUsuario = async (dadosUsuario) => {
-    try {
-      setOperacaoLoading(true);
-
-      console.log(
-        "➕ [AdminParticipantes] Criando novo participante:",
-        dadosUsuario.nome
-      );
-
-      const response = await fetchAuth(
-        "http://localhost:8000/api/participantes",
-        {
-          method: "POST",
-          body: JSON.stringify(dadosUsuario),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        // Recarregar dados para incluir o novo participante
-        await carregarParticipantes();
-
-        console.log("✅ [AdminParticipantes] Participante criado com sucesso");
-        return {
-          sucesso: true,
-          dados: data.dados,
-          mensagem: "Participante criado com sucesso!",
-        };
-      } else {
-        throw new Error(data.erro || "Erro ao criar participante");
-      }
-    } catch (error) {
-      console.error(
-        "❌ [AdminParticipantes] Erro ao criar participante:",
-        error
-      );
-      return { sucesso: false, erro: error.message };
-    } finally {
-      setOperacaoLoading(false);
-    }
-  };
-
-  const excluirParticipante = async (participanteId) => {
-    try {
-      setOperacaoLoading(true);
-
-      console.log(
-        "🗑️ [AdminParticipantes] Excluindo participante:",
-        participanteId
-      );
-
-      const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participanteId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        // Remover participante da lista local
-        setParticipantes((prev) => prev.filter((p) => p.id !== participanteId));
-
-        console.log(
-          "✅ [AdminParticipantes] Participante excluído com sucesso"
-        );
-        return { sucesso: true };
-      } else {
-        throw new Error(data.erro || "Erro ao excluir participante");
-      }
-    } catch (error) {
-      console.error("❌ [AdminParticipantes] Erro ao excluir:", error);
-      return { sucesso: false, erro: error.message };
-    } finally {
-      setOperacaoLoading(false);
-    }
-  };
-  // 🔄 RECARREGAR DADOS
-  const recarregarDados = async () => {
-    await carregarParticipantes();
-  };
-
-  // 📋 SELECIONAR PARTICIPANTE PARA EDIÇÃO
+  /**
+   * 📋 Selecionar participante para edição
+   */
   const selecionarParticipante = (participante) => {
     setParticipanteSelecionado(participante);
     setModalAberto(true);
   };
 
-  // ❌ FECHAR MODAL
+  /**
+   * ❌ Fechar modal
+   */
   const fecharModal = () => {
     setParticipanteSelecionado(null);
     setModalAberto(false);
   };
 
-  // 📄 PAGINAÇÃO
-  const totalPaginas = Math.ceil(
-    participantesFiltrados.length / itensPorPagina
-  );
-  const indiceInicio = (paginaAtual - 1) * itensPorPagina;
-  const participantesPagina = participantesFiltrados.slice(
-    indiceInicio,
-    indiceInicio + itensPorPagina
-  );
-
-  const irParaPagina = (pagina) => {
-    setPaginaAtual(Math.max(1, Math.min(pagina, totalPaginas)));
+  /**
+   * 🔄 Recarregar dados
+   */
+  const recarregarDados = async () => {
+    await carregarParticipantes();
   };
 
-  const alterarItensPorPagina = (novoValor) => {
-    setItensPorPagina(novoValor);
-    setPaginaAtual(1);
+  const abrirModalCriacao = () => {
+    setParticipanteSelecionado(null);
+    setModalCriarAberto(true);
   };
 
-  // 🚀 CARREGAR DADOS AO INICIALIZAR
-  useEffect(() => {
-    carregarParticipantes();
-  }, []);
+  const fecharModalCriacao = () => {
+    setModalCriarAberto(false);
+  };
 
-  // 🔍 APLICAR FILTROS QUANDO MUDAREM
-  useEffect(() => {
-    aplicarFiltros();
-  }, [participantes, filtros]);
-
-  //  RECALCULAR ESTATÍSTICAS QUANDO DADOS MUDAREM
-  useEffect(() => {
-    calcularEstatisticas(participantes);
-  }, [participantes]);
-  // 🗑️ EXCLUIR PARTICIPANTE - NOVA FUNÇÃO
-  // Adicione esta função APÓS a função "cancelarParticipante" e ANTES de "recarregarDados"
 
   return {
     // Estados principais
@@ -405,10 +370,12 @@ const useAdminParticipantes = () => {
     filtros,
     atualizarFiltro,
     limparFiltros,
+    temFiltrosAtivos,
 
     // Paginação
     paginaAtual,
     totalPaginas,
+    indiceInicio,
     itensPorPagina,
     irParaPagina,
     alterarItensPorPagina,
@@ -419,15 +386,18 @@ const useAdminParticipantes = () => {
     // Modal
     participanteSelecionado,
     modalAberto,
+    modalCriarAberto,
     selecionarParticipante,
     fecharModal,
+    abrirModalCriacao,
+    fecharModalCriacao,
 
     // Ações administrativas
     confirmarPagamento,
     cancelarParticipante,
-    recarregarDados,
     excluirParticipante,
     criarUsuario,
+    recarregarDados,
   };
 };
 
