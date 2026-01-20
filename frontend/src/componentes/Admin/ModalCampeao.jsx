@@ -25,9 +25,7 @@ const ModalCampeao = ({
   excluirCampeao,
   operacaoLoading,
 }) => {
-  // ========================================
-  // ESTADOS
-  // ========================================
+
   const [modoEdicao, setModoEdicao] = useState(false);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
@@ -43,9 +41,6 @@ const ModalCampeao = ({
     ano: "",
   });
 
-  // ========================================
-  // EFFECTS
-  // ========================================
   useEffect(() => {
     if (campeao && isOpen) {
       setFormData({
@@ -63,9 +58,6 @@ const ModalCampeao = ({
     }
   }, [campeao, isOpen]);
 
-  // ========================================
-  // HANDLERS
-  // ========================================
   const handleChange = (campo, valor) => {
     setFormData((prev) => ({ ...prev, [campo]: valor }));
   };
@@ -85,8 +77,6 @@ const ModalCampeao = ({
         setErro("Resultado deve ser maior que zero");
         return;
       }
-
-      console.log("💾 [ModalCampeao] Salvando alterações:", formData);
 
       const resultado = await editarCampeao(campeao.id, formData);
 
@@ -117,8 +107,6 @@ const ModalCampeao = ({
     try {
       setLoading(true);
       setErro("");
-
-      console.log("🗑️ [ModalCampeao] Excluindo campeão:", campeao.id);
 
       const resultado = await excluirCampeao(campeao.id);
 
@@ -152,17 +140,12 @@ const ModalCampeao = ({
     setModoEdicao(false);
   };
 
-  // ========================================
-  // RENDER
-  // ========================================
   if (!isOpen || !campeao) return null;
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-yellow-400/30">
-        {/* ======================================== */}
-        {/* HEADER */}
-        {/* ======================================== */}
+       
         <div className="bg-gradient-to-r from-yellow-900 to-green-900 p-6 flex justify-between items-center rounded-t-2xl sticky top-0 z-10">
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center">
@@ -181,24 +164,18 @@ const ModalCampeao = ({
           </button>
         </div>
 
-        {/* ======================================== */}
-        {/* ERRO */}
-        {/* ======================================== */}
         {erro && (
           <div className="mx-6 mt-6 bg-red-900/30 border border-red-500 rounded-lg p-4">
             <p className="text-red-400 text-sm">{erro}</p>
           </div>
         )}
 
-        {/* ======================================== */}
-        {/* CONTEÚDO */}
-        {/* ======================================== */}
         <div className="p-6 space-y-6">
           {/* DADOS PRINCIPAIS */}
           <div className="grid md:grid-cols-2 gap-6">
             {/* Nome */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <User className="mr-2" size={16} />
                 Nome Completo
               </label>
@@ -217,7 +194,7 @@ const ModalCampeao = ({
 
             {/* Resultado */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Target className="mr-2" size={16} />
                 Resultado (metros)
               </label>
@@ -244,7 +221,7 @@ const ModalCampeao = ({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Modelo da Moto */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Bike className="mr-2" size={16} />
                 Modelo da Moto
               </label>
@@ -263,7 +240,7 @@ const ModalCampeao = ({
 
             {/* Categoria */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Award className="mr-2" size={16} />
                 Categoria
               </label>
@@ -288,7 +265,7 @@ const ModalCampeao = ({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Cidade */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <MapPin className="mr-2" size={16} />
                 Cidade
               </label>
@@ -307,7 +284,7 @@ const ModalCampeao = ({
 
             {/* Estado */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <MapPin className="mr-2" size={16} />
                 Estado
               </label>
@@ -330,7 +307,7 @@ const ModalCampeao = ({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Edição */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Calendar className="mr-2" size={16} />
                 Edição
               </label>
@@ -349,7 +326,7 @@ const ModalCampeao = ({
 
             {/* Ano */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Calendar className="mr-2" size={16} />
                 Ano
               </label>
@@ -370,9 +347,6 @@ const ModalCampeao = ({
           </div>
         </div>
 
-        {/* ======================================== */}
-        {/* FOOTER - AÇÕES */}
-        {/* ======================================== */}
         <div className="border-t border-yellow-400/30 p-6 bg-gray-900/50">
           {!modoEdicao ? (
             <div className="flex justify-between">

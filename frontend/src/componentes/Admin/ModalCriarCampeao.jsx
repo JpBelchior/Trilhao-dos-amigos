@@ -1,4 +1,3 @@
-// frontend/src/componentes/Admin/ModalCriarCampeao.jsx
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -12,15 +11,12 @@ import {
   Award,
   Loader2,
   AlertCircle,
-  Sparkles,
 } from "lucide-react";
 import { useAdminCampeoes } from "../../hooks/useAdminCampeoes";
 import { calcularEdicao, anoEhValido } from "../../utils/calcularEdicao";
 
 const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
-  // ========================================
-  // ESTADOS
-  // ========================================
+ 
   const { criarCampeao } = useAdminCampeoes();
 
   const [loading, setLoading] = useState(false);
@@ -38,9 +34,6 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
     ano: "",
   });
 
-  // ========================================
-  // EFFECTS
-  // ========================================
   useEffect(() => {
     if (isOpen) {
       const anoAtual = new Date().getFullYear();
@@ -54,17 +47,15 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
         categoriaMoto: "nacional",
         cidade: "",
         estado: "",
-        edicao: edicao, // Edição calculada automaticamente
-        ano: anoAtual.toString(), // Ano atual por padrão
+        edicao: edicao, 
+        ano: anoAtual.toString(), 
       });
       setErro("");
       setSucesso("");
     }
   }, [isOpen]);
 
-  // ========================================
-  // EFFECT - Auto-calcular edição quando ano mudar
-  // ========================================
+
   useEffect(() => {
     if (formData.ano) {
       const { edicao } = calcularEdicao(formData.ano);
@@ -77,9 +68,6 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
     }
   }, [formData.ano]);
 
-  // ========================================
-  // HANDLERS
-  // ========================================
   const handleChange = (campo, valor) => {
     setFormData((prev) => ({ ...prev, [campo]: valor }));
     setErro(""); // Limpar erro ao digitar
@@ -135,8 +123,6 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
       setLoading(true);
       setErro("");
       setSucesso("");
-
-      console.log("➕ [ModalCriarCampeao] Criando campeão:", formData);
 
       const resultado = await criarCampeao(formData);
 
@@ -219,7 +205,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Nome */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <User className="mr-2" size={16} />
                 Nome Completo *
               </label>
@@ -235,7 +221,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
 
             {/* Resultado */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Target className="mr-2" size={16} />
                 Resultado (metros) *
               </label>
@@ -255,7 +241,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Modelo da Moto */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Bike className="mr-2" size={16} />
                 Modelo da Moto *
               </label>
@@ -271,7 +257,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
 
             {/* Categoria */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Award className="mr-2" size={16} />
                 Categoria *
               </label>
@@ -291,7 +277,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Cidade */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <MapPin className="mr-2" size={16} />
                 Cidade *
               </label>
@@ -307,7 +293,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
 
             {/* Estado */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <MapPin className="mr-2" size={16} />
                 Estado (UF) *
               </label>
@@ -328,7 +314,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Ano */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 <Calendar className="mr-2" size={16} />
                 Ano *
               </label>
@@ -348,7 +334,7 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
             </div>
             {/* Edição (AUTO-CALCULADA) */}
             <div>
-              <label className="block text-gray-400 text-sm mb-2 flex items-center">
+              <label className=" text-gray-400 text-sm mb-2 flex items-center">
                 Edição 
               </label>
               <div className="relative">
@@ -366,21 +352,8 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
               </p>
             </div>
           </div>
-
-          {/* AVISO */}
-          <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
-            <p className="text-yellow-400 text-sm flex items-start">
-              <AlertCircle className="mr-2 flex-shrink-0 mt-0.5" size={16} />
-              <span>
-                A edição é calculada automaticamente baseada no ano. Certifique-se de que todos os dados estão corretos antes de salvar.
-              </span>
-            </p>
-          </div>
         </div>
 
-        {/* ======================================== */}
-        {/* FOOTER - AÇÕES */}
-        {/* ======================================== */}
         <div className="border-t border-yellow-400/30 p-6 bg-gray-900/50">
           <div className="flex justify-end space-x-3">
             <button

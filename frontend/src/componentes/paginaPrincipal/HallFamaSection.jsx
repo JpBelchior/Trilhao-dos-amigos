@@ -147,7 +147,7 @@ const HallFamaSection = () => {
               <div className="text-center mb-8">
                 <div className="inline-flex items-center px-6 py-2 bg-yellow-400 text-black font-black rounded-full mb-4">
                   <Trophy className="mr-2" size={20} />
-                  {edicao.edicao}
+                  {edicao.edicao} - {edicao.ano}
                 </div>
               </div>
 
