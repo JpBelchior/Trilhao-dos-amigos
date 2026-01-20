@@ -234,7 +234,7 @@ const AdminDashboard = () => {
             description="Exportar listas, gerar estatísticas e relatórios detalhados"
             color="yellow"
             badge="Exportações"
-            onClick={() => handleNavegar("Relatórios")}
+           onClick={() => navigate("/admin/relatorios")}
           />
 
           <ActionCard

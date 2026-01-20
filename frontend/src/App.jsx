@@ -35,6 +35,8 @@ import EstoqueAdmin from "./paginas/Admin/Estoque";
 import GerenciarFotos from "./paginas/Admin/GerenciarFotos";
 import PagamentoConfirmado from "./paginas/PagamentoConfirmado";
 import AdminCampeoes from "./paginas/Admin/AdminCampeoes";
+import AdminRelatorios from "./paginas/Admin/AdminRelatorios"
+import ScrollToTop from "./componentes/scrollToTop";
 // Componente interno que tem acesso ao useLocation
 function AppContent() {
   const location = useLocation();
@@ -129,7 +131,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
+        <Route
+            path="/admin/relatorios"
+            element={
+              <ProtectedRoute>
+                <AdminRelatorios />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
 
@@ -142,6 +151,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <AppContent />
       </AuthProvider>

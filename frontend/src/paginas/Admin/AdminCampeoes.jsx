@@ -45,10 +45,6 @@ const AdminCampeoes = () => {
     recarregarDados,
   } = useAdminCampeoes();
 
-  // ========================================
-  // HANDLERS
-  // ========================================
-
   const handleEditarSuccess = async () => {
     console.log("✅ [AdminCampeoes] Campeão editado com sucesso");
     await recarregarDados();
@@ -67,9 +63,6 @@ const AdminCampeoes = () => {
     fecharModal();
   };
 
-  // ========================================
-  // LOADING/ERRO
-  // ========================================
 
   if (loading) return <LoadingComponent />;
   if (erro) return <ErroComponent erro={erro} />;
@@ -77,9 +70,7 @@ const AdminCampeoes = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">
       <div className="container mx-auto px-6">
-        {/* ======================================== */}
-        {/* HEADER */}
-        {/* ======================================== */}
+
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
           <div className="flex items-center mb-4 lg:mb-0">
             <button
@@ -122,9 +113,6 @@ const AdminCampeoes = () => {
           </div>
         </div>
 
-        {/* ======================================== */}
-        {/* CARDS DE ESTATÍSTICAS */}
-        {/* ======================================== */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <StatCard
             icon={Trophy}
@@ -161,10 +149,6 @@ const AdminCampeoes = () => {
             color="yellow"
           />
         </div>
-
-        {/* ======================================== */}
-        {/* FILTROS */}
-        {/* ======================================== */}
         <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-white flex items-center">
@@ -234,9 +218,6 @@ const AdminCampeoes = () => {
           </div>
         </div>
 
-        {/* ======================================== */}
-        {/* LISTA DE CAMPEÕES */}
-        {/* ======================================== */}
         <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30 mb-8">
           <h3 className="text-xl font-bold text-white mb-6 flex items-center justify-between">
             <span>
@@ -312,9 +293,6 @@ const AdminCampeoes = () => {
           )}
         </div>
 
-        {/* ======================================== */}
-        {/* PAGINAÇÃO */}
-        {/* ======================================== */}
         {totalPaginas > 1 && (
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
@@ -362,10 +340,7 @@ const AdminCampeoes = () => {
             </div>
           </div>
         )}
-
-        {/* ======================================== */}
-        {/* MODALS */}
-        {/* ======================================== */}
+        
         <ModalCampeao
           campeao={campeaoSelecionado}
           isOpen={modalAberto}
