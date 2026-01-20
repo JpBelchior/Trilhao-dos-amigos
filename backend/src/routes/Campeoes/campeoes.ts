@@ -20,14 +20,19 @@ router.get("/categoria/:categoria", CampeoesController.listarPorCategoria);
 // GET /api/campeoes/ano/:ano - Listar por ano
 router.get("/ano/:ano", CampeoesController.listarPorAno);
 
-// GET /api/campeoes/:id - Buscar campeão específico
-router.get("/:id", CampeoesController.buscarCampeao);
 
 // GET /api/campeoes/participantes-disponiveis - Listar participantes que podem virar campeões
 router.get(
   "/participantes-disponiveis",
   verificarAutenticacao,
   CampeoesController.listarParticipantesDisponiveis
+);
+
+//POST /api/campeoes - Criar campeão manualmente
+router.post(
+  "/",
+  verificarAutenticacao,
+  CampeoesController.criarCampeao
 );
 
 // POST /api/campeoes/criar-de-participante - Criar campeão a partir de participante
@@ -44,7 +49,17 @@ router.put(
   CampeoesController.atualizarResultado
 );
 
+//PUT /api/campeoes/:id - Editar campeão completo
+router.put(
+  "/:id",
+  verificarAutenticacao,
+  CampeoesController.editarCampeao
+);
+
 // DELETE /api/campeoes/:id - Remover campeão
 router.delete("/:id", verificarAutenticacao, CampeoesController.removerCampeao);
+
+// GET /api/campeoes/:id - Buscar campeão específico
+router.get("/:id", CampeoesController.buscarCampeao);
 
 export default router;

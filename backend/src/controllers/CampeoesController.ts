@@ -535,6 +535,143 @@ export class CampeoesController {
     }
   }
 
+  // POST /api/campeoes - Criar campeão manualmente
+  static async criarCampeao(req: Request, res: Response): Promise<void> {
+    try {
+      const dadosCampeao = req.body;
+
+      console.log("🏆 [API] Criando campeão manualmente:", dadosCampeao);
+
+      // Validações básicas
+      if (!dadosCampeao.nome || !dadosCampeao.edicao || !dadosCampeao.ano ||
+          !dadosCampeao.resultadoAltura || !dadosCampeao.modeloMoto ||
+          !dadosCampeao.categoriaMoto || !dadosCampeao.cidade || !dadosCampeao.estado) {
+        res.status(400).json({
+          sucesso: false,
+          erro: "Dados incompletos",
+          detalhes: "Todos os campos são obrigatórios (nome, edição, ano, resultado, modelo, categoria, cidade, estado)",
+        });
+        return;
+      }
+
+      // Verificar se já existe campeão para essa categoria e edição
+      const campeaoCategoria = await CampeaoBarranco.findOne({
+        where: {
+          edicao: dadosCampeao.edicao,
+          categoriaMoto: dadosCampeao.categoriaMoto,
+        },
+      });
+
+      if (campeaoCategoria) {
+        res.status(409).json({
+          sucesso: false,
+          erro: "Já existe campeão para esta categoria",
+          detalhes: `A categoria ${dadosCampeao.categoriaMoto} já tem um campeão na ${dadosCampeao.edicao}: ${campeaoCategoria.nome}`,
+          campeaoExistente: campeaoCategoria,
+        });
+        return;
+      }
+
+      // Criar novo campeão
+      const novoCampeao = await CampeaoBarranco.create({
+        nome: dadosCampeao.nome,
+        edicao: dadosCampeao.edicao,
+        ano: dadosCampeao.ano,
+        resultadoAltura: parseFloat(dadosCampeao.resultadoAltura),
+        modeloMoto: dadosCampeao.modeloMoto,
+        categoriaMoto: dadosCampeao.categoriaMoto,
+        cidade: dadosCampeao.cidade,
+        estado: dadosCampeao.estado,
+      });
+
+      console.log(`🏆 Campeão criado: ${novoCampeao.nome} - ${novoCampeao.resultadoAltura}m`);
+
+      res.status(201).json({
+        sucesso: true,
+        dados: novoCampeao,
+        mensagem: `🏆 ${novoCampeao.nome} foi registrado como campeão da ${novoCampeao.edicao}!`,
+      });
+    } catch (error) {
+      console.error("❌ [API] Erro ao criar campeão:", error);
+      res.status(500).json({
+        sucesso: false,
+        erro: "Erro interno do servidor",
+        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      });
+    }
+  }
+
+  // PUT /api/campeoes/:id - Editar campeão completo
+  static async editarCampeao(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const dadosAtualizacao = req.body;
+      const campeaoId = parseInt(id);
+
+      if (isNaN(campeaoId)) {
+        res.status(400).json({
+          sucesso: false,
+          erro: "ID inválido",
+          detalhes: "ID deve ser um número",
+        });
+        return;
+      }
+
+      console.log(`📝 [API] Editando campeão ${campeaoId}`);
+
+      const campeao = await CampeaoBarranco.findByPk(campeaoId);
+
+      if (!campeao) {
+        res.status(404).json({
+          sucesso: false,
+          erro: "Campeão não encontrado",
+          detalhes: `Campeão com ID ${campeaoId} não existe`,
+        });
+        return;
+      }
+
+      // Verificar se está tentando mudar para uma categoria/edição que já tem campeão
+      if (dadosAtualizacao.categoriaMoto || dadosAtualizacao.edicao) {
+        const novaCategoria = dadosAtualizacao.categoriaMoto || campeao.categoriaMoto;
+        const novaEdicao = dadosAtualizacao.edicao || campeao.edicao;
+
+        const campeaoConflito = await CampeaoBarranco.findOne({
+          where: {
+            edicao: novaEdicao,
+            categoriaMoto: novaCategoria,
+            id: { [Op.ne]: campeaoId }, 
+          },
+        });
+
+        if (campeaoConflito) {
+          res.status(409).json({
+            sucesso: false,
+            erro: "Conflito de categoria/edição",
+            detalhes: `Já existe campeão para categoria ${novaCategoria} na ${novaEdicao}: ${campeaoConflito.nome}`,
+          });
+          return;
+        }
+      }
+
+      // Atualizar campeão
+      await campeao.update(dadosAtualizacao);
+
+      console.log(`✅ Campeão atualizado: ${campeao.nome}`);
+
+      res.json({
+        sucesso: true,
+        dados: campeao,
+        mensagem: `Campeão ${campeao.nome} atualizado com sucesso!`,
+      });
+    } catch (error) {
+      console.error("❌ [API] Erro ao editar campeão:", error);
+      res.status(500).json({
+        sucesso: false,
+        erro: "Erro interno do servidor",
+        detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      });
+    }
+  }
   static async listarParticipantesDisponiveis(
     req: Request,
     res: Response

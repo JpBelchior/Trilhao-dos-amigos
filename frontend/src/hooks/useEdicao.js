@@ -8,7 +8,6 @@ export const useEdicao = () => {
   const [loading, setLoading] = useState(!cacheEdicao);
 
   useEffect(() => {
-    // Se já tem cache, não faz nada
     if (cacheEdicao) {
       return;
     }

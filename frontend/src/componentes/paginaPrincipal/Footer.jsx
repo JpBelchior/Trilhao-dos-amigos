@@ -23,9 +23,12 @@ const Footer = () => {
             <span>📞 (35) 9999-9999</span>
             <span>📧 contato@trilhao.com.br</span>
           </div>
-          <div className="mt-8 text-xs text-gray-600">
+           <div className="mt-8 text-xs text-gray-600">
             © {edicaoAtual?.ano || new Date().getFullYear()} Trilhão Itamonte.
             Todos os direitos reservados.
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            © Versão 1.0.0
           </div>
         </div>
       </div>

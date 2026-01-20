@@ -19,7 +19,132 @@ import {
 } from "lucide-react";
 import LoadingComponent from "../../componentes/Loading";
 import SimpleImage from "../../componentes/SimpleImage";
-import { useApiRetry } from "../../hooks/useApiRetry";
+
+const FotoCard = ({ 
+  foto, 
+  editando, 
+  dadosEdicao, 
+  setDadosEdicao, 
+  salvarEdicao, 
+  setEditando, 
+  iniciarEdicao, 
+  deletarFoto, 
+  categorias, 
+  getImageUrl 
+}) => (
+  <div className="bg-gradient-to-br from-green-900/30 to-black/60 rounded-2xl overflow-hidden border border-green-400/30 hover:border-green-400/50 transition-all">
+    {/* Preview da imagem */}
+    <div className="h-48 bg-gray-800 relative overflow-hidden">
+      <SimpleImage
+        src={getImageUrl(foto)}
+        fallbackSrc="/api/placeholder/300/200"
+        alt={foto.titulo}
+        className="w-full h-full object-cover"
+        imageId={`admin-${foto.id}`}
+      />
+
+      {/* Badge da categoria */}
+      <div className="absolute top-2 left-2">
+        <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+          {categorias[foto.categoria]}
+        </span>
+      </div>
+
+      {/* Status */}
+      <div className="absolute top-2 right-2">
+        {foto.status === "ativo" ? (
+          <Eye className="text-green-400" size={20} />
+        ) : (
+          <EyeOff className="text-gray-500" size={20} />
+        )}
+      </div>
+    </div>
+
+    {/* Conteúdo */}
+    <div className="p-4">
+      {editando === foto.id ? (
+        // Modo edição
+        <div>
+          <input
+            type="text"
+            value={dadosEdicao.titulo || ""}
+            onChange={(e) =>
+              setDadosEdicao((prev) => ({ ...prev, titulo: e.target.value }))
+            }
+            className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-2 border border-gray-600 focus:border-green-400"
+            placeholder="Título"
+          />
+          <textarea
+            value={dadosEdicao.descricao || ""}
+            onChange={(e) =>
+              setDadosEdicao((prev) => ({
+                ...prev,
+                descricao: e.target.value,
+              }))
+            }
+            className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-2 border border-gray-600 focus:border-green-400 resize-none"
+            rows="2"
+            placeholder="Descrição"
+          />
+          <input
+            type="text"
+            value={dadosEdicao.stats || ""}
+            onChange={(e) =>
+              setDadosEdicao((prev) => ({ ...prev, stats: e.target.value }))
+            }
+            className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-3 border border-gray-600 focus:border-green-400"
+            placeholder="Estatísticas"
+          />
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => salvarEdicao(foto.id)}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg flex items-center justify-center"
+            >
+              <Save size={16} className="mr-1" />
+              Salvar
+            </button>
+            <button
+              onClick={() => setEditando(null)}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg flex items-center justify-center"
+            >
+              <X size={16} className="mr-1" />
+              Cancelar
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Modo visualização
+        <div>
+          <h3 className="text-white font-bold text-lg mb-2">{foto.titulo}</h3>
+          {foto.descricao && (
+            <p className="text-gray-300 text-sm mb-2">{foto.descricao}</p>
+          )}
+          {foto.stats && (
+            <p className="text-yellow-400 text-sm mb-3">{foto.stats}</p>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => iniciarEdicao(foto)}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center justify-center text-sm"
+            >
+              <Edit3 size={16} className="mr-1" />
+              Editar
+            </button>
+            <button
+              onClick={() => deletarFoto(foto.id)}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex items-center justify-center text-sm"
+            >
+              <Trash2 size={16} className="mr-1" />
+              Deletar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 const GerenciarFotos = () => {
   const { fetchAuth } = useAuth();
@@ -58,8 +183,7 @@ const GerenciarFotos = () => {
   const categorias = {
     edicoes_anteriores: "Edições Anteriores",
     hall_fama: "Hall da Fama",
-    galeria_geral: "Galeria Geral",
-    evento_atual: "Evento Atual",
+
   };
 
   const carregarFotos = async () => {
@@ -253,120 +377,7 @@ const GerenciarFotos = () => {
   };
 
   // Componente de card
-  const FotoCard = ({ foto }) => (
-    <div className="bg-gradient-to-br from-green-900/30 to-black/60 rounded-2xl overflow-hidden border border-green-400/30 hover:border-green-400/50 transition-all">
-      {/* Preview da imagem */}
-      <div className="h-48 bg-gray-800 relative overflow-hidden">
-        <SimpleImage
-          src={getImageUrl(foto)}
-          fallbackSrc="/api/placeholder/300/200"
-          alt={foto.titulo}
-          className="w-full h-full object-cover"
-          imageId={`admin-${foto.id}`}
-        />
-
-        {/* Badge da categoria */}
-        <div className="absolute top-2 left-2">
-          <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-            {categorias[foto.categoria]}
-          </span>
-        </div>
-
-        {/* Status */}
-        <div className="absolute top-2 right-2">
-          {foto.status === "ativo" ? (
-            <Eye className="text-green-400" size={20} />
-          ) : (
-            <EyeOff className="text-gray-500" size={20} />
-          )}
-        </div>
-      </div>
-
-      {/* Conteúdo */}
-      <div className="p-4">
-        {editando === foto.id ? (
-          // Modo edição
-          <div>
-            <input
-              type="text"
-              value={dadosEdicao.titulo || ""}
-              onChange={(e) =>
-                setDadosEdicao((prev) => ({ ...prev, titulo: e.target.value }))
-              }
-              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-2 border border-gray-600 focus:border-green-400"
-              placeholder="Título"
-            />
-            <textarea
-              value={dadosEdicao.descricao || ""}
-              onChange={(e) =>
-                setDadosEdicao((prev) => ({
-                  ...prev,
-                  descricao: e.target.value,
-                }))
-              }
-              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-2 border border-gray-600 focus:border-green-400 resize-none"
-              rows="2"
-              placeholder="Descrição"
-            />
-            <input
-              type="text"
-              value={dadosEdicao.stats || ""}
-              onChange={(e) =>
-                setDadosEdicao((prev) => ({ ...prev, stats: e.target.value }))
-              }
-              className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 mb-3 border border-gray-600 focus:border-green-400"
-              placeholder="Estatísticas"
-            />
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => salvarEdicao(foto.id)}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg flex items-center justify-center"
-              >
-                <Save size={16} className="mr-1" />
-                Salvar
-              </button>
-              <button
-                onClick={() => setEditando(null)}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg flex items-center justify-center"
-              >
-                <X size={16} className="mr-1" />
-                Cancelar
-              </button>
-            </div>
-          </div>
-        ) : (
-          // Modo visualização
-          <div>
-            <h3 className="text-white font-bold text-lg mb-2">{foto.titulo}</h3>
-            {foto.descricao && (
-              <p className="text-gray-300 text-sm mb-2">{foto.descricao}</p>
-            )}
-            {foto.stats && (
-              <p className="text-yellow-400 text-sm mb-3">{foto.stats}</p>
-            )}
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => iniciarEdicao(foto)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center justify-center text-sm"
-              >
-                <Edit3 size={16} className="mr-1" />
-                Editar
-              </button>
-              <button
-                onClick={() => deletarFoto(foto.id)}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex items-center justify-center text-sm"
-              >
-                <Trash2 size={16} className="mr-1" />
-                Deletar
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  
 
   if (loading) {
     return <LoadingComponent loading="Carregando fotos..." />;
@@ -494,9 +505,21 @@ const GerenciarFotos = () => {
               : "space-y-4"
           }
         >
-          {fotos.map((foto) => (
-            <FotoCard key={foto.id} foto={foto} />
-          ))}
+        {fotos.map((foto) => (
+          <FotoCard 
+            key={foto.id} 
+            foto={foto}
+            editando={editando}
+            dadosEdicao={dadosEdicao}
+            setDadosEdicao={setDadosEdicao}
+            salvarEdicao={salvarEdicao}
+            setEditando={setEditando}
+            iniciarEdicao={iniciarEdicao}
+            deletarFoto={deletarFoto}
+            categorias={categorias}
+            getImageUrl={getImageUrl}
+          />
+      ))}
         </div>
 
         {/* Estado vazio - versão simples sem divs customizadas */}

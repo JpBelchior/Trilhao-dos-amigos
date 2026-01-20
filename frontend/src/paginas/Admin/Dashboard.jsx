@@ -226,7 +226,7 @@ const AdminDashboard = () => {
             description="Gerenciar campeões, resultados e histórico das edições"
             color="green"
             badge="Campeões"
-            onClick={() => handleNavegar("Campeões")}
+           onClick={() => navigate("/admin/campeoes")}
           />
 
           <ActionCard

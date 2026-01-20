@@ -1,4 +1,3 @@
-// frontend/src/hooks/useImageRetry.js
 import { useState, useCallback } from "react";
 
 export const useImageRetry = (maxRetries = 3) => {
