@@ -179,14 +179,16 @@ app.get("/", (req, res) => {
   });
 });
 
-// Popula estoque, campeões E participantes
+
 app.get("/seed", async (req, res) => {
   try {
     const { popularEstoque, popularCampeoes } = await import(
       "./seeds/EstoqueSeed"
     );
     const { popularParticipantes } = await import("./seeds/ParticipantesSeed");
+    const { importarGPXdaPasta } = await import("./seeds/importarGPX");
 
+    await importarGPXdaPasta();
     await popularEstoque();
     await popularCampeoes();
     await popularParticipantes();

@@ -9,8 +9,7 @@ import campeoesRoutes from "./Campeoes/campeoes";
 import entregaRoutes from "./Entregas/entregas";
 import fotoRoutes from "./Fotos/fotos";
 import camisetasExtrasRoutes from "./CamisasExtras/camisetasExtrasRoutes";
-import edicaoRoutes from "./Edicao/edicao";
-
+import trajetoRoutes from "./Trajeto/trajeto"
 const router = Router();
 
 // Rota de teste da API
@@ -28,6 +27,7 @@ router.get("/", (req, res) => {
       entrega: "/api/entrega",
       fotos: "/api/fotos",
       camisetasExtras: "/api/camisetas-extras",
+      trajeto: "/api/trajeto",
     },
     timestamp: new Date().toISOString(),
   });
@@ -59,5 +59,9 @@ router.use("/entrega", entregaRoutes);
 
 //  Rotas de fotos
 router.use("/fotos", fotoRoutes);
+
+// Rotas de trajeto
+router.use("/trajeto", trajetoRoutes);
+
 
 export default router;
