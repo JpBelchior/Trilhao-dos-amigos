@@ -182,36 +182,48 @@ app.get("/", (req, res) => {
 
 app.get("/seed", async (req, res) => {
   try {
+    console.log("\n🌱 ========================================");
+    console.log("   INICIANDO SEEDS DE DESENVOLVIMENTO");
+    console.log("========================================\n");
+
+    // Importar seeds
     const { popularEstoque, popularCampeoes } = await import(
       "./seeds/EstoqueSeed"
     );
     const { popularParticipantes } = await import("./seeds/ParticipantesSeed");
     const { importarGPXdaPasta } = await import("./seeds/importarGPX");
 
-    await importarGPXdaPasta();
-    await popularEstoque();
-    await popularCampeoes();
-    await popularParticipantes();
-  } catch (error) {
-    res.status(500).json({
-      error: "Erro ao criar dados de exemplo",
-      details: error instanceof Error ? error.message : "Erro desconhecido",
-    });
-  }
-});
+    // Executar seeds na ordem correta
+    await importarGPXdaPasta();      // 1. GPX
+    await popularEstoque();          // 2. Estoque
+    await popularCampeoes();         // 3. Campeões
+    await popularParticipantes();    // 4. Participantes
 
-// Rota para testar banco de dados
-app.get("/test-db", async (req, res) => {
-  try {
-    const connected = await testConnection();
+    console.log("\n✅ ========================================");
+    console.log("   TODAS AS SEEDS EXECUTADAS COM SUCESSO!");
+    console.log("========================================\n");
+
+    // 🆕 ADICIONAR RESPOSTA DE SUCESSO
     res.json({
-      database: connected ? "Conectado" : "Erro de conexão",
+      sucesso: true,
+      mensagem: "Seeds executadas com sucesso!",
+      seeds: {
+        gpx: "✅ Trajeto importado",
+        estoque: "✅ Estoque populado",
+        campeoes: "✅ Campeões criados",
+        participantes: "✅ Participantes criados"
+      },
       timestamp: new Date().toISOString(),
     });
+
   } catch (error) {
+    console.error("\n❌ Erro ao executar seeds:", error);
+    
     res.status(500).json({
-      error: "Erro ao testar banco",
-      details: error instanceof Error ? error.message : "Erro desconhecido",
+      sucesso: false,
+      erro: "Erro ao criar dados de exemplo",
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido",
+      timestamp: new Date().toISOString(),
     });
   }
 });

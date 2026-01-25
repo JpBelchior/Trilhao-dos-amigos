@@ -89,7 +89,7 @@ const HallFamaSection = () => {
 
   // Função para formatar distância que faltou
   const calcularDistanciaFaltou = (altura) => {
-    const ALTURA_TOPO = 100;
+    const ALTURA_TOPO = 60;
     const faltou = ALTURA_TOPO - altura;
     return faltou > 0 ? `${faltou.toFixed(1)}m` : "CONQUISTOU!";
   };

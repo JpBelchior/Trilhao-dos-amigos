@@ -175,12 +175,6 @@ const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
               Preencha todos os dados do campeão
             </p>
           </div>
-          <button
-            onClick={handleCancelar}
-            className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all"
-          >
-            <X className="text-white" size={24} />
-          </button>
         </div>
 
         <div className="px-6 pt-6">

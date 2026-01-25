@@ -5,7 +5,7 @@ const StatsSection = () => {
   const stats = [
     {
       icon: Users,
-      number: "100+",
+      number: "50+",
       label: "Pilotos por Edição",
       bgColor: "from-yellow-400 to-yellow-600",
       textColor: "text-yellow-400",

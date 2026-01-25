@@ -91,13 +91,13 @@ export class CampeoesController {
 
       if (
         isNaN(anoNumerico) ||
-        anoNumerico < 2020 ||
+        anoNumerico < 2018 ||
         anoNumerico > new Date().getFullYear() + 1
       ) {
         res.status(400).json({
           sucesso: false,
           erro: "Ano inválido",
-          detalhes: "Ano deve ser entre 2020 e o próximo ano",
+          detalhes: "Ano deve ser entre 2018 e o próximo ano",
         });
         return;
       }

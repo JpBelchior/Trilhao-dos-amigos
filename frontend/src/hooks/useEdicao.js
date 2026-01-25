@@ -29,7 +29,7 @@ export const useEdicao = () => {
 
         // Fallback: calcular aqui mesmo
         const ano = new Date().getFullYear();
-        const numero = ano - 2017 + 1;
+        const numero = ano - 2018 + 1;
 
         const dadosFallback = {
           ano,

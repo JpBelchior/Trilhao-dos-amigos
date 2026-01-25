@@ -1,4 +1,3 @@
-// backend/src/seeds/ParticipantesSeed.ts
 import { Participante, CamisetaExtra, EstoqueCamiseta } from "../models";
 import {
   TamanhoCamiseta,

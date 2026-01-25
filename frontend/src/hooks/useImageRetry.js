@@ -7,6 +7,7 @@ export const useImageRetry = (maxRetries = 3) => {
   const handleImageError = useCallback(
     (imageId, imgElement, fallbackSrc) => {
       const tentativasAtuais = tentativas.get(imageId) || 0;
+      
 
       if (tentativasAtuais < maxRetries) {
         // Incrementa tentativas e tenta novamente
@@ -32,6 +33,20 @@ export const useImageRetry = (maxRetries = 3) => {
     [tentativas, maxRetries]
   );
 
+  /**
+   * Abre Google Maps em nova aba com coordenadas específicas
+   * @param {number} lat - Latitude
+   * @param {number} lng - Longitude
+   */
+  const abrirNoGoogleMaps = useCallback((lat, lng) => {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    window.open(url, '_blank');
+  }, []);
+
+   const formatarCoordenadas = useCallback((lat, lng) => {
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }, []);
+
   const hasImageError = useCallback(
     (imageId) => {
       return imagensComErro.has(imageId);
@@ -56,5 +71,9 @@ export const useImageRetry = (maxRetries = 3) => {
     handleImageError,
     hasImageError,
     resetImage,
+    abrirNoGoogleMaps,
+    formatarCoordenadas,
   };
 };
+
+export default useImageRetry

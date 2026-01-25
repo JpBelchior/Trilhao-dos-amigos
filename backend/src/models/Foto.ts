@@ -23,20 +23,20 @@ export enum StatusFoto {
   INATIVO = "inativo",
 }
 
-// 📋 Interface que define a estrutura de uma foto
+
 export interface IFoto {
   id?: number;
   titulo: string;
   descricao?: string;
-  stats?: string; // Ex: "100+ Pilotos • 25km • 4h de Duração"
+  stats?: string; 
   categoria: CategoriaFoto;
-  edicao?: string; // Ex: "8ª Edição"
-  ano?: number; // Ex: 2024
-  ordem: number; // Para controlar ordem de exibição
+  edicao?: string;
+  ano?: number; 
+  ordem: number; 
   status: StatusFoto;
-  nomeArquivo: string; // Nome único no servidor
-  caminhoArquivo: string; // Caminho completo
-  tipoArquivo: string; // Ex: "image/jpeg"
+  nomeArquivo: string; 
+  caminhoArquivo: string; 
+  tipoArquivo: string; 
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -64,7 +64,7 @@ class Foto extends Model<InferAttributes<Foto>, InferCreationAttributes<Foto>> {
   }
 }
 
-// 🏗️ Definição da estrutura da tabela no banco
+
 Foto.init(
   {
     id: {
@@ -181,19 +181,19 @@ Foto.init(
     // 📈 Índices para otimizar consultas
     indexes: [
       {
-        fields: ["categoria"], // Buscar por categoria
+        fields: ["categoria"], 
       },
       {
-        fields: ["status"], // Buscar apenas fotos ativas
+        fields: ["status"], 
       },
       {
-        fields: ["ano"], // Buscar por ano
+        fields: ["ano"], 
       },
       {
-        fields: ["ordem"], // Ordenar por ordem
+        fields: ["ordem"],
       },
       {
-        fields: ["categoria", "status", "ordem"], // Consulta otimizada principal
+        fields: ["categoria", "status", "ordem"], 
       },
     ],
   }

@@ -1,6 +1,3 @@
-// frontend/src/componentes/paginaPrincipal/mapa.jsx
-// ATUALIZADO PARA LER DADOS DO GPX
-
 import React, { useRef, useEffect, useState } from "react";
 
 const TrilhaoMap = () => {
@@ -132,9 +129,9 @@ const TrilhaoMap = () => {
       // Marcador de LARGADA
       L.marker(startPoint, { icon: startIcon }).addTo(map).bindPopup(`
         <div style="text-align: center; min-width: 200px;">
-          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;">🏁 LARGADA</h3>
-          <p style="margin: 4px 0;">Praça da Matriz</p>
-          <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Centro de Itamonte</p>
+          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> LARGADA</h3>
+          <p style="margin: 4px 0;">Ilha Grande</p>
+          <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Itamonte/MG</p>
           <p style="font-size: 14px; font-weight: 600; color: #ea580c; margin: 4px 0;">
             Horário: 10:30h
           </p>
@@ -154,11 +151,11 @@ const TrilhaoMap = () => {
       // Marcador de CHEGADA
       L.marker(endPoint, { icon: endIcon }).addTo(map).bindPopup(`
         <div style="text-align: center; min-width: 200px;">
-          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;">🏆 CHEGADA</h3>
-          <p style="margin: 4px 0;">Mirante da Pedra do Baú</p>
+          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> CHEGADA</h3>
+          <p style="margin: 4px 0;">Ilha Grande</p>
           <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">25km de trilha</p>
           <p style="font-size: 14px; font-weight: 600; color: #2563eb; margin: 4px 0;">
-            Vista incrível!
+            Chegando pelas aguas do rio Capivari
           </p>
         </div>
       `);
@@ -166,7 +163,7 @@ const TrilhaoMap = () => {
       // Marcador do BARRANCO
       L.marker(barrancoPoint, { icon: barrancoIcon }).addTo(map).bindPopup(`
         <div style="text-align: center; min-width: 200px;">
-          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;">⛰️ BARRANCO</h3>
+          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> BARRANCO</h3>
           <p style="margin: 4px 0;">Prova da Subida</p>
           <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Barranco dos Campeões</p>
           <p style="font-size: 14px; font-weight: 600; color: #dc2626; margin: 4px 0;">

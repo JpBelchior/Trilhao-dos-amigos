@@ -67,24 +67,22 @@ const ProvasSection = () => {
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
                   <div className="w-3 h-3 bg-green-400 rounded-full mr-4"></div>
                   <span>
-                    <strong className="text-green-400">Largada:</strong> Praça
-                    da Matriz - Centro
+                    <strong className="text-green-400">Largada:</strong> Centro Comunitário
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full mr-4"></div>
+                  <div ><Clock className="mr-4 text-yellow-400" size={20} /></div>
                   <span>
-                    <strong className="text-yellow-400">Chegada:</strong>{" "}
-                    Mirante da Pedra do Baú
+                    <strong className="text-yellow-400">Tempo:</strong>{" "}
+                   3H de Trilha
                   </span>
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <Clock className="mr-4 text-green-400" size={20} />
+                 <div className="w-3 h-3 bg-green-400 rounded-full mr-4"></div>
                   <span>
-                    <strong className="text-green-400">Distância:</strong> 25km
-                    off-road
+                    <strong className="text-green-400">Distancia:</strong> 25 Km Off Road
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
@@ -176,7 +174,7 @@ const ProvasSection = () => {
                     MOTOS NACIONAIS
                   </strong>
                   <p className="text-gray-200">
-                    Bros, Lander, Crosser, XTZ e os guerreiros brasileiros
+                    Bros, Lander, Crosser, XTZ...
                   </p>
                 </div>
                 <div className="bg-gradient-to-r from-yellow-500/30 to-yellow-600 p-6 rounded-2xl border border-yellow-400/30 hover:border-yellow-200/60 transition-all">
@@ -184,7 +182,7 @@ const ProvasSection = () => {
                     MOTOS IMPORTADAS
                   </strong>
                   <p className="text-gray-200">
-                    Honda, Yamaha, KTM, Husqvarna e outras máquinas de guerra
+                    Honda, Yamaha, KTM, Husqvarna... 
                   </p>
                 </div>
               </div>

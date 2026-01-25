@@ -1,6 +1,3 @@
-// backend/src/seeds/importarGPX.ts
-// Script para importar GPX de uma pasta específica
-
 import fs from "fs";
 import path from "path";
 import { Trajeto } from "../models";
@@ -29,7 +26,7 @@ export const importarGPXdaPasta = async () => {
     }
 
     console.log("✅ Arquivo encontrado:", gpxPath);
-    console.log("📊 Processando...\n");
+    
 
     // Ler arquivo
     const gpxContent = fs.readFileSync(gpxPath, "utf8");

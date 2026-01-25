@@ -1,9 +1,15 @@
 import React from "react";
 import { useEdicao } from "../../hooks/useEdicao";
-import { Flashlight, Signpost, Trophy, Zap } from "lucide-react";
+import {useImageRetry} from "../../hooks/useImageRetry";
+import { Flashlight, Signpost } from "lucide-react";
 
 const HeroSection = ({ isVisible, scrollY }) => {
   const { edicaoAtual, loading } = useEdicao();
+  const { abrirNoGoogleMaps, formatarCoordenadas } = useImageRetry();
+    const coordenadas = {
+      lat: -22.3121252, 
+      lng: -44.8171325  ,
+    };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -33,7 +39,7 @@ const HeroSection = ({ isVisible, scrollY }) => {
         {/* Stats em Cards Flutuantes */}
         <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
           <div className="bg-black/40 backdrop-blur-lg border border-yellow-400/30 rounded-2xl p-4">
-            <div className="text-3xl font-black text-yellow-400">43KM</div>
+            <div className="text-3xl font-black text-yellow-400">25KM</div>
             <div className="text-sm text-gray-300">Trilha Off-Road</div>
           </div>
           <div className="bg-black/40 backdrop-blur-lg border border-green-400/30 rounded-2xl p-4">
@@ -65,6 +71,15 @@ const HeroSection = ({ isVisible, scrollY }) => {
             PILOTOS • NOVOS DESAFIOS TODO ANO
             <Signpost className="inline ml-2" size={24} />
           </p>
+           <p className="text-gray-300 ">Endereço: <span className="text-yellow-300 font-semibold">Centro Comunitário, Ilha Grande, Itamonte/MG</span> <br></br>Datas:<span className="text-yellow-300 font-semibold"> 27 e 28 de Julho</span>   </p>
+          <button
+                onClick={() => abrirNoGoogleMaps(coordenadas.lat, coordenadas.lng)}
+                className="bg-black/40 rounded-xl p-3 mt-4 w-80 mx-auto hover:bg-green-600/30 transition-all cursor-pointer border border-green-400/30 hover:border-green-400/60 group"
+              >
+                <p className="text-green-400 font-bold group-hover:text-green-300">
+                  Ver Localização no Mapa
+                </p>
+              </button>
         </div>
       </div>
     </div>

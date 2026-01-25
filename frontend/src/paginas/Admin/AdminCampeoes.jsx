@@ -97,19 +97,6 @@ const AdminCampeoes = () => {
               <PlusCircle className="mr-2" size={20} />
               Adicionar Campeão
             </button>
-
-            <button
-              onClick={recarregarDados}
-              disabled={loading}
-              className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
-                loading
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 text-white"
-              }`}
-            >
-              <RefreshCw className="mr-2" size={20} />
-              Atualizar
-            </button>
           </div>
         </div>
 
@@ -245,8 +232,8 @@ const AdminCampeoes = () => {
                   <div className="grid grid-cols-12 gap-4 items-center">
                     {/* Número */}
                     <div className="col-span-1 text-center">
-                      <div className="bg-yellow-500 text-black font-black w-10 h-10 rounded-lg flex items-center justify-center text-lg">
-                        {(paginaAtual - 1) * itensPorPagina + index + 1}
+                      <div className="bg-yellow-500 text-black font-black w-10 h-10 rounded-full  flex items-center justify-center text-sm">
+                        #{(paginaAtual - 1) * itensPorPagina + index + 1}
                       </div>
                     </div>
 

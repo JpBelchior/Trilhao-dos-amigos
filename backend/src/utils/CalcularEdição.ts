@@ -1,4 +1,4 @@
-export const ANO_PRIMEIRA_EDICAO = 2017;
+export const ANO_PRIMEIRA_EDICAO = 2018;
 
 /**
  * Calcula a edição baseada no ano

@@ -1,21 +1,9 @@
-// frontend/src/hooks/useFiltros.js
 import { useState, useEffect, useMemo } from "react";
 
 /**
  * @param {Array} dados - Array de dados a serem filtrados
  * @param {Object} configFiltros - Configuração dos filtros
  * @param {Object} opcoes - Opções adicionais
- * 
- * @example
- * const { dadosFiltrados, filtros, atualizarFiltro, limparFiltros, ... } = useFiltros(
- *   participantes,
- *   {
- *     nome: { tipo: 'texto', campo: 'nome' },
- *     cidade: { tipo: 'texto', campo: 'cidade' },
- *     categoriaMoto: { tipo: 'select', campo: 'categoriaMoto', padrao: 'todos' }
- *   },
- *   { itensPorPaginaPadrao: 20 }
- * );
  */
 export const useFiltros = (
   dados = [], 
@@ -108,13 +96,22 @@ export const useFiltros = (
     return resultado;
   }, [dados, filtros, configFiltros]);
 
+  /**
+   * Ordena os dados filtrados por nome em ordem alfabética
+   */
+  const dadosOrdenados = useMemo(() => {
+    return [...dadosFiltrados].sort((a, b) => {
+      const nomeA = String(a.nome || "").toLowerCase();
+      const nomeB = String(b.nome || "").toLowerCase();
+      return nomeA.localeCompare(nomeB, 'pt-BR');
+    });
+  }, [dadosFiltrados]);
 
-
-  const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
+  const totalPaginas = Math.ceil(dadosOrdenados.length / itensPorPagina);
   const indiceInicio = (paginaAtual - 1) * itensPorPagina;
   const dadosPagina = habilitarPaginacao 
-    ? dadosFiltrados.slice(indiceInicio, indiceInicio + itensPorPagina)
-    : dadosFiltrados;
+    ? dadosOrdenados.slice(indiceInicio, indiceInicio + itensPorPagina)
+    : dadosOrdenados;
 
   const irParaPagina = (pagina) => {
     setPaginaAtual(Math.max(1, Math.min(pagina, totalPaginas)));
@@ -124,8 +121,6 @@ export const useFiltros = (
     setItensPorPagina(novoValor);
     setPaginaAtual(1);
   };
-
-
 
   /**
    * Atualiza um filtro específico
@@ -166,7 +161,7 @@ export const useFiltros = (
   return {
     // Dados
     dadosOriginais: dados,
-    dadosFiltrados,
+    dadosFiltrados: dadosOrdenados,
     dadosPagina,
     
     // Filtros
@@ -185,7 +180,7 @@ export const useFiltros = (
     
     // Estatísticas
     totalItens: dados.length,
-    totalFiltrados: dadosFiltrados.length,
+    totalFiltrados: dadosOrdenados.length,
   };
 };
 

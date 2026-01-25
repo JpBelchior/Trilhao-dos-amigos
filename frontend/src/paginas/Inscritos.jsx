@@ -285,17 +285,6 @@ const Inscritos = () => {
               </button>
             </div>
           )}
-
-          {/* ========== BOTÃO ATUALIZAR ========== */}
-          <div className="mt-8 text-center">
-            <button
-              onClick={carregarParticipantes}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105"
-            >
-              <RefreshCw className="mr-2 inline" size={20} />
-              Atualizar Lista
-            </button>
-          </div>
         </div>
       </div>
     </div>

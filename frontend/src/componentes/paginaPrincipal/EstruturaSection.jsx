@@ -1,41 +1,46 @@
 import React from "react";
 import { MapPin, Utensils, Calendar } from "lucide-react";
-
+import { useImageRetry} from "../../hooks/useImageRetry"
 const EstruturaSection = () => {
+  const { abrirNoGoogleMaps, formatarCoordenadas } = useImageRetry();
+  const coordenadas = {
+    lat: -22.3121252, 
+    lng: -44.8171325  ,
+  };
   const alimentacao = [
-    { item: " Churrasquinho", preco: "R$ 8" },
-    { item: " Cachorro-quente", preco: "R$ 6" },
-    { item: " Sanduíche Natural", preco: "R$ 10" },
-    { item: " Bebidas Geladas", preco: "R$ 4" },
-    { item: " Café da Roça", preco: "R$ 3" },
-    { item: " Doces Caseiros", preco: "R$ 5" },
+    { item: "Churrasquinho", preco: "R$ 8" },
+    { item: "Cachorro-quente", preco: "R$ 6" },
+    { item: "Prato de Almoço", preco: "R$ 15" },
+    { item: "Bebidas Geladas", preco: "R$ 8" },
+    { item: "Café da Roça", preco: "R$ 3" },
+    { item: "Doces Caseiros", preco: "R$ 5" },
   ];
 
   const infraestrutura = [
-    {  item: "Área de Camping", color: "text-green-400" },
-    {  item: "Banheiros Completos", color: "text-yellow-400" },
-    {  item: "Estacionamento", color: "text-green-400" },
-    {  item: "Primeiros Socorros", color: "text-yellow-400" },
-    {  item: "Oficina Básica", color: "text-green-400" },
+    { item: "Área de Camping", color: "text-green-400" },
+    { item: "Banheiros Completos", color: "text-yellow-400" },
+    { item: "Estacionamento", color: "text-green-400" },
+    { item: "Primeiros Socorros", color: "text-yellow-400" },
+    { item: "Oficina Básica", color: "text-green-400" },
     { item: "Som Ambiente", color: "text-yellow-400" },
-    {  item: "Palco de Premiação", color: "text-green-400" },
+    { item: "Palco de Premiação", color: "text-green-400" },
   ];
 
   const cronogramaSabado = [
-    { horario: "07:00", atividade: " Abertura dos portões", destaque: false },
-    { horario: "08:00", atividade: " Café da manhã", destaque: false },
-    { horario: "09:00", atividade: " Verificação técnica", destaque: false },
-    { horario: "10:30", atividade: " LARGADA DA TRILHA", destaque: true },
-    { horario: "14:00", atividade: " Almoço", destaque: false },
-    { horario: "15:30", atividade: " PROVA DA SUBIDA", destaque: true },
+    { horario: "07:00", atividade: "Abertura dos portões", destaque: false },
+    { horario: "08:00", atividade: "Café da manhã", destaque: false },
+    { horario: "09:00", atividade: "Verificação técnica", destaque: false },
+    { horario: "10:30", atividade: "LARGADA DA TRILHA", destaque: true },
+    { horario: "14:00", atividade: "Almoço", destaque: false },
+    { horario: "15:30", atividade: "PROVA DA SUBIDA", destaque: true },
   ];
 
   const cronogramaDomingo = [
-    { horario: "08:00", atividade: " Café da manhã", destaque: false },
-    { horario: "09:00", atividade: " Passeio família", destaque: false },
-    { horario: "11:00", atividade: " PREMIAÇÃO", destaque: true },
-    { horario: "12:00", atividade: " Confraternização", destaque: false },
-    { horario: "14:00", atividade: " Encerramento", destaque: false },
+    { horario: "08:00", atividade: "Café da manhã", destaque: false },
+    { horario: "09:00", atividade: "Passeio família", destaque: false },
+    { horario: "11:00", atividade: "PREMIAÇÃO", destaque: true },
+    { horario: "12:00", atividade: "Confraternização", destaque: false },
+    { horario: "14:00", atividade: "Encerramento", destaque: false },
   ];
 
   return (
@@ -52,16 +57,22 @@ const EstruturaSection = () => {
             </h3>
             <div className="text-gray-300 space-y-3 text-center">
               <p className="text-yellow-400 font-bold text-lg">
-                Centro de Eventos
+                Centro Comunitário
               </p>
-              <p className="text-white font-semibold">Fazenda do Trilhão</p>
-              <p>Estrada da Mantiqueira, Km 15</p>
-              <p>Itamonte - MG</p>
-              <div className="bg-black/40 rounded-xl p-3 mt-4">
-                <p className="text-green-400 font-bold">
-                  📍 GPS: -22.2875, -44.8647
+              <p>Estrada do Picuzinho, Km 5</p>
+              <p>Bairro: Ilha Grande</p>
+              <p>Itamonte - MG, 37466-000</p>
+               <button
+                onClick={() => abrirNoGoogleMaps(coordenadas.lat, coordenadas.lng)}
+                className="bg-black/40 rounded-xl p-3 mt-4 w-full hover:bg-green-600/30 transition-all cursor-pointer border border-green-400/30 hover:border-green-400/60 group"
+              >
+                <p className="text-green-400 font-bold group-hover:text-green-300">
+                  📍 Ver no Google Maps
                 </p>
-              </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {formatarCoordenadas(coordenadas.lat, coordenadas.lng)}
+                </p>
+              </button>
             </div>
           </div>
 
@@ -80,9 +91,6 @@ const EstruturaSection = () => {
                   className="bg-black/40 rounded-xl p-3 flex justify-between items-center"
                 >
                   <span>
-                    <strong className="text-yellow-400">
-                      {item.item.split(" ")[0]}
-                    </strong>
                     {item.item.substring(item.item.indexOf(" "))}
                   </span>
                   <span className="text-green-400 font-bold">{item.preco}</span>
@@ -105,13 +113,8 @@ const EstruturaSection = () => {
                   key={index}
                   className="bg-black/40 rounded-xl p-3 flex items-center"
                 >
-                  <div
-                    className={`w-3 h-3 ${
-                      index % 2 === 0 ? "bg-green-400" : "bg-yellow-400"
-                    } rounded-full mr-4`}
-                  ></div>
                   <span>
-                    <strong className={item.color}>{item.icon}</strong>{" "}
+                    <strong className={item.color}></strong>{" "}
                     {item.item}
                   </span>
                 </div>
@@ -132,7 +135,7 @@ const EstruturaSection = () => {
               {/* Sábado */}
               <div className="bg-black/40 rounded-2xl p-8 border border-yellow-400/30">
                 <h4 className="text-3xl font-black mb-8 text-yellow-400 text-center">
-                 SÁBADO
+                  SÁBADO
                 </h4>
                 <div className="space-y-4">
                   {cronogramaSabado.map((item, index) => (
@@ -170,7 +173,7 @@ const EstruturaSection = () => {
               {/* Domingo */}
               <div className="bg-black/40 rounded-2xl p-8 border border-green-400/30">
                 <h4 className="text-3xl font-black mb-8 text-green-400 text-center">
-                   DOMINGO
+                  DOMINGO
                 </h4>
                 <div className="space-y-4">
                   {cronogramaDomingo.map((item, index) => (

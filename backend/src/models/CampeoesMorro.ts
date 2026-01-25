@@ -79,7 +79,7 @@ CampeaoBarranco.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
-        min: { args: [2020], msg: "Ano deve ser a partir de 2020" },
+        min: { args: [2018], msg: "Ano deve ser a partir de 2018" },
         max: {
           args: [new Date().getFullYear() + 1],
           msg: "Ano não pode ser futuro",
@@ -88,11 +88,11 @@ CampeaoBarranco.init(
     },
 
     resultadoAltura: {
-      type: DataTypes.DECIMAL(5, 2), // 999.99 metros (máximo)
+      type: DataTypes.DECIMAL(5, 2), 
       allowNull: false,
       validate: {
         min: { args: [0], msg: "Altura deve ser positiva" },
-        max: { args: [999.99], msg: "Altura máxima é 999.99m" },
+        max: { args: [100], msg: "Altura máxima é 999.99m" },
       },
     },
 
