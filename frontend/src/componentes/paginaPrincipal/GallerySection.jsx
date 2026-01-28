@@ -4,7 +4,7 @@ import SimpleImage from "../SimpleImage";
 import LoadingComponent from "../Loading";
 import { apiClient } from "../../services/api";
 import ErroComponent from "../Erro";
-import { formatarEdicao } from "../../utils/calcularEdicao";
+import { formatarEdicao } from "../../hooks/useEdicao";
 
 const GallerySection = () => {
   const [fotos, setFotos] = useState([]);

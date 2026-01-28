@@ -60,8 +60,8 @@ const HeroSection = ({ isVisible, scrollY }) => {
             VOCÊ TEM CORAGEM DE ENFRENTAR A ESSE DESAFIO?
           </p>
           <p className="text-gray-300">
-            40km de trilha pelos montes de Itamonte. Estradas de terra, e
-            vegetação que testam sua capacidade de pilotar! Além disso, para os
+            Uma trilha pelos morros de Itamonte. Estradas de terra, e
+            vegetação e travessias de rios testam sua capacidade de pilotar! Além disso, para os
             mais corajosos, ainda há um desafio:{" "}
             <span className="text-green-400 font-bold">O Morro do Desafio</span>{" "}
             - o qual ninguem alcançou o topo.

@@ -17,12 +17,11 @@ const Navbar = () => {
     isActive,
   } = useNavbarFunctions();
 
-  // Configuração das opções do dropdown "Início"
+
   const inicioOptions = [
     {
       path: "/",
-      label: "Página Principal",
-      icon: Mountain,
+      label: "Página Principal",  
       isActive: isActive("/"),
       dividerAfter: true,
     },
@@ -43,7 +42,7 @@ const Navbar = () => {
     },
   ];
 
-  // Configuração das opções do dropdown "Inscritos"
+  
   const inscritosOptions = [
     {
       path: "/inscritos",
@@ -78,10 +77,6 @@ const Navbar = () => {
                   e.target.style.display = "none";
                   e.target.nextSibling.style.display = "flex";
                 }}
-              />
-              <Mountain
-                className="w-8 h-8 text-black absolute inset-0 m-auto hidden"
-                size={32}
               />
             </div>
             <div>

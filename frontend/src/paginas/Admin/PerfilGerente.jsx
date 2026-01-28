@@ -75,28 +75,6 @@ const PerfilGerente = () => {
       return false;
     }
 
-    // Validar nome se foi alterado
-    if (nomeAlterado) {
-      if (formData.nome.trim().length < 2) {
-        setErro("Nome deve ter pelo menos 2 caracteres");
-        return false;
-      }
-      if (formData.nome.trim().length > 100) {
-        setErro("Nome deve ter no máximo 100 caracteres");
-        return false;
-      }
-    }
-
-    // Validar email se foi alterado
-    if (emailAlterado) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email.trim())) {
-        setErro("Email inválido");
-        return false;
-      }
-    }
-
-    // Validar dados de senha se fornecidos
     if (temDadosSenha) {
       if (!formData.senhaAtual.trim()) {
         setErro("Senha atual é obrigatória para alterar dados");
@@ -135,16 +113,6 @@ const PerfilGerente = () => {
       // Preparar dados apenas com campos alterados
       const dadosAlteracao = {};
 
-      // Verificar se nome foi alterado
-      if (formData.nome.trim() !== gerente.nome) {
-        dadosAlteracao.nome = formData.nome.trim();
-      }
-
-      // Verificar se email foi alterado
-      if (formData.email.trim().toLowerCase() !== gerente.email.toLowerCase()) {
-        dadosAlteracao.email = formData.email.trim().toLowerCase();
-      }
-
       // Adicionar senha atual se fornecida
       if (formData.senhaAtual.trim()) {
         dadosAlteracao.senhaAtual = formData.senhaAtual;
@@ -155,8 +123,6 @@ const PerfilGerente = () => {
         dadosAlteracao.novaSenha = formData.novaSenha;
         dadosAlteracao.confirmarSenha = formData.confirmarSenha;
       }
-
-      console.log("📝 Dados para alteração:", dadosAlteracao);
 
       // Usar função do contexto para atualizar
       const resultado = await atualizarPerfil(dadosAlteracao);

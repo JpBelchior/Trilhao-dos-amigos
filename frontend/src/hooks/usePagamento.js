@@ -63,7 +63,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
       return;
     }
 
-    if (jaGerouPix.current) return; // 🔒 Evita dupla chamada
+    if (jaGerouPix.current) return; 
     jaGerouPix.current = true;
 
     gerarPix();

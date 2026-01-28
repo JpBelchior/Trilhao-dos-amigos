@@ -20,8 +20,8 @@ const CTASection = () => {
           </h2>
 
           <p className="text-2xl md:text-3xl mb-12 text-gray-300 leading-relaxed">
-            40km de trilha épica, desafios formidáveis e a chance de
-            <span className="text-yellow-400 font-bold"> marcar seu nome </span>
+            25km de trilha, desafios formidáveis e a chance de
+            <span className="text-yellow-400 font-semibold"> marcar seu nome </span>
             na Serra da Mantiqueira!
           </p>
 
@@ -37,7 +37,7 @@ const CTASection = () => {
           </div>
 
           {/* Texto Final Motivacional */}
-          <div className="mt-16 max-w-3xl mx-auto">
+          <div className="mt-10 max-w-2xl mx-auto">
             <p className="text-xl text-gray-400 leading-relaxed">
               <span className="text-white font-bold">
                 Só os mais corajosos ousam tentar.

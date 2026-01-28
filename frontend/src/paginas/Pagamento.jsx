@@ -30,7 +30,6 @@ const Pagamento = () => {
   // ========================================
   const {
     dadosPix,
-    statusPagamento,
     erro,
     loading,
     copiado,

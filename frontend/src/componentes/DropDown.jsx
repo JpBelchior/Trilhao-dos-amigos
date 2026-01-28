@@ -1,4 +1,3 @@
-// frontend/src/componentes/NavDropdown.jsx
 import React from "react";
 import { ChevronDown } from "lucide-react";
 

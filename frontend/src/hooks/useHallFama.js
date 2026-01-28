@@ -1,0 +1,136 @@
+// frontend/src/hooks/useHallFama.js
+import { useState, useEffect, useMemo } from "react";
+import { apiClient } from "../services/api";
+
+
+export const useHallFama = () => {
+  // ========================================
+  // ESTADOS
+  // ========================================
+  const [campeoes, setCampeoes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(null);
+  const [melhorResultado, setMelhorResultado] = useState(null);
+
+  // ========================================
+  // CONSTANTES
+  // ========================================
+  const ALTURA_TOPO = 60; // Altura total do morro em metros
+
+  // ========================================
+  // CARREGAR DADOS AO MONTAR
+  // ========================================
+  useEffect(() => {
+    carregarCampeoes();
+  }, []);
+
+  // ========================================
+  // FUNÇÕES - API
+  // ========================================
+
+ 
+  const carregarCampeoes = async () => {
+    try {
+      setLoading(true);
+      setErro(null);
+
+      console.log("🏆 [useHallFama] Carregando campeões...");
+
+      // Usar Promise.all para fazer as duas requisições em paralelo
+      const [campeoesData, melhorData] = await Promise.all([
+        apiClient.get("/campeoes"),
+        apiClient.get("/campeoes/melhor"),
+      ]);
+
+      if (campeoesData.sucesso) {
+        setCampeoes(campeoesData.dados.campeoes);
+        console.log(
+          `✅ [useHallFama] ${campeoesData.dados.campeoes.length} campeões carregados`
+        );
+      }
+
+      if (melhorData.sucesso) {
+        setMelhorResultado(melhorData.dados.campeao);
+        console.log(
+          `🥇 [useHallFama] Melhor resultado: ${melhorData.dados.campeao.nome} - ${melhorData.dados.campeao.resultadoAltura}m`
+        );
+      }
+    } catch (error) {
+      console.error("❌ [useHallFama] Erro ao carregar campeões:", error);
+      setErro(error.message || "Erro ao carregar dados dos campeões");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ========================================
+  // FUNÇÕES - PROCESSAMENTO DE DADOS
+  // ========================================
+
+
+  const organizarPorEdicao = useMemo(() => {
+    const edicoes = {};
+
+    campeoes.forEach((campeao) => {
+      const edicaoKey = `${campeao.edicao}_${campeao.ano}`;
+
+      // Criar estrutura da edição se não existir
+      if (!edicoes[edicaoKey]) {
+        edicoes[edicaoKey] = {
+          edicao: campeao.edicao,
+          ano: campeao.ano,
+          melhorNacional: null,
+          melhorImportada: null,
+        };
+      }
+
+      // Para cada categoria, manter apenas o MELHOR (maior altura)
+      if (campeao.categoriaMoto === "nacional") {
+        if (
+          !edicoes[edicaoKey].melhorNacional ||
+          campeao.resultadoAltura >
+            edicoes[edicaoKey].melhorNacional.resultadoAltura
+        ) {
+          edicoes[edicaoKey].melhorNacional = campeao;
+        }
+      } else if (campeao.categoriaMoto === "importada") {
+        if (
+          !edicoes[edicaoKey].melhorImportada ||
+          campeao.resultadoAltura >
+            edicoes[edicaoKey].melhorImportada.resultadoAltura
+        ) {
+          edicoes[edicaoKey].melhorImportada = campeao;
+        }
+      }
+    });
+
+    // Converter para array e ordenar por ano (mais recente primeiro)
+    return Object.values(edicoes).sort((a, b) => b.ano - a.ano);
+  }, [campeoes]); // Só recalcula quando campeoes mudar
+
+
+  const calcularDistanciaFaltou = (altura) => {
+    const faltou = ALTURA_TOPO - altura;
+    return faltou > 0 ? `${faltou.toFixed(1)}m` : "CONQUISTOU!";
+  };
+
+  // ========================================
+  // RETORNO DO HOOK
+  // ========================================
+  return {
+    // Estados
+    campeoes,
+    loading,
+    erro,
+    melhorResultado,
+
+    // Dados processados
+    edicoes: organizarPorEdicao,
+
+    // Funções
+    carregarCampeoes,
+    calcularDistanciaFaltou,
+  };
+};
+
+export default useHallFama;

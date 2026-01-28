@@ -7,7 +7,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { BarChart3, Users, MapPin, Bike } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 const GraficosParticipantes = ({ participantes = [] }) => {
   const [dadosCidades, setDadosCidades] = useState([]);

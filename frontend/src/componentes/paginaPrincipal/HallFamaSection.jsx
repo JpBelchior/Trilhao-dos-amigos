@@ -1,113 +1,46 @@
-import React, { useState, useEffect } from "react";
-import { Mountain, Trophy, Star, Award } from "lucide-react";
+import React from "react";
+import { Mountain, Trophy, Award } from "lucide-react";
 import LoadingComponent from "../Loading";
 import ErroComponent from "../Erro";
+import { useHallFama } from "../../hooks/useHallFama";
 
+/**
+ * 🏆 Hall da Fama - Componente de UI puro
+ * 
+ * Exibe os melhores resultados históricos do Morro do Desafio
+ * organizados por edição e categoria (nacional/importada)
+ */
 const HallFamaSection = () => {
-  const [campeoes, setCampeoes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);
-  const [melhorResultado, setMelhorResultado] = useState(null);
-
-  // Carregar dados da API
-  useEffect(() => {
-    carregarCampeoes();
-  }, []);
-
-  const carregarCampeoes = async () => {
-    try {
-      setLoading(true);
-      setErro(null);
-
-      // Buscar todos os campeões
-      const campeoesResponse = await fetch(
-        "http://localhost:8000/api/campeoes"
-      );
-      const campeoesData = await campeoesResponse.json();
-
-      // Buscar melhor resultado
-      const melhorResponse = await fetch(
-        "http://localhost:8000/api/campeoes/melhor"
-      );
-      const melhorData = await melhorResponse.json();
-
-      if (campeoesData.sucesso) {
-        setCampeoes(campeoesData.dados.campeoes);
-      }
-
-      if (melhorData.sucesso) {
-        setMelhorResultado(melhorData.dados.campeao);
-        console.log(`🏆 Melhor resultado: ${melhorData.dados.campeao.nome}`);
-      }
-    } catch (error) {
-      console.error("❌ Erro ao carregar campeões:", error);
-      setErro("Erro ao carregar dados dos campeões");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Organizar campeões por edição - MELHOR DE CADA CATEGORIA POR EDIÇÃO
-  const organizarPorEdicao = () => {
-    const edicoes = {};
-
-    campeoes.forEach((campeao) => {
-      const edicaoKey = `${campeao.edicao}_${campeao.ano}`;
-
-      if (!edicoes[edicaoKey]) {
-        edicoes[edicaoKey] = {
-          edicao: campeao.edicao,
-          ano: campeao.ano,
-          melhorNacional: null,
-          melhorImportada: null,
-        };
-      }
-
-      // Para cada categoria, manter apenas o MELHOR (maior altura)
-      if (campeao.categoriaMoto === "nacional") {
-        if (
-          !edicoes[edicaoKey].melhorNacional ||
-          campeao.resultadoAltura >
-            edicoes[edicaoKey].melhorNacional.resultadoAltura
-        ) {
-          edicoes[edicaoKey].melhorNacional = campeao;
-        }
-      } else if (campeao.categoriaMoto === "importada") {
-        if (
-          !edicoes[edicaoKey].melhorImportada ||
-          campeao.resultadoAltura >
-            edicoes[edicaoKey].melhorImportada.resultadoAltura
-        ) {
-          edicoes[edicaoKey].melhorImportada = campeao;
-        }
-      }
-    });
-
-    // Converter para array e ordenar por ano (mais recente primeiro)
-    return Object.values(edicoes).sort((a, b) => b.ano - a.ano);
-  };
-
-  // Função para formatar distância que faltou
-  const calcularDistanciaFaltou = (altura) => {
-    const ALTURA_TOPO = 60;
-    const faltou = ALTURA_TOPO - altura;
-    return faltou > 0 ? `${faltou.toFixed(1)}m` : "CONQUISTOU!";
-  };
+  // ========================================
+  // HOOK - Toda lógica vem daqui
+  // ========================================
+  const {
+    loading,
+    erro,
+    melhorResultado,
+    edicoes,
+    carregarCampeoes,
+    calcularDistanciaFaltou,
+  } = useHallFama();
 
   if (loading) {
     return <LoadingComponent loading="Carregando Hall da Fama..." />;
   }
+
   if (erro) {
     return (
       <ErroComponent mensagem={erro} onTentarNovamente={carregarCampeoes} />
     );
   }
 
-  const edicoes = organizarPorEdicao();
-
+  // ========================================
+  // RENDERIZAÇÃO PRINCIPAL - APENAS UI
+  // ========================================
   return (
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
+        
+        {/* ========== HEADER ========== */}
         <div className="text-center mb-16">
           <h6 className="text-4xl md:text-5xl font-black text-yellow-400 mb-4">
             Hall da Fama
@@ -118,7 +51,7 @@ const HallFamaSection = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
 
-        {/* Legenda */}
+        {/* ========== LEGENDA ========== */}
         <div className="max-w-4xl mx-auto mb-12">
           <div className="bg-gradient-to-r from-green-900/40 to-black/60 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30">
             <h3 className="text-2xl font-black text-center text-white mb-4">
@@ -136,28 +69,30 @@ const HallFamaSection = () => {
           </div>
         </div>
 
-        {/* Cards das Edições - CORRIGIDO */}
-        <div className="space-y-8 max-w-6xl mx-auto">
+        {/* ========== LISTA DE EDIÇÕES ========== */}
+        <div className="space-y-12 max-w-6xl mx-auto">
           {edicoes.map((edicao, index) => (
             <div
-              key={`${edicao.edicao}-${edicao.ano}`}
-              className="bg-gradient-to-r from-green-900/30 to-black/50 backdrop-blur-lg rounded-3xl p-8 border border-green-400/20 hover:border-green-400/40 transition-all"
+              key={index}
+              className="bg-gradient-to-r from-black/60 to-green-900/20 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30"
             >
               {/* Header da Edição */}
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center px-6 py-2 bg-yellow-400 text-black font-black rounded-full mb-4">
-                  <Trophy className="mr-2" size={20} />
+              <div className="flex items-center justify-center mb-8">
+                <Mountain className="text-green-400 mr-4" size={32} />
+                <h3 className="text-3xl font-black text-white">
                   {edicao.edicao} - {edicao.ano}
-                </div>
+                </h3>
+                <Mountain className="text-green-400 ml-4" size={32} />
               </div>
 
-              {/* Grid com AMBOS os vencedores da MESMA edição lado a lado */}
+              {/* Grid de Categorias */}
               <div className="grid md:grid-cols-2 gap-8">
-                {/* Card Nacional */}
+                
+                {/* ========== CARD NACIONAL ========== */}
                 <div className="bg-gradient-to-br from-green-900/50 to-black/60 rounded-2xl p-6 border border-green-400/30 hover:border-green-400/50 transition-all transform hover:scale-105">
                   <div className="flex items-center mb-4">
                     <div className="bg-green-500 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                      <Star className="text-black" size={24} />
+                      <Trophy className="text-black" size={24} />
                     </div>
                     <div>
                       <h4 className="text-green-400 font-black text-lg">
@@ -210,7 +145,7 @@ const HallFamaSection = () => {
                   )}
                 </div>
 
-                {/* Card Importada */}
+                {/* ========== CARD IMPORTADA ========== */}
                 <div className="bg-gradient-to-br from-yellow-900/50 to-black/60 rounded-2xl p-6 border border-yellow-400/30 hover:border-yellow-400/50 transition-all transform hover:scale-105">
                   <div className="flex items-center mb-4">
                     <div className="bg-yellow-500 rounded-full w-12 h-12 flex items-center justify-center mr-4">
@@ -271,33 +206,34 @@ const HallFamaSection = () => {
           ))}
         </div>
 
-        {/* Call to Action Final */}
+        {/* ========== DESTAQUE DO MELHOR RESULTADO ========== */}
         {melhorResultado && (
-          <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-yellow-900/40 to-green-900/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30 max-w-4xl mx-auto">
-              <h3 className="text-3xl font-black text-white mb-4">
-                <Mountain className="inline mr-3 text-yellow-400" size={32} />O
-                TOPO AINDA ESPERA SEU CONQUISTADOR!
-              </h3>
-              <p className="text-gray-300 text-lg leading-relaxed mb-6">
-                {melhorResultado.nome} de {melhorResultado.cidade}/
-                {melhorResultado.estado} chegou a{" "}
-                <span className="text-green-400 font-bold">
-                  {melhorResultado.resultadoAltura}m
-                </span>{" "}
-                em{" "}
-                <span className="text-yellow-400 font-bold">
-                  {melhorResultado.ano}
-                </span>
-                , faltando apenas{" "}
-                <span className="text-red-400 font-bold">
-                  {calcularDistanciaFaltou(melhorResultado.resultadoAltura)}
-                </span>{" "}
-                para conquistar o topo! O topo continua esperando pelo seu
-                conquistador, venha ser o primeiro!
-              </p>
-              <div className="text-2xl font-black text-yellow-400">
-                SERÁ QUE VOCÊ SERÁ O PRIMEIRO? 🏔️
+          <div className="mt-16 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-yellow-900/40 via-green-900/40 to-black/60 backdrop-blur-lg rounded-3xl p-10 border-2 border-yellow-400/50 relative overflow-hidden">
+              <div className="text-center relative z-10">
+                <h3 className="text-3xl font-black text-yellow-400 mb-6">
+                  🏆 MELHOR RESULTADO DE TODOS OS TEMPOS
+                </h3>
+                <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                  {melhorResultado.nome} de {melhorResultado.cidade}/
+                  {melhorResultado.estado} chegou a{" "}
+                  <span className="text-green-400 font-bold">
+                    {melhorResultado.resultadoAltura}m
+                  </span>{" "}
+                  em{" "}
+                  <span className="text-yellow-400 font-bold">
+                    {melhorResultado.ano}
+                  </span>
+                  , faltando apenas{" "}
+                  <span className="text-red-400 font-bold">
+                    {calcularDistanciaFaltou(melhorResultado.resultadoAltura)}
+                  </span>{" "}
+                  para conquistar o topo! O topo continua esperando pelo seu
+                  conquistador, venha ser o primeiro!
+                </p>
+                <div className="text-2xl font-black text-yellow-400">
+                  SERÁ QUE VOCÊ SERÁ O PRIMEIRO? 🏔️
+                </div>
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAdminCampeoes } from "../../hooks/useAdminCampeoes";
-import { calcularEdicao, anoEhValido } from "../../utils/calcularEdicao";
+import {anoEhValido,calcularEdicao} from "../../hooks/useEdicao"
 
 const ModalCriarCampeao = ({ isOpen, onClose, onSuccess, operacaoLoading }) => {
  

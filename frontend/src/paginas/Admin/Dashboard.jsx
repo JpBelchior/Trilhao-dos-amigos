@@ -8,7 +8,6 @@ import {
   LogOut,
   FileText,
   Trophy,
-  RefreshCw,
   Camera,
   Lock,
 } from "lucide-react";
@@ -249,13 +248,6 @@ const AdminDashboard = () => {
 
         {/* Botão para atualizar dados */}
         <div className="text-center mt-12">
-          <button
-            onClick={carregarEstatisticas}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center mx-auto"
-          >
-            <RefreshCw className="mr-2" size={20} />
-            Atualizar Dados
-          </button>
         </div>
       </div>
     </div>

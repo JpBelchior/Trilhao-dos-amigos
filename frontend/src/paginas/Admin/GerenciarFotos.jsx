@@ -15,7 +15,6 @@ import {
   EyeOff,
   AlertTriangle,
   CheckCircle,
-  RefreshCw,
 } from "lucide-react";
 import LoadingComponent from "../../componentes/Loading";
 import SimpleImage from "../../componentes/SimpleImage";
@@ -63,7 +62,6 @@ const FotoCard = ({
     {/* Conteúdo */}
     <div className="p-4">
       {editando === foto.id ? (
-        // Modo edição
         <div>
           <input
             type="text"
@@ -182,7 +180,6 @@ const GerenciarFotos = () => {
   // Categorias
   const categorias = {
     edicoes_anteriores: "Edições Anteriores",
-    hall_fama: "Hall da Fama",
 
   };
 
@@ -196,7 +193,7 @@ const GerenciarFotos = () => {
           ? "http://localhost:8000/api/fotos"
           : `http://localhost:8000/api/fotos?categoria=${filtroCategoria}`;
 
-      const response = await fetchAuth(url); // ← USAR fetchAuth
+      const response = await fetchAuth(url); 
       const data = await response.json();
 
       if (data.sucesso) {
@@ -208,7 +205,7 @@ const GerenciarFotos = () => {
       console.error("Erro ao carregar fotos:", error);
       setErro("Erro ao conectar com servidor");
     } finally {
-      setLoading(false); // ← ADICIONAR
+      setLoading(false); 
     }
   };
 
@@ -248,7 +245,7 @@ const GerenciarFotos = () => {
     setArquivosSelecionados(arquivosValidos);
   };
 
-  // Upload
+  
   const handleUpload = async (e) => {
     e.preventDefault();
 
@@ -376,9 +373,6 @@ const GerenciarFotos = () => {
     }
   };
 
-  // Componente de card
-  
-
   if (loading) {
     return <LoadingComponent loading="Carregando fotos..." />;
   }
@@ -406,14 +400,7 @@ const GerenciarFotos = () => {
           </div>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => carregarFotos()}
-              className="bg-yellow-500 hover:bg-yellow-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
-              disabled={loading}
-            >
-              <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
-              Atualizar
-            </button>
+           
             <button
               onClick={() => setMostrarUpload(true)}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl flex items-center gap-2 transition-all"

@@ -12,7 +12,6 @@ import {
 // Componentes
 import ErroComponent from "../componentes/Erro";
 import LoadingComponent from "../componentes/Loading";
-import ExpandToggleButton from "../componentes/ExpandToggleButton";
 
 import useInscritos from "../hooks/useInscritos";
 
