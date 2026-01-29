@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFiltros } from "./useFiltros";
 import { apiClient } from "../services/api";
+import { calcularEstatisticasParticipantes } from "../utils/estatisticas";
 
 /**
  * 📋 Hook customizado para gerenciar lista de inscritos
@@ -77,13 +78,11 @@ export const useInscritos = () => {
 
       console.log("📊 [useInscritos] Carregando participantes confirmados...");
 
-      // ✅ USANDO apiClient ao invés de fetch direto
       const data = await apiClient.get("/participantes?status=confirmado");
 
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];
         
-        // Filtrar apenas confirmados (caso o backend não filtre)
         const participantesConfirmados = participantesData.filter(
           (p) => p.statusPagamento === "confirmado"
         );
@@ -104,44 +103,8 @@ export const useInscritos = () => {
   };
 
 
-  const calcularEstatisticas = (dados) => {
-    const total = dados.length;
-    const nacionais = dados.filter(
-      (p) => p.categoriaMoto === "nacional"
-    ).length;
-    const importadas = dados.filter(
-      (p) => p.categoriaMoto === "importada"
-    ).length;
-
-    // Agrupar por cidade
-    const cidadesMap = {};
-    dados.forEach((p) => {
-      const cidadeCompleta = `${p.cidade}/${p.estado}`;
-      cidadesMap[cidadeCompleta] = (cidadesMap[cidadeCompleta] || 0) + 1;
-    });
-
-    // Agrupar por estado
-    const estadosMap = {};
-    dados.forEach((p) => {
-      estadosMap[p.estado] = (estadosMap[p.estado] || 0) + 1;
-    });
-
-    // Converter para arrays ordenados
-    const cidades = Object.entries(cidadesMap)
-      .map(([cidade, count]) => ({ cidade, count }))
-      .sort((a, b) => b.count - a.count);
-
-    const estados = Object.entries(estadosMap)
-      .map(([estado, count]) => ({ estado, count }))
-      .sort((a, b) => b.count - a.count);
-
-    setEstatisticas({
-      total,
-      nacionais,
-      importadas,
-      cidades,
-      estados,
-    });
+   const calcularEstatisticas = (dados) => {
+    setEstatisticas(calcularEstatisticasParticipantes(dados));
   };
 
   // ========================================

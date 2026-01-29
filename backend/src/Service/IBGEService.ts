@@ -1,4 +1,3 @@
-// backend/src/services/IBGEService.ts
 import fetch from "node-fetch";
 
 interface EstadoIBGE {

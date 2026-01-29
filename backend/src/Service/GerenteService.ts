@@ -3,7 +3,6 @@ import { Gerente } from "../models";
 import {
   ICriarGerenteDTO,
   ILoginGerenteDTO,
-  IGerenteResponse,
 } from "../types/models";
 
 

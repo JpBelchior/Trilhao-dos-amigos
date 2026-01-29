@@ -97,7 +97,7 @@ const EstoqueAdmin = () => {
       <div className="container mx-auto px-6">
         
         {/* ========== HEADER ========== */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-7">
           <div>
             <div className="flex items-center mb-4">
               <button
@@ -106,12 +106,15 @@ const EstoqueAdmin = () => {
               >
                 <ArrowLeft size={24} />
               </button>
-              <h1 className="text-5xl font-black text-white">
-                GESTÃO DE <span className="text-yellow-400">ESTOQUE</span>
+              <div>
+              <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
+                Gestão de Estoque
               </h1>
+              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400"></div>
+              </div>
             </div>
             <p className="text-gray-400 text-xl">
-              Controle do estoque e das entregas
+              Controle do estoque e das entregas de camisas
             </p>
           </div>
 
@@ -123,7 +126,7 @@ const EstoqueAdmin = () => {
               className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
                 sincronizandoEstoque
                   ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
+                  : "bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
               }`}
             >
               {sincronizandoEstoque ? (

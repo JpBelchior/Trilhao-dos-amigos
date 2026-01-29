@@ -1,6 +1,6 @@
-// frontend/src/hooks/useAdminRelatorios.js
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { calcularEstatisticasAdmin } from "../utils/estatisticas";
 
 /**
  * 📊 Hook customizado para gerenciamento de relatórios
@@ -50,12 +50,8 @@ export const useAdminRelatorios = () => {
     }
   };
 
-  const calcularEstatisticas = (dados) => {
-    const total = dados.length;
-    const confirmados = dados.filter((p) => p.statusPagamento === "confirmado").length;
-    const pendentes = dados.filter((p) => p.statusPagamento === "pendente").length;
-
-    setEstatisticas({ total, confirmados, pendentes });
+   const calcularEstatisticas = (dados) => {
+    setEstatisticas(calcularEstatisticasAdmin(dados));
   };
 
   return {

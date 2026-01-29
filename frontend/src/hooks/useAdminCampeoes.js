@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFiltros } from "./useFiltros";
+import { calcularEstatisticasCampeoes } from "../utils/estatisticas";
 
 /**
  * 🏆 Hook customizado para gerenciamento de campeões
@@ -218,41 +219,8 @@ export const useAdminCampeoes = () => {
   /**
    * 📊 Calcular estatísticas dos campeões
    */
-  const calcularEstatisticas = (listaCampeoes) => {
-    const nacionais = listaCampeoes.filter((c) => c.categoriaMoto === "nacional");
-    const importadas = listaCampeoes.filter((c) => c.categoriaMoto === "importada");
-
-    const mediaNacional =
-      nacionais.length > 0
-        ? nacionais.reduce((sum, c) => sum + parseFloat(c.resultadoAltura), 0) / nacionais.length
-        : 0;
-
-    const mediaImportada =
-      importadas.length > 0
-        ? importadas.reduce((sum, c) => sum + parseFloat(c.resultadoAltura), 0) / importadas.length
-        : 0;
-
-    const melhorGeral =
-      listaCampeoes.length > 0
-        ? listaCampeoes.reduce((max, c) =>
-            parseFloat(c.resultadoAltura) > parseFloat(max.resultadoAltura) ? c : max
-          )
-        : null;
-
-    setEstatisticas({
-      total: listaCampeoes.length,
-      nacionais: nacionais.length,
-      importadas: importadas.length,
-      mediaNacional: parseFloat(mediaNacional.toFixed(2)),
-      mediaImportada: parseFloat(mediaImportada.toFixed(2)),
-      melhorGeral,
-    });
-
-    console.log("📊 [AdminCampeoes] Estatísticas calculadas:", {
-      total: listaCampeoes.length,
-      nacionais: nacionais.length,
-      importadas: importadas.length,
-    });
+   const calcularEstatisticas = (listaCampeoes) => {
+    setEstatisticas(calcularEstatisticasCampeoes(listaCampeoes));
   };
 
 

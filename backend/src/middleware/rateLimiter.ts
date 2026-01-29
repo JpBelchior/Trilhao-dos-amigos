@@ -1,4 +1,3 @@
-// backend/src/middleware/rateLimiter.ts
 import rateLimit from 'express-rate-limit';
 
 // ========================================
@@ -96,7 +95,7 @@ export const paymentLimiter = rateLimit({
 // Protege contra abuso geral da API
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 150, // Máximo 100 requisições em 15 minutos
+  max: 3000, // Máximo 100 requisições em 15 minutos
   message: {
     sucesso: false,
     erro: 'Muitas requisições',

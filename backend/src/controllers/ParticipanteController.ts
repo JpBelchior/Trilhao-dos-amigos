@@ -1,4 +1,3 @@
-// backend/src/controllers/ParticipanteController.ts (VERSÃO FINAL - SOLID)
 import { Request, Response } from "express";
 import { Participante, CamisetaExtra } from "../models";
 import { ICriarParticipanteDTO, StatusPagamento } from "../types/models";

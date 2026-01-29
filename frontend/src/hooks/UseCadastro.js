@@ -1,26 +1,9 @@
 import { useState, useEffect } from "react";
-
-// =======================
-// ENUMS (compatíveis com backend)
-// =======================
-
-const TamanhoCamiseta = {
-  PP: "PP",
-  P: "P",
-  M: "M",
-  G: "G",
-  GG: "GG",
-};
-
-const TipoCamiseta = {
-  MANGA_CURTA: "manga_curta",
-  MANGA_LONGA: "manga_longa",
-};
-
-const CategoriaMoto = {
-  NACIONAL: "nacional",
-  IMPORTADA: "importada",
-};
+import { 
+  TamanhoCamiseta, 
+  TipoCamiseta, 
+  CategoriaMoto 
+} from "../constants";
 
 const useCadastro = () => {
   // =======================

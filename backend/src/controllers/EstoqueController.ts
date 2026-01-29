@@ -1,6 +1,3 @@
-// backend/src/controllers/EstoqueController.ts
-// ✅ REFATORADO PARA SEGUIR PRINCÍPIOS SOLID (SEM BaseValidator desnecessário)
-
 import { Request, Response } from "express";
 import { TamanhoCamiseta, TipoCamiseta } from "../types/models";
 

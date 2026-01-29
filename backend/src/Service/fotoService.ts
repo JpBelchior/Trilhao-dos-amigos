@@ -1,4 +1,3 @@
-// backend/src/services/FotoService.ts
 import fs from "fs";
 import path from "path";
 import Foto, { CategoriaFoto, StatusFoto } from "../models/Foto";

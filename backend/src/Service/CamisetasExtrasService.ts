@@ -1,4 +1,3 @@
-// backend/src/Service/CamisetasExtrasService.ts
 import sequelize from "../config/db";
 import { Participante, CamisetaExtra, EstoqueCamiseta } from "../models";
 import { TamanhoCamiseta, TipoCamiseta, StatusEntrega } from "../types/models";

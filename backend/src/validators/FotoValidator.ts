@@ -1,4 +1,3 @@
-// backend/src/validators/FotoValidator.ts
 import { CategoriaFoto, StatusFoto } from "../models/Foto";
 
 export interface ValidationResult {

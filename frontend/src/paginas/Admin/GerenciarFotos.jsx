@@ -383,16 +383,19 @@ const GerenciarFotos = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <button
+           <button
               onClick={() => navigate("/admin")}
-              className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-xl transition-all"
+              className="bg-black/40 backdrop-blur-lg p-3 rounded-xl border border-green-400/30 hover:border-green-400/60 transition-all mr-4"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft className="text-green-400" size={24} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-white">Gerenciar Fotos</h1>
+              <div>
+              <h1 className="text-3xl font-black text-white mb-2">Gerenciar Fotos</h1>
+              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400"></div>
+              </div>
               <p className="text-gray-400">
-                {fotos.length} foto{fotos.length !== 1 ? "s" : ""}
+                {fotos.length} Foto{fotos.length !== 1 ? "s" : ""}
                 {filtroCategoria !== "todas" &&
                   ` em ${categorias[filtroCategoria]}`}
               </p>

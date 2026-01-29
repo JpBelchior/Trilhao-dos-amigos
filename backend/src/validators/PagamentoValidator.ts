@@ -1,4 +1,3 @@
-// backend/src/validators/PagamentoValidator.ts
 import { StatusPagamento } from "../types/models";
 
 export interface ValidationResult {

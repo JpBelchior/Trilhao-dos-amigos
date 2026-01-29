@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFiltros } from "./useFiltros";
-
+import { calcularEstatisticasAdmin } from "../utils/estatisticas";
 /**
  * 👥 Hook customizado para gerenciamento administrativo de participantes
  * 
@@ -297,30 +297,8 @@ export const useAdminParticipantes = () => {
   /**
    * 📊 Calcular estatísticas dos participantes
    */
-  const calcularEstatisticas = (dados) => {
-    const total = dados.length;
-    const confirmados = dados.filter(
-      (p) => p.statusPagamento === "confirmado"
-    ).length;
-    const pendentes = dados.filter(
-      (p) => p.statusPagamento === "pendente"
-    ).length;
-    const cancelados = dados.filter(
-      (p) => p.statusPagamento === "cancelado"
-    ).length;
-
-    // Calcular receita apenas dos confirmados
-    const receita = dados
-      .filter((p) => p.statusPagamento === "confirmado")
-      .reduce((total, p) => total + parseFloat(p.valorInscricao || 0), 0);
-
-    setEstatisticas({
-      total,
-      confirmados,
-      pendentes,
-      cancelados,
-      receita,
-    });
+    const calcularEstatisticas = (dados) => {
+    setEstatisticas(calcularEstatisticasAdmin(dados));
   };
 
 

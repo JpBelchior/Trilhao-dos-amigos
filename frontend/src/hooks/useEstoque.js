@@ -1,6 +1,10 @@
 // frontend/src/hooks/useEstoque.js
 import { useState, useEffect, useMemo } from "react";
 import { useAuthApi } from "./useAuthApi";
+import { 
+    TamanhosCamisetaArray as TamanhoCamiseta,  
+    TipoCamisetaLabel as TipoCamiseta           
+} from "../constants";
 
 /**
  * 📦 Hook customizado para gerenciar estoque de camisetas
@@ -35,15 +39,6 @@ export const useEstoque = () => {
   // ESTADOS DE UI
   // ========================================
   const [estoqueExpandido, setEstoqueExpandido] = useState(false);
-
-  // ========================================
-  // CONSTANTES
-  // ========================================
-  const TamanhoCamiseta = ["PP", "P", "M", "G", "GG"];
-  const TipoCamiseta = {
-    manga_curta: "Manga Curta",
-    manga_longa: "Manga Longa",
-  };
 
   // ========================================
   // CARREGAR DADOS AO MONTAR

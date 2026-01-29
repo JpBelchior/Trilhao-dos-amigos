@@ -1,10 +1,5 @@
-// backend/src/utils/sanitizer.ts
 import validator from 'validator';
 
-/**
- * Utilitário para sanitizar inputs do usuário
- * Remove/escapa caracteres perigosos que podem causar XSS
- */
 export class Sanitizer {
   /**
    * Sanitizar string removendo HTML/scripts maliciosos

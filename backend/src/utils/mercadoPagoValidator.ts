@@ -1,4 +1,3 @@
-// backend/src/utils/mercadoPagoValidator.ts
 import crypto from 'crypto';
 
 /**

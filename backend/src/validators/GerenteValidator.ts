@@ -107,7 +107,7 @@ export class GerenteValidator {
       }
     }
 
-    // Validar mudança de senha se fornecida (como era no código antigo)
+    // Validar mudança de senha se fornecida 
     if (dados.novaSenha) {
       // Verificar se senha atual foi fornecida
       if (!dados.senhaAtual) {
@@ -115,7 +115,7 @@ export class GerenteValidator {
       }
 
       // Verificar se nova senha é válida
-      if (dados.novaSenha.length < 6) {
+      if (dados.novaSenha.length < 6 || dados.novaSenha.length!==0 ) {
         errors.push("Nova senha deve ter pelo menos 6 caracteres");
       }
 

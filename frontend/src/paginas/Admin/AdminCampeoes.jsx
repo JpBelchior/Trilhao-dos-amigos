@@ -71,7 +71,7 @@ const AdminCampeoes = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">
       <div className="container mx-auto px-6">
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-2">
           <div className="flex items-center mb-4 lg:mb-0">
             <button
               onClick={() => navigate("/admin")}
@@ -81,9 +81,8 @@ const AdminCampeoes = () => {
             </button>
 
             <div>
-              <h1 className="text-4xl font-black text-white mb-2">
-                <Trophy className="inline mr-3 text-yellow-400" size={40} />
-                HALL DA FAMA
+              <h1 className="text-3xl font-black text-white mb-2">
+                Hall da Fama
               </h1>
               <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400"></div>
             </div>
@@ -92,13 +91,16 @@ const AdminCampeoes = () => {
           <div className="flex space-x-4">
             <button
               onClick={abrirModalCriacao}
-              className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold py-3 px-6 rounded-xl transition-all flex items-center"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center"
             >
               <PlusCircle className="mr-2" size={20} />
               Adicionar Campeão
             </button>
           </div>
         </div>
+        <p className="text-gray-400 text-xl mb-5">
+              Controle dos campeoes das edições anteriores
+            </p>
 
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <StatCard

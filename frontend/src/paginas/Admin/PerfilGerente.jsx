@@ -67,7 +67,7 @@ const PerfilGerente = () => {
 
     // Verificar se há dados de senha
     const temDadosSenha =
-      formData.novaSenha || formData.senhaAtual || formData.confirmarSenha;
+       formData.senhaAtual;
 
     // Se não há nenhuma alteração
     if (!nomeAlterado && !emailAlterado && !temDadosSenha) {
@@ -82,7 +82,7 @@ const PerfilGerente = () => {
       }
 
       if (formData.novaSenha) {
-        if (formData.novaSenha.length < 6) {
+        if (formData.novaSenha.length < 6 || formData.novaSenha.length!=0 ) {
           setErro("Nova senha deve ter pelo menos 6 caracteres");
           return false;
         }
@@ -97,65 +97,69 @@ const PerfilGerente = () => {
     return true;
   };
 
-  // Submeter alterações
   const submeterAlteracoes = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validarFormulario()) {
-      return;
+  if (!validarFormulario()) {
+    return;
+  }
+
+  setLoading(true);
+  setErro("");
+  setSucesso("");
+
+  try {
+    const dadosAlteracao = {};
+
+    if (formData.nome.trim() !== gerente.nome) {
+      dadosAlteracao.nome = formData.nome.trim();
     }
 
-    setLoading(true);
-    setErro("");
-    setSucesso("");
+    if (formData.email.trim().toLowerCase() !== gerente.email.toLowerCase()) {
+      dadosAlteracao.email = formData.email.trim().toLowerCase();
+    }
 
-    try {
-      // Preparar dados apenas com campos alterados
-      const dadosAlteracao = {};
+    if (formData.senhaAtual.trim()) {
+      dadosAlteracao.senhaAtual = formData.senhaAtual;
+    }
 
-      // Adicionar senha atual se fornecida
-      if (formData.senhaAtual.trim()) {
-        dadosAlteracao.senhaAtual = formData.senhaAtual;
-      }
+    if (formData.novaSenha) {
+      dadosAlteracao.novaSenha = formData.novaSenha;
+      dadosAlteracao.confirmarSenha = formData.confirmarSenha;
+    }
 
-      // Adicionar nova senha se fornecida
-      if (formData.novaSenha) {
-        dadosAlteracao.novaSenha = formData.novaSenha;
-        dadosAlteracao.confirmarSenha = formData.confirmarSenha;
-      }
+    console.log("📝 Dados para alteração:", dadosAlteracao);
 
-      // Usar função do contexto para atualizar
-      const resultado = await atualizarPerfil(dadosAlteracao);
+    // Usar função do contexto para atualizar
+    const resultado = await atualizarPerfil(dadosAlteracao);
 
-      if (resultado.sucesso) {
-        setSucesso("✅ Perfil atualizado com sucesso!");
+    if (resultado.sucesso) {
+      setSucesso("✅ Perfil atualizado com sucesso!");
 
-        // Limpar campos de senha
+      setFormData((prev) => ({
+        ...prev,
+        senhaAtual: "",
+        novaSenha: "",
+        confirmarSenha: "",
+      }));
+
+      if (resultado.dados?.gerente) {
         setFormData((prev) => ({
           ...prev,
-          senhaAtual: "",
-          novaSenha: "",
-          confirmarSenha: "",
+          nome: resultado.dados.gerente.nome,
+          email: resultado.dados.gerente.email,
         }));
-
-        // Atualizar dados locais se nome/email mudaram
-        if (dadosAlteracao.nome || dadosAlteracao.email) {
-          setFormData((prev) => ({
-            ...prev,
-            nome: resultado.dados.nome,
-            email: resultado.dados.email,
-          }));
-        }
-      } else {
-        throw new Error(resultado.erro || "Erro ao atualizar perfil");
       }
-    } catch (error) {
-      console.error("❌ Erro ao atualizar perfil:", error);
-      setErro(error.message || "Erro ao atualizar perfil");
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(resultado.erro || "Erro ao atualizar perfil");
     }
-  };
+  } catch (error) {
+    console.error("❌ Erro ao atualizar perfil:", error);
+    setErro(error.message || "Erro ao atualizar perfil");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">

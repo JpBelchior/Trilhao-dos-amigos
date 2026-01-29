@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuthApi } from "./useAuthApi";
+import { TipoCamisetaLabel as TipoCamiseta } from "../constants";
 
 /**
  * 📦 Hook customizado para gerenciar entregas de camisetas
@@ -31,13 +32,6 @@ export const useEntregasCamisas = () => {
   const [filtroNome, setFiltroNome] = useState("");
   const [loadingButtons, setLoadingButtons] = useState({});
 
-  // ========================================
-  // CONSTANTES
-  // ========================================
-  const TipoCamiseta = {
-    manga_curta: "Manga Curta",
-    manga_longa: "Manga Longa",
-  };
 
   // ========================================
   // CARREGAR DADOS AO MONTAR

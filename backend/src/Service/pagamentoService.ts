@@ -1,7 +1,5 @@
-// backend/src/Service/pagamentoService.ts - VERSÃO COMPLETA COM SIMULAÇÃO
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { Participante } from "../models";
-import { StatusPagamento } from "../types/models";
 import { ParticipanteController } from "../controllers/ParticipanteController";
 
 // ========================================

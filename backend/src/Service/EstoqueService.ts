@@ -1,6 +1,3 @@
-// backend/src/Service/EstoqueService.ts
-// ✅ RECRIADO BASEADO NO CÓDIGO ANTIGO QUE FUNCIONAVA
-
 import { EstoqueCamiseta, Participante, CamisetaExtra } from "../models";
 import { TamanhoCamiseta, TipoCamiseta } from "../types/models";
 

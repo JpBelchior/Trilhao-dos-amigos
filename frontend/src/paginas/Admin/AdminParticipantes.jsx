@@ -119,7 +119,7 @@ const AdminParticipantes = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-8">
       <div className="container mx-auto px-6">
         {/* HEADER DA PÁGINA */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-2">
           <div className="flex items-center mb-4 lg:mb-0">
             <button
               onClick={() => navigate("/admin")}
@@ -129,13 +129,13 @@ const AdminParticipantes = () => {
             </button>
 
             <div>
-              <h1 className="text-4xl font-black text-white mb-2">
-                <Users className="inline mr-3" size={40} />
-                GERENCIAR PARTICIPANTES
+              <h1 className="text-3xl font-black text-white mb-2">
+                Gerenciar Participantes
               </h1>
               <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400"></div>
             </div>
           </div>
+           
 
           <div className="flex space-x-4">
             {/* NOVO BOTÃO - Criar Participante */}
@@ -148,6 +148,9 @@ const AdminParticipantes = () => {
             </button>
           </div>
         </div>
+        <p className="text-gray-400 text-xl mb-5">
+              Controle dos Participantes inscritos
+            </p>
 
         {/* CARDS DE ESTATÍSTICAS */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">

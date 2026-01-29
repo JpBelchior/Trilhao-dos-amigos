@@ -170,17 +170,19 @@ const AdminRelatorios = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate("/admin")}
-              className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-xl transition-all"
-            >
-              <ArrowLeft size={20} />
+                 onClick={() => navigate("/admin")}
+                 className="mr-4 p-2 rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 transition-colors"
+                          >
+                <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-4xl font-bold text-white flex items-center gap-3">
-                <FileText className="text-yellow-400" size={40} />
+              <div>
+              <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
                 Relatórios
               </h1>
-              <p className="text-gray-400 mt-2">
+              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400"></div>
+              </div>
+              <p className="text-gray-400 text-xl mt-2">
                 Gere e exporte listas de participantes
               </p>
             </div>
@@ -189,7 +191,7 @@ const AdminRelatorios = () => {
           <button
             onClick={gerarPDF}
             disabled={gerandoPDF || participantes.length === 0}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
           >
             {gerandoPDF ? (
               <>
@@ -206,25 +208,14 @@ const AdminRelatorios = () => {
         </div>
 
         {/* ESTATÍSTICAS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8">
           <StatCard
             icon={Users}
             value={estatisticas.total}
             label="Total de Participantes"
             color="yellow"
           />
-          <StatCard
-            icon={CheckCircle}
-            value={estatisticas.confirmados}
-            label="Pagamentos Confirmados"
-            color="green"
-          />
-          <StatCard
-            icon={Clock}
-            value={estatisticas.pendentes}
-            label="Pagamentos Pendentes"
-            color="yellow"
-          />
+         
         </div>
 
         {/* TABELA */}

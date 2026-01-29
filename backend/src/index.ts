@@ -199,10 +199,6 @@ app.get("/seed", async (req, res) => {
     await popularCampeoes();         // 3. Campeões
     await popularParticipantes();    // 4. Participantes
 
-    console.log("\n✅ ========================================");
-    console.log("   TODAS AS SEEDS EXECUTADAS COM SUCESSO!");
-    console.log("========================================\n");
-
     // 🆕 ADICIONAR RESPOSTA DE SUCESSO
     res.json({
       sucesso: true,
@@ -265,7 +261,6 @@ const startServer = async () => {
         "🔍 Configurando verificação automática de participantes cancelados..."
       );
 
-      // Executar a primeira verificação após 1 minuto (para dar tempo do sistema inicializar)
       setTimeout(async () => {
         console.log("🔍 Executando primeira verificação de cancelados...");
         try {
@@ -278,7 +273,7 @@ const startServer = async () => {
         }
       }, 60 * 1000); // 1 minuto
 
-      // Executar a cada 15 minutos
+     
       setInterval(async () => {
         try {
           const { ParticipanteController } = await import(
@@ -288,7 +283,7 @@ const startServer = async () => {
         } catch (error) {
           console.error("❌ Erro na verificação automática:", error);
         }
-      }, 15 * 60 * 1000); // 15 minutos
+      }, 15 * 60 * 1000); 
 
       console.log(
         "✅ Verificação automática configurada para executar a cada 15 minutos"

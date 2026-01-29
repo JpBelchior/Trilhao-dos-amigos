@@ -295,7 +295,6 @@ const TabelaCamisasReservadas = () => {
                                         : "text-yellow-400"
                                     }`}
                                   >
-                                    {extra.entregue ? "✓" : "⏳"}
                                   </span>
                                 </div>
                               ))}
@@ -311,7 +310,7 @@ const TabelaCamisasReservadas = () => {
                                   : "bg-orange-500 text-white"
                               }`}
                             >
-                              {todasEntregues ? "✅ COMPLETO" : "⏳ PENDENTE"}
+                              {todasEntregues ? " COMPLETO" : " PENDENTE"}
                             </span>
                             <span className="text-gray-400 text-xs">
                               {camisetas.length} camiseta
