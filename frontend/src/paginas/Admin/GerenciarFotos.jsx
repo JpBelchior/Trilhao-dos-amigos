@@ -185,7 +185,7 @@ const GerenciarFotos = () => {
 
   const carregarFotos = async () => {
     try {
-      setLoading(true); // ← ADICIONAR
+      setLoading(true); 
       setErro("");
 
       const url =

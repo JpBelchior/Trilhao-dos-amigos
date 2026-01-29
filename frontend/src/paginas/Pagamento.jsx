@@ -1,4 +1,3 @@
-// frontend/src/paginas/Pagamento.jsx - VERSÃO REFATORADA COM HOOK
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom"
 import {
@@ -11,17 +10,13 @@ import {
   Loader2,
   Clock,
   RefreshCw,
-  CheckCircle2,
 } from "lucide-react";
 
-// 🎯 Importar o hook customizado
+
 import usePagamento from "../hooks/usePagamento";
 
 const Pagamento = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  
-  // Dados vindos do cadastro via route state
   const { dadosInscricao, valorTotal } = location.state || {};
   console.log("🔍 [DEBUG] dadosInscricao:", dadosInscricao);
 
@@ -48,7 +43,7 @@ const Pagamento = () => {
   const dados = dadosParticipante || dadosInscricao || {};
   console.log("🔍 [DEBUG] dadosInscricao:", dadosParticipante);
   // ========================================
-  // VERIFICAR AMBIENTE (desenvolvimento vs produção)
+  // VERIFICAR AMBIENTE
   // ========================================
   const isDevelopment = import.meta.env.MODE === 'development' || 
                         window.location.hostname === 'localhost' ||
@@ -58,8 +53,6 @@ const Pagamento = () => {
   // ========================================
   // RENDERIZAÇÕES CONDICIONAIS
   // ========================================
-
-  // 1️⃣ Loading inicial - Gerando PIX
   if (loading.gerandoPix) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 flex items-center justify-center">

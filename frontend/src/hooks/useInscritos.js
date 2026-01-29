@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { useFiltros } from "./useFiltros";
+import { apiClient } from "../services/api";
 
 /**
+ * 📋 Hook customizado para gerenciar lista de inscritos
+ * 
+ * Responsabilidades:
+ * - Buscar participantes confirmados da API
+ * - Calcular estatísticas
+ * - Gerenciar filtros e paginação
+ * 
  * @returns {Object} Estados e funções necessários para o componente
  */
 export const useInscritos = () => {
@@ -39,7 +47,7 @@ export const useInscritos = () => {
       nome: {
         tipo: "texto",
         campo: "nome",
-        camposAdicionais: ["numeroInscricao"], 
+        camposAdicionais: ["numeroInscricao"],
       },
       cidade: {
         tipo: "texto",
@@ -56,33 +64,26 @@ export const useInscritos = () => {
       habilitarPaginacao: true,
     }
   );
-  
-  // Carregar participantes ao montar
+
+
   useEffect(() => {
     carregarParticipantes();
   }, []);
 
-  // ========================================
-  // FUNÇÕES - API
-  // ========================================
-
-  /**
-   * 📥 Carregar participantes confirmados
-   */
   const carregarParticipantes = async () => {
     try {
       setLoading(true);
       setErro(null);
 
-      console.log("📊 [Inscritos] Carregando participantes confirmados...");
+      console.log("📊 [useInscritos] Carregando participantes confirmados...");
 
-      const response = await fetch(
-        "http://localhost:8000/api/participantes?status=confirmado"
-      );
-      const data = await response.json();
+      // ✅ USANDO apiClient ao invés de fetch direto
+      const data = await apiClient.get("/participantes?status=confirmado");
 
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];
+        
+        // Filtrar apenas confirmados (caso o backend não filtre)
         const participantesConfirmados = participantesData.filter(
           (p) => p.statusPagamento === "confirmado"
         );
@@ -91,74 +92,80 @@ export const useInscritos = () => {
         calcularEstatisticas(participantesConfirmados);
 
         console.log(
-          `✅ [Inscritos] ${participantesConfirmados.length} participantes carregados`
+          `✅ [useInscritos] ${participantesConfirmados.length} participantes carregados`
         );
-      } else {
-        throw new Error(data.erro || "Erro ao carregar participantes");
       }
     } catch (error) {
-      console.error("❌ [Inscritos] Erro ao carregar:", error);
-      setErro(error.message);
+      console.error("❌ [useInscritos] Erro ao carregar:", error);
+      setErro(error.message || "Erro ao carregar participantes");
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * 📊 Calcular estatísticas dos participantes
-   */
+
   const calcularEstatisticas = (dados) => {
     const total = dados.length;
-    const nacionais = dados.filter((p) => p.categoriaMoto === "nacional").length;
-    const importadas = dados.filter((p) => p.categoriaMoto === "importada").length;
+    const nacionais = dados.filter(
+      (p) => p.categoriaMoto === "nacional"
+    ).length;
+    const importadas = dados.filter(
+      (p) => p.categoriaMoto === "importada"
+    ).length;
 
-    // Extrair cidades e estados únicos
-    const cidadesUnicas = [...new Set(dados.map((p) => p.cidade))];
-    const estadosUnicos = [...new Set(dados.map((p) => p.estado))];
+    // Agrupar por cidade
+    const cidadesMap = {};
+    dados.forEach((p) => {
+      const cidadeCompleta = `${p.cidade}/${p.estado}`;
+      cidadesMap[cidadeCompleta] = (cidadesMap[cidadeCompleta] || 0) + 1;
+    });
+
+    // Agrupar por estado
+    const estadosMap = {};
+    dados.forEach((p) => {
+      estadosMap[p.estado] = (estadosMap[p.estado] || 0) + 1;
+    });
+
+    // Converter para arrays ordenados
+    const cidades = Object.entries(cidadesMap)
+      .map(([cidade, count]) => ({ cidade, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const estados = Object.entries(estadosMap)
+      .map(([estado, count]) => ({ estado, count }))
+      .sort((a, b) => b.count - a.count);
 
     setEstatisticas({
       total,
       nacionais,
       importadas,
-      cidades: cidadesUnicas.sort(),
-      estados: estadosUnicos.sort(),
-    });
-
-    console.log("📊 [Inscritos] Estatísticas calculadas:", {
-      total,
-      nacionais,
-      importadas,
-      cidades: cidadesUnicas.length,
-      estados: estadosUnicos.length,
+      cidades,
+      estados,
     });
   };
 
   // ========================================
-  // FUNÇÕES - UI
+  // RETORNO DO HOOK
   // ========================================
-
-  /**
-   * 👁️ Toggle de visibilidade dos filtros
-   */
-  const toggleFiltros = () => {
-    setMostrarFiltros((prev) => !prev);
-  };
-
   return {
-    // Estados principais
+    // Dados
     participantes,
     participantesFiltrados,
     participantesPagina,
+
+    // Estados
     loading,
     erro,
+    mostrarFiltros,
+
+    // Estatísticas
+    estatisticas,
 
     // Filtros
     filtros,
-    mostrarFiltros,
     atualizarFiltro,
     limparFiltros,
-    toggleFiltros,
-    temFiltrosAtivos, 
+    temFiltrosAtivos,
 
     // Paginação
     paginaAtual,
@@ -167,11 +174,9 @@ export const useInscritos = () => {
     itensPorPagina,
     irParaPagina,
 
-    // Estatísticas
-    estatisticas,
-
-    // Funções de ação
+    // Funções
     carregarParticipantes,
+    setMostrarFiltros,
   };
 };
 

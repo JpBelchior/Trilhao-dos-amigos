@@ -5,7 +5,6 @@ import {
   MapPin,
   Bike,
   CreditCard,
-  ChevronDown,
   RotateCcw,
 } from "lucide-react";
 import ExpandToggleButton from "../ExpandToggleButton";

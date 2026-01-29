@@ -146,19 +146,6 @@ const AdminParticipantes = () => {
               <UserPlus className="mr-2" size={20} />
               Criar Participante
             </button>
-
-            <button
-              onClick={recarregarDados}
-              disabled={loading}
-              className={`font-bold py-3 px-6 rounded-xl transition-all flex items-center ${
-                loading
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 text-white"
-              }`}
-            >
-              <RefreshCw className="mr-2" size={20} />
-              Atualizar
-            </button>
           </div>
         </div>
 

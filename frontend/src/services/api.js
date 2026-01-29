@@ -1,236 +1,266 @@
 const API_BASE_URL = "http://localhost:8000/api";
 
+// ============================================
+// 🔧 UTILITÁRIOS INTERNOS
+// ============================================
+
 /**
- * Cliente base para requisições HTTP
+ * Função auxiliar para fazer requisições HTTP
+ * Centraliza tratamento de erro e parsing de JSON
  */
-export const apiClient = {
+const makeRequest = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    // Se a resposta não for OK (status 200-299), lançar erro
+    if (!response.ok) {
+      throw new Error(data.erro || `HTTP ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    // Re-lançar erro para ser capturado pelo hook
+    throw error;
+  }
+};
+
+/**
+ * Formatar endpoint (adiciona / se necessário)
+ */
+const formatEndpoint = (endpoint) => {
+  return endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+};
+
+// ============================================
+// 📡 CLIENTE PÚBLICO (sem autenticação)
+// ============================================
+
+
+const apiClient = {
   /**
    * GET request
+   * @param {string} endpoint - Endpoint da API (ex: "/participantes")
+   * @returns {Promise<Object>} Dados da resposta
    */
   async get(endpoint) {
+    const formattedEndpoint = formatEndpoint(endpoint);
+    console.log(`🌐 [API] GET ${formattedEndpoint}`);
+
     try {
-      console.log(`🌐 [API] GET ${endpoint}`);
-
-      const response = await fetch(`${API_BASE_URL}${endpoint}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
-      }
-
-      console.log(`✅ [API] GET ${endpoint} - Sucesso`);
+      const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`);
+      console.log(`✅ [API] GET ${formattedEndpoint} - Sucesso`);
       return data;
     } catch (error) {
-      console.error(`❌ [API] GET ${endpoint} - Erro:`, error);
+      console.error(`❌ [API] GET ${formattedEndpoint} - Erro:`, error.message);
       throw error;
     }
   },
 
   /**
    * POST request
+   * @param {string} endpoint - Endpoint da API
+   * @param {Object} body - Dados a enviar
+   * @returns {Promise<Object>} Dados da resposta
    */
   async post(endpoint, body) {
-    try {
-      console.log(`🌐 [API] POST ${endpoint}`);
+    const formattedEndpoint = formatEndpoint(endpoint);
+    console.log(`🌐 [API] POST ${formattedEndpoint}`);
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    try {
+      const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
-      }
-
-      console.log(`✅ [API] POST ${endpoint} - Sucesso`);
+      console.log(`✅ [API] POST ${formattedEndpoint} - Sucesso`);
       return data;
     } catch (error) {
-      console.error(`❌ [API] POST ${endpoint} - Erro:`, error);
+      console.error(`❌ [API] POST ${formattedEndpoint} - Erro:`, error.message);
       throw error;
     }
   },
 
   /**
    * PUT request
+   * @param {string} endpoint - Endpoint da API
+   * @param {Object} body - Dados a enviar
+   * @returns {Promise<Object>} Dados da resposta
    */
   async put(endpoint, body) {
-    try {
-      console.log(`🌐 [API] PUT ${endpoint}`);
+    const formattedEndpoint = formatEndpoint(endpoint);
+    console.log(`🌐 [API] PUT ${formattedEndpoint}`);
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    try {
+      const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
-      }
-
-      console.log(`✅ [API] PUT ${endpoint} - Sucesso`);
+      console.log(`✅ [API] PUT ${formattedEndpoint} - Sucesso`);
       return data;
     } catch (error) {
-      console.error(`❌ [API] PUT ${endpoint} - Erro:`, error);
+      console.error(`❌ [API] PUT ${formattedEndpoint} - Erro:`, error.message);
       throw error;
     }
   },
 
   /**
    * DELETE request
+   * @param {string} endpoint - Endpoint da API
+   * @returns {Promise<Object>} Dados da resposta
    */
   async delete(endpoint) {
-    try {
-      console.log(`🌐 [API] DELETE ${endpoint}`);
+    const formattedEndpoint = formatEndpoint(endpoint);
+    console.log(`🌐 [API] DELETE ${formattedEndpoint}`);
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    try {
+      const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
         method: "DELETE",
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
-      }
-
-      console.log(`✅ [API] DELETE ${endpoint} - Sucesso`);
+      console.log(`✅ [API] DELETE ${formattedEndpoint} - Sucesso`);
       return data;
     } catch (error) {
-      console.error(`❌ [API] DELETE ${endpoint} - Erro:`, error);
+      console.error(`❌ [API] DELETE ${formattedEndpoint} - Erro:`, error.message);
       throw error;
     }
   },
 };
 
+// ============================================
+// 🔐 FACTORY DE CLIENTE AUTENTICADO
+// ============================================
+
 /**
- * Cliente para requisições autenticadas
- * Usa o token do AuthContext
+ * 
+ * @param {string} token - Token JWT do usuário logado
+ * @returns {Object} Cliente HTTP autenticado
  */
-export const createAuthApiClient = (token) => ({
-  /**
-   * GET autenticado
-   */
-  async get(endpoint) {
-    try {
-      console.log(`🔐 [API-AUTH] GET ${endpoint}`);
+ const createAuthApiClient = (token) => {
+  if (!token) {
+    console.warn("⚠️ [API-AUTH] Token não fornecido ao criar cliente autenticado");
+  }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+  return {
+    /**
+     * GET autenticado
+     * @param {string} endpoint - Endpoint da API
+     * @returns {Promise<Object>} Dados da resposta
+     */
+    async get(endpoint) {
+      const formattedEndpoint = formatEndpoint(endpoint);
+      console.log(`🔐 [API-AUTH] GET ${formattedEndpoint}`);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
+      try {
+        const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(`✅ [API-AUTH] GET ${formattedEndpoint} - Sucesso`);
+        return data;
+      } catch (error) {
+        console.error(`❌ [API-AUTH] GET ${formattedEndpoint} - Erro:`, error.message);
+        throw error;
       }
+    },
 
-      console.log(`✅ [API-AUTH] GET ${endpoint} - Sucesso`);
-      return data;
-    } catch (error) {
-      console.error(`❌ [API-AUTH] GET ${endpoint} - Erro:`, error);
-      throw error;
-    }
-  },
+    /**
+     * POST autenticado
+     * @param {string} endpoint - Endpoint da API
+     * @param {Object|FormData} body - Dados a enviar (JSON ou FormData)
+     * @returns {Promise<Object>} Dados da resposta
+     */
+    async post(endpoint, body) {
+      const formattedEndpoint = formatEndpoint(endpoint);
+      console.log(`🔐 [API-AUTH] POST ${formattedEndpoint}`);
 
-  /**
-   * POST autenticado
-   */
-  async post(endpoint, body) {
-    try {
-      console.log(`🔐 [API-AUTH] POST ${endpoint}`);
+      // Detectar se é FormData (para uploads)
+      const isFormData = body instanceof FormData;
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
+      try {
+        const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // Não adicionar Content-Type para FormData (browser define automaticamente)
+            ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          },
+          body: isFormData ? body : JSON.stringify(body),
+        });
+        console.log(`✅ [API-AUTH] POST ${formattedEndpoint} - Sucesso`);
+        return data;
+      } catch (error) {
+        console.error(`❌ [API-AUTH] POST ${formattedEndpoint} - Erro:`, error.message);
+        throw error;
       }
+    },
 
-      console.log(`✅ [API-AUTH] POST ${endpoint} - Sucesso`);
-      return data;
-    } catch (error) {
-      console.error(`❌ [API-AUTH] POST ${endpoint} - Erro:`, error);
-      throw error;
-    }
-  },
+    /**
+     * PUT autenticado
+     * @param {string} endpoint - Endpoint da API
+     * @param {Object|FormData} body - Dados a enviar (JSON ou FormData)
+     * @returns {Promise<Object>} Dados da resposta
+     */
+    async put(endpoint, body) {
+      const formattedEndpoint = formatEndpoint(endpoint);
+      console.log(`🔐 [API-AUTH] PUT ${formattedEndpoint}`);
 
-  /**
-   * PUT autenticado
-   */
-  async put(endpoint, body) {
-    try {
-      console.log(`🔐 [API-AUTH] PUT ${endpoint}`);
+      const isFormData = body instanceof FormData;
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
+      try {
+        const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          },
+          body: isFormData ? body : JSON.stringify(body),
+        });
+        console.log(`✅ [API-AUTH] PUT ${formattedEndpoint} - Sucesso`);
+        return data;
+      } catch (error) {
+        console.error(`❌ [API-AUTH] PUT ${formattedEndpoint} - Erro:`, error.message);
+        throw error;
       }
+    },
 
-      console.log(`✅ [API-AUTH] PUT ${endpoint} - Sucesso`);
-      return data;
-    } catch (error) {
-      console.error(`❌ [API-AUTH] PUT ${endpoint} - Erro:`, error);
-      throw error;
-    }
-  },
+    /**
+     * DELETE autenticado
+     * @param {string} endpoint - Endpoint da API
+     * @returns {Promise<Object>} Dados da resposta
+     */
+    async delete(endpoint) {
+      const formattedEndpoint = formatEndpoint(endpoint);
+      console.log(`🔐 [API-AUTH] DELETE ${formattedEndpoint}`);
 
-  /**
-   * DELETE autenticado
-   */
-  async delete(endpoint) {
-    try {
-      console.log(`🔐 [API-AUTH] DELETE ${endpoint}`);
-
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || `HTTP ${response.status}`);
+      try {
+        const data = await makeRequest(`${API_BASE_URL}${formattedEndpoint}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(`✅ [API-AUTH] DELETE ${formattedEndpoint} - Sucesso`);
+        return data;
+      } catch (error) {
+        console.error(`❌ [API-AUTH] DELETE ${formattedEndpoint} - Erro:`, error.message);
+        throw error;
       }
+    },
+  };
+};
 
-      console.log(`✅ [API-AUTH] DELETE ${endpoint} - Sucesso`);
-      return data;
-    } catch (error) {
-      console.error(`❌ [API-AUTH] DELETE ${endpoint} - Erro:`, error);
-      throw error;
-    }
-  },
-});
+// ============================================
+// 📤 EXPORTS
+// ============================================
 
 export default apiClient;
+
+export { apiClient, createAuthApiClient };

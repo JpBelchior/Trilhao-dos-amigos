@@ -2,7 +2,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { apiClient } from "../services/api";
 
-
+/**
+ * 🏆 Hook customizado para gerenciar o Hall da Fama
+ * 
+ * @returns {Object} Estados e funções necessários para o componente
+ */
 export const useHallFama = () => {
   // ========================================
   // ESTADOS
@@ -15,7 +19,7 @@ export const useHallFama = () => {
   // ========================================
   // CONSTANTES
   // ========================================
-  const ALTURA_TOPO = 60; // Altura total do morro em metros
+  const ALTURA_TOPO = 100; // Altura total do morro em metros
 
   // ========================================
   // CARREGAR DADOS AO MONTAR
@@ -28,7 +32,10 @@ export const useHallFama = () => {
   // FUNÇÕES - API
   // ========================================
 
- 
+  /**
+   * 📥 Carregar campeões e melhor resultado da API
+   * Usando apiClient centralizado para consistência
+   */
   const carregarCampeoes = async () => {
     try {
       setLoading(true);
@@ -67,7 +74,12 @@ export const useHallFama = () => {
   // FUNÇÕES - PROCESSAMENTO DE DADOS
   // ========================================
 
-
+  /**
+   * 📊 Organizar campeões por edição
+   * Retorna apenas o MELHOR de cada categoria por edição
+   * 
+   * @returns {Array} Array de edições com melhor nacional e melhor importada
+   */
   const organizarPorEdicao = useMemo(() => {
     const edicoes = {};
 
@@ -108,7 +120,12 @@ export const useHallFama = () => {
     return Object.values(edicoes).sort((a, b) => b.ano - a.ano);
   }, [campeoes]); // Só recalcula quando campeoes mudar
 
-
+  /**
+   * 📏 Calcular distância que faltou para o topo
+   * 
+   * @param {number} altura - Altura alcançada pelo piloto
+   * @returns {string} Distância formatada (ex: "12.5m") ou "CONQUISTOU!"
+   */
   const calcularDistanciaFaltou = (altura) => {
     const faltou = ALTURA_TOPO - altura;
     return faltou > 0 ? `${faltou.toFixed(1)}m` : "CONQUISTOU!";

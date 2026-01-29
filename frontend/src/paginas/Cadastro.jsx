@@ -2,17 +2,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreditCard, Loader2, AlertTriangle, X } from "lucide-react";
 
-// Importar hook customizado
+
 import useCadastro from "../hooks/UseCadastro";
 
-// Importar componentes dos steps
 import StepDadosIniciais from "../componentes/Cadastro/DadosIniciais";
 import StepCamisetas from "../componentes/Cadastro/Camisetas";
 
 const Cadastro = () => {
   const navigate = useNavigate();
 
-  // 🆕 Estado para exibir erros de validação
   const [erroValidacao, setErroValidacao] = useState(null);
 
   // Usar hook customizado

@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
+import { apiClient } from "../services/api";
 
 /**
-
+ * 📊 Hook customizado para gerenciar estatísticas do evento
+ * 
+ * Responsabilidades:
+ * - Buscar participantes confirmados da API
+ * - Calcular estatísticas detalhadas
+ * - Processar dados para gráficos
  * 
  * @returns {Object} Estados e funções necessários para o componente
  */
@@ -31,25 +37,28 @@ export const useEstatisticas = () => {
     motosPopulares: [],
   });
 
+  // ========================================
+  // CARREGAR DADOS AO MONTAR
+  // ========================================
   useEffect(() => {
     carregarDados();
   }, []);
 
-
+  // ========================================
+  // FUNÇÕES - API
+  // ========================================
   const carregarDados = async () => {
     try {
       setLoading(true);
       setErro(null);
 
-      console.log("📊 [Estatisticas] Carregando dados...");
+      console.log("📊 [useEstatisticas] Carregando dados...");
 
-      const response = await fetch(
-        "http://localhost:8000/api/participantes?status=confirmado"
-      );
-      const data = await response.json();
+      const data = await apiClient.get("/participantes?status=confirmado");
 
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];
+        
         const participantesConfirmados = participantesData.filter(
           (p) => p.statusPagamento === "confirmado"
         );
@@ -58,14 +67,12 @@ export const useEstatisticas = () => {
         calcularEstatisticasDetalhadas(participantesConfirmados);
 
         console.log(
-          `✅ [Estatisticas] ${participantesConfirmados.length} participantes carregados`
+          `✅ [useEstatisticas] ${participantesConfirmados.length} participantes carregados`
         );
-      } else {
-        throw new Error(data.erro || "Erro ao carregar dados");
       }
     } catch (error) {
-      console.error("❌ [Estatisticas] Erro ao carregar:", error);
-      setErro(error.message);
+      console.error("❌ [useEstatisticas] Erro ao carregar:", error);
+      setErro(error.message || "Erro ao carregar dados");
     } finally {
       setLoading(false);
     }
@@ -73,8 +80,12 @@ export const useEstatisticas = () => {
 
   const calcularEstatisticasDetalhadas = (dados) => {
     const total = dados.length;
-    const nacionais = dados.filter((p) => p.categoriaMoto === "nacional").length;
-    const importadas = dados.filter((p) => p.categoriaMoto === "importada").length;
+    const nacionais = dados.filter(
+      (p) => p.categoriaMoto === "nacional"
+    ).length;
+    const importadas = dados.filter(
+      (p) => p.categoriaMoto === "importada"
+    ).length;
 
     // Percentuais
     const percentualNacionais =
@@ -82,83 +93,65 @@ export const useEstatisticas = () => {
     const percentualImportadas =
       total > 0 ? ((importadas / total) * 100).toFixed(1) : 0;
 
-    // Contagem por cidade
-    const contagemCidades = {};
+    // Agrupar por cidade
+    const cidadesMap = {};
     dados.forEach((p) => {
-      const chave = `${p.cidade}/${p.estado}`;
-      contagemCidades[chave] = (contagemCidades[chave] || 0) + 1;
+      const cidadeCompleta = `${p.cidade}/${p.estado}`;
+      cidadesMap[cidadeCompleta] = (cidadesMap[cidadeCompleta] || 0) + 1;
     });
 
-    // Contagem por estado
-    const contagemEstados = {};
+    // Agrupar por estado
+    const estadosMap = {};
     dados.forEach((p) => {
-      contagemEstados[p.estado] = (contagemEstados[p.estado] || 0) + 1;
+      estadosMap[p.estado] = (estadosMap[p.estado] || 0) + 1;
     });
 
-    // Contagem por modelo de moto (simplificado)
-    const contagemMotos = {};
+    // Agrupar por modelo de moto
+    const motosMap = {};
     dados.forEach((p) => {
-      const modelo = p.modeloMoto.toLowerCase();
-      
-      // Simplificar o nome da moto para agrupar melhor
-      let modeloSimplificado = modelo;
-      if (modelo.includes("bros")) modeloSimplificado = "Honda Bros";
-      else if (modelo.includes("lander")) modeloSimplificado = "Yamaha Lander";
-      else if (modelo.includes("ktm")) modeloSimplificado = "KTM";
-      else if (modelo.includes("crosser")) modeloSimplificado = "Yamaha Crosser";
-      else if (modelo.includes("xre")) modeloSimplificado = "Honda XRE";
-      else if (modelo.includes("crf")) modeloSimplificado = "Honda CRF";
-      else if (modelo.includes("wr")) modeloSimplificado = "Yamaha WR";
-      else if (modelo.includes("husqvarna")) modeloSimplificado = "Husqvarna";
-
-      contagemMotos[modeloSimplificado] =
-        (contagemMotos[modeloSimplificado] || 0) + 1;
+      motosMap[p.modeloMoto] = (motosMap[p.modeloMoto] || 0) + 1;
     });
 
-    // Encontrar cidade com mais participantes
-    const cidadeMaisParticipantes = Object.entries(contagemCidades).sort(
-      ([, a], [, b]) => b - a
-    )[0] || [null, 0];
+    // Converter para arrays ordenados
+    const cidades = Object.entries(cidadesMap)
+      .map(([cidade, quantidade]) => ({ nome: cidade, quantidade }))
+      .sort((a, b) => b.quantidade - a.quantidade);
 
-    // Encontrar estado com mais participantes
-    const estadoMaisParticipantes = Object.entries(contagemEstados).sort(
-      ([, a], [, b]) => b - a
-    )[0] || [null, 0];
+    const estados = Object.entries(estadosMap)
+      .map(([estado, quantidade]) => ({ nome: estado, quantidade }))
+      .sort((a, b) => b.quantidade - a.quantidade);
 
-    // Top 5 motos mais populares
-    const motosPopulares = Object.entries(contagemMotos)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([modelo, quantidade]) => ({ modelo, quantidade }));
+    const motosPopulares = Object.entries(motosMap)
+      .map(([modelo, quantidade]) => ({ modelo, quantidade }))
+      .sort((a, b) => b.quantidade - a.quantidade)
+      .slice(0, 5); 
 
-    // Atualizar estado
+    // Cidade e estado com mais participantes
+    const cidadeMaisParticipantes = cidades[0] || null;
+    const estadoMaisParticipantes = estados[0] || null;
+
     setEstatisticas({
       total,
       nacionais,
       importadas,
       percentualNacionais,
       percentualImportadas,
-      cidades: Object.keys(contagemCidades).sort(),
-      estados: Object.keys(contagemEstados).sort(),
-      totalCidades: Object.keys(contagemCidades).length,
-      totalEstados: Object.keys(contagemEstados).length,
-      cidadeMaisParticipantes: {
-        nome: cidadeMaisParticipantes[0],
-        quantidade: cidadeMaisParticipantes[1],
-      },
-      estadoMaisParticipantes: {
-        nome: estadoMaisParticipantes[0],
-        quantidade: estadoMaisParticipantes[1],
-      },
+      cidades,
+      estados,
+      totalCidades: Object.keys(cidadesMap).length,
+      totalEstados: Object.keys(estadosMap).length,
+      cidadeMaisParticipantes,
+      estadoMaisParticipantes,
       motosPopulares,
     });
-
   };
 
- 
+
   return {
-    // Estados principais
+    // Dados
     participantes,
+
+    // Estados
     loading,
     erro,
 
