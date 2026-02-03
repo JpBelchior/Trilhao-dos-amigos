@@ -113,8 +113,26 @@ const Pagamento = () => {
             Escaneie o QR Code ou copie o código para pagar
           </p>
         </div>
-
         {/* Container principal */}
+
+        <div className="mb-8 bg-black/40  backdrop-blur-lg rounded-2xl p-5 border border-green-400/30 shadow-lg">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <AlertCircle className="text-white  animate-pulse" size={32} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+               Atenção: Não atualize, feche ou volte a página sem antes realizar o pagamento!
+            </h3>
+            <div className="mt-3 pt-3 border-t border-yellow-400/30">
+              <p className="text-white text-sm">
+                <strong>Por quê?</strong> Atualizar a página pode gerar um novo PIX e causar problemas. 
+                O sistema já está <strong>verificando automaticamente</strong> seu pagamento!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
         <div className="grid md:grid-cols-2 gap-8">
           {/* Coluna 1: Resumo do pedido */}
           <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
@@ -192,9 +210,9 @@ const Pagamento = () => {
               Pagar com PIX
             </h2>
 
-            {/* QR Code */}
+           {/* QR Code */}
             {dadosPix?.qrCodeBase64 && (
-              <div className="bg-white rounded-2xl p-4 mb-4">
+              <div className="bg-white rounded-2xl p-4 mb-4 max-w-xs mx-auto">
                 <img
                   src={`data:image/png;base64,${dadosPix.qrCodeBase64}`}
                   alt="QR Code PIX"
@@ -202,6 +220,7 @@ const Pagamento = () => {
                 />
               </div>
             )}
+          
 
             {/* Código Copia e Cola */}
             {dadosPix?.qrCode && (
@@ -238,8 +257,6 @@ const Pagamento = () => {
             <div className="bg-blue-900/30 rounded-xl p-4 mb-4 border border-blue-400/30">
               <h4 className="text-blue-400 font-bold mb-2">📱 Como pagar:</h4>
               <ol className="text-gray-300 text-sm space-y-1 list-decimal list-inside">
-                <li>Abra o app do seu banco</li>
-                <li>Escolha pagar com PIX</li>
                 <li>Escaneie o QR Code ou cole o código</li>
                 <li>Confirme o pagamento de R$ {valorTotal?.toFixed(2)}</li>
                 <li>Aguarde a confirmação automática</li>
@@ -308,27 +325,16 @@ const Pagamento = () => {
             {!isDevelopment && (
               <div className="mt-4 bg-yellow-900/30 rounded-xl p-3 border border-yellow-400/30">
                 <p className="text-yellow-200 text-xs">
-                  ⚡ O pagamento é confirmado automaticamente. Não feche esta
-                  página!
+                 O pagamento é confirmado automaticamente.
                 </p>
               </div>
             )}
-
-            {/* Aviso - Modo Desenvolvimento */}
-            {isDevelopment && (
-              <div className="mt-4 bg-orange-900/30 rounded-xl p-3 border border-orange-400/30">
-                <p className="text-orange-200 text-xs font-bold mb-1">
-                  🧪 MODO DESENVOLVIMENTO
-                </p>
-                <p className="text-orange-200 text-xs">
-                  Use o botão "Simular Aprovação" para aprovar o pagamento sem usar o Mercado Pago. 
-                  Isso facilita os testes!
-                </p>
-              </div>
-            )}
+            
           </div>
         </div>
+
       </div>
+      
     </div>
   );
 };

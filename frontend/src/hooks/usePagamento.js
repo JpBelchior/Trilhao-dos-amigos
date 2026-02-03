@@ -1,13 +1,13 @@
-// frontend/src/hooks/usePagamento.js
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from '../services/api'; 
 
 /**
  * 🎯 Hook customizado para gerenciar toda a lógica de pagamento PIX
  * 
  * Responsabilidades:
  * - Gerar PIX via API
- * - Verificar status do pagamento (manual e automático)
+ * - Verificar status do pagamento 
  * - Gerenciar timer de expiração
  * - Copiar código PIX
  * - Redirecionar após aprovação
@@ -40,10 +40,10 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
    useEffect(() => {
     if (statusPagamento === "approved" && dadosPix) {
-      // Pequeno delay para o usuário ver a animação de verificação
+      
       setTimeout(() => {
         navigate("/pagamento-confirmado", {
-          replace: true, // ✅ Substitui a entrada atual (não pode voltar)
+          replace: true, 
           state: {
             dadosParticipante: dadosInscricao,
             valorTotal: valorTotal,
@@ -100,7 +100,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
     const intervalo = setInterval(() => {
       verificarStatusSilencioso();
-    }, 5000); // Verifica a cada 5 segundos
+    }, 10000); 
 
     return () => clearInterval(intervalo);
   }, [dadosPix?.pagamentoId, statusPagamento]);
@@ -111,7 +111,6 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
   /**
    * 🏦 Gerar PIX no backend
-   * 🔒 SEGURANÇA: Envia apenas participanteId, o valor é calculado no backend
    */
   const gerarPix = async () => {
     setLoading((prev) => ({ ...prev, gerandoPix: true }));
@@ -120,27 +119,9 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
     try {
       console.log("🏦 [usePagamento] Gerando PIX...");
 
-      const response = await fetch(
-        "http://localhost:8000/api/pagamento/criar-pix",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            participanteId: dadosInscricao.id,
-            // ✅ REMOVIDO: valorTotal
-            // O valor é calculado no backend baseado no banco de dados
-            // Isso previne manipulação via console/DevTools
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok || !data.sucesso) {
-        throw new Error(data.erro || "Erro ao gerar PIX");
-      }
+      const data = await apiClient.post('/pagamento/criar-pix', {
+        participanteId: dadosInscricao.id,
+      });
 
       console.log("✅ [usePagamento] PIX gerado com sucesso:", data.dados);
 

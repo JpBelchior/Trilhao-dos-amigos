@@ -385,15 +385,82 @@ export class PagamentoService {
   }
 }
 
+public static async verificarPixPendente(participanteId: number): Promise<{
+  temPendente: boolean;
+  mensagem?: string;
+}> {
+  try {
+    const participante = await this.buscarParticipante(participanteId);
+    
+    if (!participante) {
+      return { temPendente: false };
+    }
+
+    // 🔒 1. Verificar se já está confirmado (não pode gerar novo PIX)
+    if (participante.statusPagamento === 'confirmado') {
+      return { 
+        temPendente: true,
+        mensagem: 'Pagamento já confirmado. Participante registrado com sucesso.'
+      };
+    }
+
+    // 🔒 2. Verificar se tem PIX pendente nas observações
+    if (!participante.observacoes || !participante.observacoes.includes('PIX MP:')) {
+      return { temPendente: false };
+    }
+
+    // Extrair data de expiração usando o formato conhecido
+    const matchExpiracao = participante.observacoes.match(/Expira: (.+?)$/);
+    
+    if (!matchExpiracao) {
+      // Se não encontrou a data, permite criar novo (seguro)
+      console.warn('⚠️ [verificarPixPendente] Formato de observações inesperado');
+      return { temPendente: false };
+    }
+
+    try {
+      // Parsear data no formato pt-BR que você já usa
+      const dataString = matchExpiracao[1].trim();
+      const dataExpiracao = new Date(dataString);
+      const agora = new Date();
+
+      // Validar se a data foi parseada corretamente
+      if (isNaN(dataExpiracao.getTime())) {
+        console.warn('⚠️ [verificarPixPendente] Data inválida:', dataString);
+        return { temPendente: false };
+      }
+
+      // Verificar se ainda não expirou
+      if (dataExpiracao > agora) {
+        const minutosRestantes = Math.ceil((dataExpiracao.getTime() - agora.getTime()) / 60000);
+        
+        return { 
+          temPendente: true,
+          mensagem: `Já existe um PIX pendente. Expira em ${minutosRestantes} minuto(s). Efetue o pagamento ou aguarde a expiração.`
+        };
+      }
+
+      // PIX expirou, pode criar novo
+      console.log(`✅ [verificarPixPendente] PIX anterior expirou, permitindo novo`);
+      return { temPendente: false };
+      
+    } catch (parseError) {
+      console.error('❌ [verificarPixPendente] Erro ao parsear data:', parseError);
+      // Em caso de erro, permite criar novo PIX (fail-safe)
+      return { temPendente: false };
+    }
+    
+  } catch (error) {
+    console.error('❌ [verificarPixPendente] Erro ao verificar PIX pendente:', error);
+    // Em caso de erro, permite criar novo PIX (fail-safe)
+    return { temPendente: false };
+  }
+}
+
   // ========================================
   // SIMULAR STATUS (DESENVOLVIMENTO)
   // ========================================
 
-  /**
-   * Simular status de pagamento para desenvolvimento/testes
-   * NÃO consulta o Mercado Pago - apenas simula localmente
-   */
-  // backend/src/Service/pagamentoService.ts
 
 /**
  * Simular status de pagamento para desenvolvimento/testes
@@ -420,7 +487,6 @@ public static async simularStatus(
       console.log(`✅ [Simular] Simulando aprovação! Confirmando participante...`);
 
       // ✅ CORREÇÃO: Extrair o número de inscrição do external_reference
-      // Formato: trilhao_TRI2026006_timestamp_random
       const partes = externalReference.split('_');
       const numeroInscricao = partes[1]; // TRI2026006
       
@@ -435,7 +501,6 @@ public static async simularStatus(
         };
       }
 
-      // ✅ Passar o NÚMERO DE INSCRIÇÃO, não o external_reference completo
       const resultado = await ParticipanteController.confirmarParticipante(
         numeroInscricao, // ✅ CORRETO: "TRI2026006"
         {

@@ -12,93 +12,109 @@ export class PagamentoController {
    * 🔒 SEGURANÇA: Valor vem do banco de dados, NÃO do frontend!
    */
   public static async criarPagamentoPix(
-    req: Request,
-    res: Response
-  ): Promise<void> {
-    try {
-      const { participanteId } = req.body; // ✅ Só recebe o ID
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const { participanteId } = req.body; // ✅ Só recebe o ID
 
-      console.log(
-        "🏦 [PagamentoController] Criando PIX para participante:",
-        participanteId
-      );
+    console.log(
+      "🏦 [PagamentoController] Criando PIX para participante:",
+      participanteId
+    );
 
-      // 1. VALIDAR dados básicos usando Validator
-      const validacaoDados = PagamentoValidator.validarCriacaoPix({
-        participanteId,
-      });
-      if (!validacaoDados.isValid) {
-        return ResponseUtil.erroValidacao(
-          res,
-          "Dados inválidos",
-          validacaoDados.detalhes
-        );
-      }
-
-      // 2. BUSCAR participante usando Service
-      const participante = await PagamentoService.buscarParticipante(
-        parseInt(participanteId)
-      );
-      if (!participante) {
-        return ResponseUtil.naoEncontrado(
-          res,
-          "Participante não encontrado",
-          "ID do participante inválido"
-        );
-      }
-
-      // 3. VALIDAR participante para PIX usando Validator
-      const validacaoParticipante =
-        PagamentoValidator.validarParticipanteParaPix(participante);
-      if (!validacaoParticipante.isValid) {
-        return ResponseUtil.erroValidacao(
-          res,
-          validacaoParticipante.errors[0],
-          validacaoParticipante.detalhes
-        );
-      }
-      const valorTotal = parseFloat(participante.valorInscricao);
-
-      console.log("👤 Participante encontrado:", {
-        id: participante.id,
-        nome: participante.nome,
-        numeroInscricao: participante.numeroInscricao,
-        status: participante.statusPagamento,
-        valorInscricao: valorTotal, // ✅ Valor seguro do banco
-      });
-
-      // 5. CRIAR PIX usando Service com valor DO BANCO
-      const resultado = await PagamentoService.criarPix(
-        participante,
-        valorTotal // ✅ Valor do banco, não do frontend!
-      );
-
-      if (!resultado.sucesso) {
-        return ResponseUtil.erroInterno(
-          res,
-          resultado.erro!,
-          resultado.detalhes
-        );
-      }
-
-      // 6. RETORNAR sucesso
-      return ResponseUtil.sucesso(
+    // 1. VALIDAR dados básicos usando Validator
+    const validacaoDados = PagamentoValidator.validarCriacaoPix({
+      participanteId,
+    });
+    if (!validacaoDados.isValid) {
+      return ResponseUtil.erroValidacao(
         res,
-        resultado.dados,
-        "PIX criado com sucesso. Pagamento expira em 15 minutos."
-      );
-    } catch (error) {
-      console.error(
-        "💥 [PagamentoController] Erro ao criar pagamento PIX:",
-        error
-      );
-      return ResponseUtil.erroInterno(
-        res,
-        "Erro ao processar pagamento",
-        error instanceof Error ? error.message : "Erro desconhecido"
+        "Dados inválidos",
+        validacaoDados.detalhes
       );
     }
+
+    // 2. BUSCAR participante usando Service
+    const participante = await PagamentoService.buscarParticipante(
+      parseInt(participanteId)
+    );
+    if (!participante) {
+      return ResponseUtil.naoEncontrado(
+        res,
+        "Participante não encontrado",
+        "ID do participante inválido"
+      );
+    }
+
+    // 3. VALIDAR participante para PIX usando Validator
+    const validacaoParticipante =
+      PagamentoValidator.validarParticipanteParaPix(participante);
+    if (!validacaoParticipante.isValid) {
+      return ResponseUtil.erroValidacao(
+        res,
+        validacaoParticipante.errors[0],
+        validacaoParticipante.detalhes
+      );
+    }
+    const verificacao = await PagamentoService.verificarPixPendente(
+      parseInt(participanteId)
+    );
+    
+    if (verificacao.temPendente) {
+      console.warn(
+        `⚠️ [PagamentoController] Tentativa de criar PIX duplicado para participante ${participanteId}`
+      );
+      return ResponseUtil.erroValidacao(
+        res,
+        "PIX já existe",
+        verificacao.mensagem
+      );
+    }
+
+    // 5. Calcular valor total do banco
+    const valorTotal = parseFloat(participante.valorInscricao);
+
+    console.log("👤 Participante encontrado:", {
+      id: participante.id,
+      nome: participante.nome,
+      numeroInscricao: participante.numeroInscricao,
+      status: participante.statusPagamento,
+      valorInscricao: valorTotal, // ✅ Valor seguro do banco
+    });
+
+    // 6. CRIAR PIX usando Service com valor DO BANCO
+    const resultado = await PagamentoService.criarPix(
+      participante,
+      valorTotal 
+    );
+
+    if (!resultado.sucesso) {
+      return ResponseUtil.erroInterno(
+        res,
+        resultado.erro!,
+        resultado.detalhes
+      );
+    }
+
+    // 7. RETORNAR sucesso
+    return ResponseUtil.sucesso(
+      res,
+      resultado.dados,
+      "PIX criado com sucesso. Pagamento expira em 15 minutos."
+    );
+  } catch (error) {
+    console.error(
+      "💥 [PagamentoController] Erro ao criar pagamento PIX:",
+      error
+    );
+    return ResponseUtil.erroInterno(
+      res,
+      "Erro ao processar pagamento",
+      error instanceof Error ? error.message : "Erro desconhecido"
+    );
   }
+}
 
   /**
    * GET /api/pagamento/status/:id - Consultar status do pagamento
