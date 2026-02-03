@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { ICriarGerenteDTO, ILoginGerenteDTO } from "../types/models";
 
-// Importações SOLID
 import { GerenteValidator } from "../validators/GerenteValidator";
 import { GerenteService } from "../Service/GerenteService";
 import { ResponseUtil } from "../utils/responseUtil";

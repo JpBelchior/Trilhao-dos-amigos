@@ -4,15 +4,14 @@ import { ICriarParticipanteDTO, StatusPagamento } from "../types/models";
 import { Op } from "sequelize";
 import { AuthenticatedRequest } from "./GerenteController";
 
-// Importações das classes SOLID
 import { ParticipanteValidator } from "../validators/ParticipanteValidator";
 import { ParticipanteService } from "../Service/participanteService";
 import { ResponseUtil } from "../utils/responseUtil";
+ import { formatarNome, formatarCidade } from "../utils/formatarNome";
 
 export class ParticipanteController {
   /**
    * POST /api/participantes - Criar participante PENDENTE
-   * RESPONSABILIDADE: Apenas orquestração (SRP)
    */
   public static async criarParticipante(
     req: Request,
@@ -127,7 +126,6 @@ export class ParticipanteController {
 
   /**
    * PUT /api/participantes/:id/pagamento - Confirmar pagamento via API
-   * RESPONSABILIDADE: Apenas orquestração (SRP)
    */
   public static async confirmarPagamento(
     req: Request,
@@ -228,9 +226,6 @@ export class ParticipanteController {
       );
     }
   }
-  // =================================================================
-  // MÉTODOS INTERNOS (para usar em outros controllers)
-  // =================================================================
 
   /**
    * Confirmar participante (método interno para PagamentoController)
@@ -263,7 +258,6 @@ export class ParticipanteController {
 
   /**
    * Excluir participante pendente (método interno)
-   * RESPONSABILIDADE: Apenas orquestração (SRP)
    */
   public static async excluirParticipantePendente(
     participanteId: number
@@ -281,10 +275,6 @@ export class ParticipanteController {
       return false;
     }
   }
-
-  // =================================================================
-  // MÉTODOS DE CONSULTA (mantém como estão - são apenas leitura)
-  // =================================================================
 
   /**
    * GET /api/participantes - Listar participantes com filtros
@@ -342,7 +332,7 @@ export class ParticipanteController {
           participantes: participantes.map((p) => ({
             id: p.id,
             numeroInscricao: p.numeroInscricao,
-            nome: p.nome,
+            nome: formatarNome(p.nome),
             email: p.email,
             cpf: p.cpf,
             telefone: p.telefone,
@@ -444,8 +434,6 @@ export class ParticipanteController {
       console.log(
         "🔍 [ParticipanteController] Executando verificação automática..."
       );
-
-      // Buscar participantes pendentes há mais de 30 minutos
       const limiteTempo = new Date();
       limiteTempo.setMinutes(limiteTempo.getMinutes() - 30);
 
@@ -467,7 +455,6 @@ export class ParticipanteController {
           `⏰ Cancelando participante pendente: ${participante.numeroInscricao}`
         );
 
-        // CHAMAR Service para excluir
         await ParticipanteService.excluirParticipantePendente(participante.id);
       }
 
@@ -481,11 +468,9 @@ export class ParticipanteController {
       );
     }
   }
-  // Adicionar este método no ParticipanteController.ts
 
 /**
  * POST /api/participantes/validar - Validar dados ANTES de criar participante
- * RESPONSABILIDADE: Validar CPF/email duplicados sem criar registro
  */
 public static async validarDados(
   req: Request,
@@ -522,8 +507,6 @@ public static async validarDados(
         "Este email já está sendo usado por outro participante. Use outro email ou faça login se já tem cadastro."
       );
     }
-
-    // 3. Verificar se CPF já existe
     const cpfExiste = await ParticipanteService.verificarCPFExistente(
       dadosParticipante.cpf
     );
@@ -534,8 +517,6 @@ public static async validarDados(
         "Este CPF já está sendo usado por outro participante. Verifique seus dados ou entre em contato com o suporte."
       );
     }
-
-    // 4. Se tudo OK, retornar sucesso
     console.log("✅ [ParticipanteController] Dados válidos!");
     return ResponseUtil.sucesso(
       res,

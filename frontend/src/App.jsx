@@ -1,4 +1,3 @@
-// frontend/src/App.jsx - VERSÃO CORRIGIDA E COMPLETA
 
 import React from "react";
 import {

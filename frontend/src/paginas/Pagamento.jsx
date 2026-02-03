@@ -18,7 +18,7 @@ import usePagamento from "../hooks/usePagamento";
 const Pagamento = () => {
   const location = useLocation();
   const { dadosInscricao, valorTotal } = location.state || {};
-  console.log("🔍 [DEBUG] dadosInscricao:", dadosInscricao);
+  
 
   // ========================================
   // 🎯 USAR HOOK CUSTOMIZADO
@@ -41,7 +41,7 @@ const Pagamento = () => {
   } = usePagamento(dadosInscricao, valorTotal);
 
   const dados = dadosParticipante || dadosInscricao || {};
-  console.log("🔍 [DEBUG] dadosInscricao:", dadosParticipante);
+  
   // ========================================
   // VERIFICAR AMBIENTE
   // ========================================

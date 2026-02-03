@@ -1,4 +1,3 @@
-// backend/src/controllers/CampeoesController.ts
 import { Request, Response } from "express";
 import { CampeaoBarranco } from "../models";
 import { CategoriaMoto } from "../types/models";

@@ -60,7 +60,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-black/95 backdrop-blur-md shadow-2xl fixed top-0 left-0 right-0 z-50 border-b border-yellow-400/20">
+    <nav className="bg-black/95 backdrop-blur-md shadow-2xl fixed top-0 left-0 right-0  z-50 border-b border-yellow-400/20">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-20">
           {/* Logo Moderno */}
@@ -68,11 +68,11 @@ const Navbar = () => {
             className="flex items-center group cursor-pointer"
             onClick={() => irPara("/")}
           >
-            <div className="relative -top-1 -left-2 w-12 h-12 bg-yellow-500 rounded-full shadow-lg shadow-yellow-400/25 transition-transform transform group-hover:scale-110">
+            <div className="relative -top-3 -left-2 w-12 h-12  rounded-full shadow-yellow-400/25 transition-transform transform group-hover:scale-110">
               <img
-                src="/assets/moto.png"
+                src="/logo.png"
                 alt="Logo"
-                className="w-12 h-12 object-contain"
+                className="w-20 h-20 object-contain "
                 onError={(e) => {
                   e.target.style.display = "none";
                   e.target.nextSibling.style.display = "flex";

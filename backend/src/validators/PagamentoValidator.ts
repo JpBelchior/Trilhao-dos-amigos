@@ -20,17 +20,6 @@ export class PagamentoValidator {
       errors.push("ID do participante deve ser um número válido");
     }
 
-    // Validar valorTotal
-    if (!dados.valorTotal) {
-      errors.push("Valor total é obrigatório");
-    } else if (isNaN(parseFloat(dados.valorTotal))) {
-      errors.push("Valor total deve ser um número válido");
-    } else if (parseFloat(dados.valorTotal) <= 0) {
-      errors.push("Valor total deve ser maior que zero");
-    } else if (parseFloat(dados.valorTotal) > 10000) {
-      errors.push("Valor total não pode exceder R$ 10.000");
-    }
-
     return {
       isValid: errors.length === 0,
       errors,
@@ -74,6 +63,62 @@ export class PagamentoValidator {
   ): string | null {
     const match = externalReference.match(/trilhao_([^_]+)_/);
     return match ? match[1] : null;
+  }
+
+  /**
+   * Validar se participante pode receber PIX
+   */
+  public static validarParticipanteParaPix(
+    participante: any
+  ): ValidationResult {
+    const errors: string[] = [];
+
+    if (!participante) {
+      errors.push("Participante não encontrado");
+      return {
+        isValid: false,
+        errors,
+        detalhes: "Participante é obrigatório para gerar PIX",
+      };
+    }
+
+    // Verificar se está pendente
+    if (participante.statusPagamento !== StatusPagamento.PENDENTE) {
+      errors.push("Participante não está pendente");
+      return {
+        isValid: false,
+        errors,
+        detalhes: `Status atual: ${participante.statusPagamento}. Apenas participantes pendentes podem gerar PIX.`,
+      };
+    }
+
+    // Verificar dados essenciais para o PIX
+    if (!participante.email) {
+      errors.push("Email do participante é obrigatório");
+    }
+
+    if (!participante.cpf) {
+      errors.push("CPF do participante é obrigatório");
+    }
+
+    if (!participante.nome) {
+      errors.push("Nome do participante é obrigatório");
+    }
+
+    if (!participante.numeroInscricao) {
+      errors.push("Número de inscrição é obrigatório");
+    }
+
+    // ✅ NOVO: Validar se tem valor de inscrição
+    if (!participante.valorInscricao || participante.valorInscricao <= 0) {
+      errors.push("Valor de inscrição inválido");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      detalhes: errors.length > 0 ? errors.join(", ") : undefined,
+    };
   }
 
   /**
@@ -177,77 +222,5 @@ export class PagamentoValidator {
       errors,
       detalhes: errors.length > 0 ? errors.join(", ") : undefined,
     };
-  }
-
-  /**
-   * Validar se participante pode receber PIX
-   */
-  public static validarParticipanteParaPix(
-    participante: any
-  ): ValidationResult {
-    const errors: string[] = [];
-
-    if (!participante) {
-      errors.push("Participante não encontrado");
-      return {
-        isValid: false,
-        errors,
-        detalhes: "Participante é obrigatório para gerar PIX",
-      };
-    }
-
-    // Verificar se está pendente
-    if (participante.statusPagamento !== StatusPagamento.PENDENTE) {
-      errors.push("Participante não está pendente");
-      return {
-        isValid: false,
-        errors,
-        detalhes: `Status atual: ${participante.statusPagamento}. Apenas participantes pendentes podem gerar PIX.`,
-      };
-    }
-
-    // Verificar dados essenciais para o PIX
-    if (!participante.email) {
-      errors.push("Email do participante é obrigatório");
-    }
-
-    if (!participante.cpf) {
-      errors.push("CPF do participante é obrigatório");
-    }
-
-    if (!participante.nome) {
-      errors.push("Nome do participante é obrigatório");
-    }
-
-    if (!participante.numeroInscricao) {
-      errors.push("Número de inscrição é obrigatório");
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-      detalhes: errors.length > 0 ? errors.join(", ") : undefined,
-    };
-  }
-
-  /**
-   * Validar valor do PIX
-   */
-  public static validarValorPix(
-    valorInscricao: number,
-    valorSolicitado: number
-  ): ValidationResult {
-    if (Math.abs(valorInscricao - valorSolicitado) > 0.01) {
-      // Tolerância de 1 centavo
-      return {
-        isValid: false,
-        errors: ["Valor incorreto"],
-        detalhes: `Valor esperado: R$ ${valorInscricao.toFixed(
-          2
-        )}, valor solicitado: R$ ${valorSolicitado.toFixed(2)}`,
-      };
-    }
-
-    return { isValid: true, errors: [] };
   }
 }

@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
  * - Redirecionar após aprovação
  * 
  * @param {Object} dadosInscricao - Dados do participante
- * @param {number} valorTotal - Valor total a pagar
+ * @param {number} valorTotal - Valor total a pagar (APENAS PARA EXIBIÇÃO)
  * @returns {Object} Estados e funções necessários para o componente
  */
 export const usePagamento = (dadosInscricao, valorTotal) => {
@@ -53,6 +53,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
       }, 1000);
     }
   }, [statusPagamento, dadosPix, navigate, dadosInscricao, valorTotal]);
+  
   // ========================================
   // VALIDAÇÃO INICIAL
   // ========================================
@@ -110,6 +111,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
   /**
    * 🏦 Gerar PIX no backend
+   * 🔒 SEGURANÇA: Envia apenas participanteId, o valor é calculado no backend
    */
   const gerarPix = async () => {
     setLoading((prev) => ({ ...prev, gerandoPix: true }));
@@ -127,7 +129,9 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
           },
           body: JSON.stringify({
             participanteId: dadosInscricao.id,
-            valorTotal: valorTotal,
+            // ✅ REMOVIDO: valorTotal
+            // O valor é calculado no backend baseado no banco de dados
+            // Isso previne manipulação via console/DevTools
           }),
         }
       );
@@ -245,18 +249,12 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
   /**
    * 🧪 SIMULAR APROVAÇÃO - Apenas para desenvolvimento/teste
-   * Chama a rota de simulação do backend para aprovar o pagamento sem Mercado Pago
    */
   const simularAprovacao = async () => {
     if (!dadosPix?.pagamentoId) {
       alert("Dados do PIX não encontrados!");
       return;
     }
-
-    // 🔍 DEBUG: Ver o que temos disponível
-    console.log("🧪 [DEBUG] dadosPix completo:", dadosPix);
-    console.log("🧪 [DEBUG] externalReference:", dadosPix.externalReference);
-    console.log("🧪 [DEBUG] numeroInscricao:", dadosPix.participante?.numeroInscricao);
 
     // Confirmação antes de simular
     const confirmar = window.confirm(
@@ -273,10 +271,9 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
     try {
       console.log("🧪 [usePagamento] Simulando aprovação do pagamento...");
 
-      // ✅ CORREÇÃO: Usar dadosPix.externalReference ao invés de numeroInscricao
       const payload = {
         status: "approved",
-        external_reference: dadosPix.externalReference, // ✅ CORRETO!
+        external_reference: dadosPix.externalReference,
         date_approved: new Date().toISOString(),
       };
 
@@ -301,7 +298,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
       console.log("✅ [usePagamento] Pagamento simulado como aprovado!");
       
-      // Atualizar status (SEM redirecionar)
+      // Atualizar status
       setStatusPagamento("approved");
 
     } catch (error) {
@@ -331,7 +328,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
     copiarCodigoPix,
     formatarTempo,
     cancelarPagamento,
-    simularAprovacao, // 🧪 Nova função para testes
+    simularAprovacao,
   };
 };
 

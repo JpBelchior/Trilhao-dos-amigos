@@ -1,7 +1,7 @@
 import React from "react";
 import { useEdicao } from "../../hooks/useEdicao";
 import {useImageRetry} from "../../hooks/useImageRetry";
-import { Flashlight, Signpost } from "lucide-react";
+import { Signpost } from "lucide-react";
 
 const HeroSection = ({ isVisible, scrollY }) => {
   const { edicaoAtual, loading } = useEdicao();
@@ -13,18 +13,17 @@ const HeroSection = ({ isVisible, scrollY }) => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background com Parallax */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-black via-green-950 to-black"
         style={{ transform: `translateY(${scrollY * 0.5}px)` }}
       ></div>
 
       <div
-        className={`relative z-20 text-center text-white px-6 max-w-6xl transition-all duration-1000 ${
+        className={`relative z-20 text-center text-white px-8 max-w-6xl transition-all duration-1000 ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
       >
-        <h1 className="text-7xl md:text-7xl font-black mb-6 bg-gradient-to-r from-yellow-400 via-white to-green-400 bg-clip-text text-transparent">
+        <h1 className="text-7xl md:text-7xl font-black mb-3 bg-gradient-to-r from-yellow-400 via-white to-green-400 bg-clip-text text-transparent">
           TRILHÃO DOS AMIGOS
         </h1>
 

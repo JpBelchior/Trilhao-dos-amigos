@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { TamanhoCamiseta, TipoCamiseta } from "../types/models";
 
-// Importações SOLID
+
 import { EstoqueValidator } from "../validators/EstoqueValidator";
 import { EstoqueService } from "../Service/EstoqueService";
 import { ResponseUtil } from "../utils/responseUtil";

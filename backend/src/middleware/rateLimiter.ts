@@ -94,8 +94,8 @@ export const paymentLimiter = rateLimit({
 // ========================================
 // Protege contra abuso geral da API
 export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 3000, // Máximo 100 requisições em 15 minutos
+  windowMs: 15 * 60 * 1000, 
+  max: 3000, 
   message: {
     sucesso: false,
     erro: 'Muitas requisições',

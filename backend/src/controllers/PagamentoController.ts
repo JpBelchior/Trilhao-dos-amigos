@@ -9,13 +9,14 @@ import { MercadoPagoValidator } from "../utils/mercadoPagoValidator";
 export class PagamentoController {
   /**
    * POST /api/pagamento/criar-pix - Criar PIX para participante
+   * 🔒 SEGURANÇA: Valor vem do banco de dados, NÃO do frontend!
    */
   public static async criarPagamentoPix(
     req: Request,
     res: Response
   ): Promise<void> {
     try {
-      const { participanteId, valorTotal } = req.body;
+      const { participanteId } = req.body; // ✅ Só recebe o ID
 
       console.log(
         "🏦 [PagamentoController] Criando PIX para participante:",
@@ -25,7 +26,6 @@ export class PagamentoController {
       // 1. VALIDAR dados básicos usando Validator
       const validacaoDados = PagamentoValidator.validarCriacaoPix({
         participanteId,
-        valorTotal,
       });
       if (!validacaoDados.isValid) {
         return ResponseUtil.erroValidacao(
@@ -57,31 +57,20 @@ export class PagamentoController {
           validacaoParticipante.detalhes
         );
       }
-
-      // 4. VALIDAR valor usando Validator
-      const validacaoValor = PagamentoValidator.validarValorPix(
-        participante.valorInscricao,
-        parseFloat(valorTotal)
-      );
-      if (!validacaoValor.isValid) {
-        return ResponseUtil.erroValidacao(
-          res,
-          validacaoValor.errors[0],
-          validacaoValor.detalhes
-        );
-      }
+      const valorTotal = parseFloat(participante.valorInscricao);
 
       console.log("👤 Participante encontrado:", {
         id: participante.id,
         nome: participante.nome,
         numeroInscricao: participante.numeroInscricao,
         status: participante.statusPagamento,
+        valorInscricao: valorTotal, // ✅ Valor seguro do banco
       });
 
-      // 5. CRIAR PIX usando Service
+      // 5. CRIAR PIX usando Service com valor DO BANCO
       const resultado = await PagamentoService.criarPix(
         participante,
-        parseFloat(valorTotal)
+        valorTotal // ✅ Valor do banco, não do frontend!
       );
 
       if (!resultado.sucesso) {
@@ -96,7 +85,7 @@ export class PagamentoController {
       return ResponseUtil.sucesso(
         res,
         resultado.dados,
-        "PIX criado com sucesso. Pagamento expira em 10 minutos."
+        "PIX criado com sucesso. Pagamento expira em 15 minutos."
       );
     } catch (error) {
       console.error(
@@ -159,9 +148,6 @@ export class PagamentoController {
   /**
    * POST /api/pagamento/webhook - Receber notificações do Mercado Pago
    */
-  /**
- * POST /api/pagamento/webhook - Receber notificações do Mercado Pago
- */
   public static async receberWebhook(
     req: Request,
     res: Response
@@ -241,7 +227,7 @@ export class PagamentoController {
     }
   }
 
-    /**
+  /**
    * PUT /api/pagamento/status/:id - Simular status de pagamento (desenvolvimento)
    */
   public static async simularStatusPagamento(

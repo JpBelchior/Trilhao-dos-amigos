@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 
-// Importações SOLID
 import { LocalizacaoValidator } from "../validators/LocalizacaoValidator";
 import { LocalizacaoService } from "../Service/LocalizacaoService";
 import { ResponseUtil } from "../utils/responseUtil";

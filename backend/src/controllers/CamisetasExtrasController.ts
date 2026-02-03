@@ -1,4 +1,3 @@
-// backend/src/controllers/CamisetasExtrasController.ts
 import { Response } from "express";
 import type { AuthenticatedRequest } from "./GerenteController";
 import { CamisetasExtrasService } from "../Service/CamisetasExtrasService";
