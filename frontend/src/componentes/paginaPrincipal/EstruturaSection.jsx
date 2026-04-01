@@ -8,39 +8,44 @@ const EstruturaSection = () => {
     lng: -44.8171325  ,
   };
   const alimentacao = [
-    { item: "Churrasquinho", preco: "R$ 8" },
-    { item: "Cachorro-quente", preco: "R$ 6" },
-    { item: "Prato de Almoço", preco: "R$ 15" },
-    { item: "Bebidas Geladas", preco: "R$ 8" },
-    { item: "Café da Roça", preco: "R$ 3" },
-    { item: "Doces Caseiros", preco: "R$ 5" },
+    { item: "Churrasquinho" },
+    { item: "Pão com Pernil"  },
+    { item: "Pastel"  },
+    { item: "Salgados Diversos" },
+    { item: "Prato de Almoço" },
+    { item: "Bebidas Geladas"},
+    { item: "Picolés" },
+    { item: "Doces Caseiros" },
   ];
 
   const infraestrutura = [
-    { item: "Área de Camping", color: "text-green-400" },
-    { item: "Banheiros Completos", color: "text-yellow-400" },
-    { item: "Estacionamento", color: "text-green-400" },
-    { item: "Primeiros Socorros", color: "text-yellow-400" },
-    { item: "Oficina Básica", color: "text-green-400" },
-    { item: "Som Ambiente", color: "text-yellow-400" },
-    { item: "Palco de Premiação", color: "text-green-400" },
+    { item: "Banheiros Completos" },
+    { item: "Estacionamento"},
+    { item: "Brinquedos para Crianças" },
+    { item: "Telão pra Copa do Mundo" },
+    { item: "Barracas de Alimentação" },
+    { item: "Ambulância" },
+    { item: "Som Ambiente"},
+    { item: "Palco de Premiação" },
   ];
 
-  const cronogramaSabado = [
-    { horario: "07:00", atividade: "Abertura dos portões", destaque: false },
-    { horario: "08:00", atividade: "Café da manhã", destaque: false },
-    { horario: "09:00", atividade: "Verificação técnica", destaque: false },
-    { horario: "10:30", atividade: "LARGADA DA TRILHA", destaque: true },
-    { horario: "14:00", atividade: "Almoço", destaque: false },
-    { horario: "15:30", atividade: "PROVA DA SUBIDA", destaque: true },
-  ];
+    const cronogramaSabado = [
+      { horario: "08:00", atividade: "Abertura do Morro para Treinos", destaque: false },
+      { horario: "09:00", atividade: "Treino da Manhã", destaque: true },
+      { horario: "12:00", atividade: "Almoço", destaque: false },
+      { horario: "14:00", atividade: "Treino da Tare", destaque: true },
+      { horario: "16:00", atividade: "Show ao Vivo & Barraquinhas ", destaque: false },
+      { horario: "17:00", atividade: "Encerramento ", destaque: false },
+    ];
 
   const cronogramaDomingo = [
-    { horario: "08:00", atividade: "Café da manhã", destaque: false },
-    { horario: "09:00", atividade: "Passeio família", destaque: false },
-    { horario: "11:00", atividade: "PREMIAÇÃO", destaque: true },
-    { horario: "12:00", atividade: "Confraternização", destaque: false },
-    { horario: "14:00", atividade: "Encerramento", destaque: false },
+    { horario: "08:00", atividade: "Café da manhã e Entrega e Kits", destaque: false },
+    { horario: "09:30", atividade: "Saída dos Competidores", destaque: false },
+    { horario: "10:00", atividade: "Início dos Show", destaque: true },
+    { horario: "12:00", atividade: "Almoço", destaque: false },
+    { horario: "14:30", atividade: "Abertura do Morro do Dasafio", destaque: false },
+    { horario: "16:00", atividade: "Chegada dos Trilheiros", destaque: false },
+    { horario: "18:00", atividade: "Premiação & Encerramento", destaque: false },
   ];
 
   return (
@@ -88,12 +93,9 @@ const EstruturaSection = () => {
               {alimentacao.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-black/40 rounded-xl p-3 flex justify-between items-center"
+                  className="bg-black/40 rounded-xl p-3 flex justify-center items-center"
                 >
-                  <span>
-                    {item.item.substring(item.item.indexOf(" "))}
-                  </span>
-                  <span className="text-green-400 font-bold">{item.preco}</span>
+                  <span className="text-center">{item.item}</span>
                 </div>
               ))}
             </div>
@@ -185,7 +187,7 @@ const EstruturaSection = () => {
               {/* ================= DOMINGO ================= */}
               <div className="bg-black/40 rounded-2xl p-5 lg:p-8 border border-green-400/30">
 
-                <h4 className="text-xl lg:text-3xl font-black mb-6 lg:mb-8 text-green-400 text-center">
+                <h4 className="text-xl lg:text-3xl font-black mb-6 lg:mb-8 text-yellow-400  text-center">
                   DOMINGO
                 </h4>
 
@@ -199,14 +201,14 @@ const EstruturaSection = () => {
                         gap-1 sm:gap-4
                         rounded-xl p-3 lg:p-4
                         ${item.destaque
-                          ? "bg-green-600/20 border border-green-400/50"
+                          ? "bg-yellow-600/20 border border-yellow-400/50"
                           : "bg-green-900/30"}
                       `}
                     >
 
                       <span
                         className={`text-sm lg:text-base font-bold ${
-                          item.destaque ? "text-green-400 font-black" : "text-white"
+                          item.destaque ? "text-yellow-400 font-black" : "text-white"
                         }`}
                       >
                         {item.horario}
@@ -214,7 +216,7 @@ const EstruturaSection = () => {
 
                       <span
                         className={`text-sm lg:text-base ${
-                          item.destaque ? "text-green-400 font-bold" : "text-gray-300"
+                          item.destaque ? "text-yellow-400 font-bold" : "text-gray-300"
                         }`}
                       >
                         {item.atividade}

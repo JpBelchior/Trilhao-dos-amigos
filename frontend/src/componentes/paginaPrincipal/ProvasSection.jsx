@@ -74,7 +74,7 @@ const ProvasSection = () => {
                   <div ><Clock className="mr-4 text-yellow-400" size={20} /></div>
                   <span>
                     <strong className="text-yellow-400">Tempo:</strong>{" "}
-                   3H de Trilha
+                   5H de Trilha
                   </span>
                 </div>
               </div>
@@ -96,10 +96,10 @@ const ProvasSection = () => {
             </div>
 
             <p className="text-gray-300 leading-relaxed text-lg bg-black/20 rounded-xl p-6">
-              🏔️ Percurso desafiador pela majestosa Serra da Mantiqueira,
-              atravessando cachoeiras cristalinas, mata atlântica preservada e
-              trechos técnicos que testam cada fibra do piloto. Uma jornada
-              épica por terrenos selvagens que separa aventureiros de lendas.
+              Percurso desafiador pela Serra da Mantiqueira,
+              atravessando cachoeiras , muita mata e
+              trechos estreitos e com muito barro que testam cada fibra do piloto. Uma jornada
+              por terrenos selvagens que separa aventureiros de lendas.
             </p>
           </div>
 
@@ -133,7 +133,7 @@ const ProvasSection = () => {
                   <Trophy className="mr-4 text-green-400" size={20} />
                   <span>
                     <strong className="text-green-400">Prêmio:</strong> R$
-                    1.000,00
+                    1.500,00
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">

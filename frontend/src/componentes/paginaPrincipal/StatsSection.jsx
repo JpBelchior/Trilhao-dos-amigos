@@ -19,7 +19,7 @@ const StatsSection = () => {
     },
     {
       icon: Trophy,
-      number: "R$1.000",
+      number: "R$1.500",
       label: "Prêmio Máximo",
       bgColor: "from-yellow-400 to-yellow-600",
       textColor: "text-yellow-400",
@@ -62,27 +62,25 @@ const StatsSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-r from-green-900/40 to-yellow-900/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
             <h4 className="text-3xl font-black text-center text-white mb-9">
-              <Gift className="inline-block mr-2 mb-2" size={30} />
               INCLUSO NA SUA INSCRIÇÃO
             </h4>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-black/40 rounded-2xl p-6 text-center">
-                <div className="text-4xl mb-4">👕</div>
                 <h5 className="text-xl font-bold text-green-400 mb-2">
-                  CAMISETA OFICIAL
+                  Kit Oficial
                 </h5>
                 <p className="text-gray-300">
-                  Leve para casa sua camiseta exclusiva do Trilhão dos Amigos
-                  totalmente gratuita!
+                  Leve para casa seu kit exclusivo do Trilhão, nele vem uma camisa oficial, pulseiras e adesivos comemorativos, além do trofeu e conclusão
+                  totalmente gratuito para os inscritos!
                 </p>
               </div>
               <div className="bg-black/40 rounded-2xl p-6 text-center">
-                <div className="text-4xl mb-4">🍽️</div>
                 <h5 className="text-xl font-bold text-yellow-400 mb-2">
                   ALIMENTAÇÃO COMPLETA
                 </h5>
                 <p className="text-gray-300">
                   Café da manhã, almoço e apoio durante a trilha inclusos!
+                  Após o Trilhão nossos trilheiros sarão recebios com um banquete merecido.
                 </p>
               </div>
             </div>

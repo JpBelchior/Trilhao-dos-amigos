@@ -43,11 +43,8 @@ export const useHallFama = () => {
 
       console.log("🏆 [useHallFama] Carregando campeões...");
 
-      // Usar Promise.all para fazer as duas requisições em paralelo
-      const [campeoesData, melhorData] = await Promise.all([
-        apiClient.get("/campeoes"),
-        apiClient.get("/campeoes/melhor"),
-      ]);
+      // Carregar lista de campeões (obrigatório)
+      const campeoesData = await apiClient.get("/campeoes");
 
       if (campeoesData.sucesso) {
         setCampeoes(campeoesData.dados.campeoes);
@@ -56,11 +53,18 @@ export const useHallFama = () => {
         );
       }
 
-      if (melhorData.sucesso) {
-        setMelhorResultado(melhorData.dados.campeao);
-        console.log(
-          `🥇 [useHallFama] Melhor resultado: ${melhorData.dados.campeao.nome} - ${melhorData.dados.campeao.resultadoAltura}m`
-        );
+      // Carregar melhor resultado (opcional — pode não existir ainda)
+      try {
+        const melhorData = await apiClient.get("/campeoes/melhor");
+        if (melhorData.sucesso) {
+          setMelhorResultado(melhorData.dados.campeao);
+          console.log(
+            `🥇 [useHallFama] Melhor resultado: ${melhorData.dados.campeao.nome} - ${melhorData.dados.campeao.resultadoAltura}m`
+          );
+        }
+      } catch {
+        // Nenhum campeão cadastrado ainda — não é um erro crítico
+        setMelhorResultado(null);
       }
     } catch (error) {
       console.error("❌ [useHallFama] Erro ao carregar campeões:", error);

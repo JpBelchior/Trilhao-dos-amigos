@@ -53,7 +53,7 @@ const HeroSection = ({ isVisible, scrollY }) => {
       </div>
 
       <div className="bg-black/40 backdrop-blur-lg border border-yellow-400/30 rounded-2xl p-4">
-        <div className="text-2xl md:text-3xl font-black text-yellow-400">R$1K</div>
+        <div className="text-2xl md:text-3xl font-black text-yellow-400">R$1.5K</div>
         <div className="text-sm text-gray-300">Prêmio Máximo</div>
       </div>
     </div>

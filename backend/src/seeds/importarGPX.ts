@@ -8,9 +8,6 @@ import { XMLParser } from "fast-xml-parser";
  */
 export const importarGPXdaPasta = async () => {
   try {
-    console.log("\n📍 ========================================");
-    console.log("   IMPORTANDO TRAJETO GPX");
-    console.log("========================================\n");
 
     // Caminho do arquivo GPX
     const gpxPath = path.join(process.cwd(), "uploads", "trajeto.gpx");

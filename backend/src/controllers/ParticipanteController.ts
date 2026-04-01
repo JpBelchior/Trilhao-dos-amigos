@@ -269,7 +269,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao excluir participante pendente:",
+        " [ParticipanteController] Erro ao excluir participante pendente:",
         error
       );
       return false;

@@ -6,14 +6,9 @@ import { useHallFama } from "../../hooks/useHallFama";
 
 /**
  * 🏆 Hall da Fama - Componente de UI puro
- * 
- * Exibe os melhores resultados históricos do Morro do Desafio
- * organizados por edição e categoria (nacional/importada)
  */
 const HallFamaSection = () => {
-  // ========================================
-  // HOOK - Toda lógica vem daqui
-  // ========================================
+
   const {
     loading,
     erro,
