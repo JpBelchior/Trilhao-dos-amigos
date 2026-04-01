@@ -5,9 +5,6 @@
 frontend/node_modules/
 backend/node_modules/
 
-# ========================================
-# 🔐 ARQUIVOS SENSÍVEIS
-# ========================================
 
 # Backend .env (contém MP_ACCESS_TOKEN - NUNCA COMMITAR!)
 backend/.env

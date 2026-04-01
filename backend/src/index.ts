@@ -318,7 +318,6 @@ const startServer = async () => {
       }
 
       // Se não existe, criar gerente padrão
-
       const gerente = await Gerente.criarGerente({
         nome: "Administrador Trilhão",
         email: "admin@trilhao.com",

@@ -80,7 +80,7 @@ export class PagamentoController {
       nome: participante.nome,
       numeroInscricao: participante.numeroInscricao,
       status: participante.statusPagamento,
-      valorInscricao: valorTotal, // ✅ Valor seguro do banco
+      valorInscricao: valorTotal, 
     });
 
     // 6. CRIAR PIX usando Service com valor DO BANCO

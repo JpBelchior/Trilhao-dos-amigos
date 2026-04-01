@@ -263,7 +263,7 @@ export class ParticipanteController {
     participanteId: number
   ): Promise<boolean> {
     try {
-      // CHAMAR Service com método AUTOMÁTICO (só pendentes)
+      // CHAMAR Service com método AUTOMÁTICO 
       return await ParticipanteService.excluirParticipantePendente(
         participanteId
       );

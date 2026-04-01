@@ -127,7 +127,7 @@ export class CampeoesController {
     }
   }
 
-  // GET /api/campeoes/melhor - Obter melhor resultado geral
+  // GET /api/campeoes/melhor
   static async obterMelhorResultado(
     req: Request,
     res: Response
@@ -166,7 +166,7 @@ export class CampeoesController {
     }
   }
 
-  // GET /api/campeoes/estatisticas - Estatísticas dos campeões
+  // GET /api/campeoes/estatisticas 
   static async obterEstatisticas(req: Request, res: Response): Promise<void> {
     try {
       console.log("📊 [API] Calculando estatísticas dos campeões...");
@@ -730,7 +730,6 @@ export class CampeoesController {
           const anoInscricao = new Date(
             participante.dataInscricao
           ).getFullYear();
-          // ⭐ USAR FUNÇÃO DA UTILS
           const { edicao, numeroEdicao } = calcularEdicao(anoInscricao);
 
           // Verificar se já é campeão

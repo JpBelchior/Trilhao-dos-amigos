@@ -124,81 +124,97 @@ const EstruturaSection = () => {
         </div>
 
         {/* Programação Moderna */}
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-r from-green-900/60 to-black/80 backdrop-blur-lg rounded-3xl p-10 border border-green-400/30">
-            <h3 className="text-4xl font-black text-center mb-12 text-white">
-              <Calendar className="inline mr-4 text-yellow-400" size={40} />
+        <div className="max-w-6xl mx-auto px-3  ">
+
+          <div className="bg-gradient-to-r from-green-900/60 to-black/80 backdrop-blur-lg rounded-3xl p-6 lg:p-10 border border-green-400/30">
+
+            {/* TÍTULO */}
+            <h3 className="text-2xl lg:text-4xl font-black text-center mb-8 lg:mb-12 text-white">
+              <Calendar className="inline mr-3 lg:mr-4 text-yellow-400" size={28} />
               CRONOGRAMA
             </h3>
 
-            <div className="grid md:grid-cols-2 gap-12">
-              {/* Sábado */}
-              <div className="bg-black/40 rounded-2xl p-8 border border-yellow-400/30">
-                <h4 className="text-3xl font-black mb-8 text-yellow-400 text-center">
+            {/* GRID RESPONSIVA */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12">
+
+              {/* ================= SÁBADO ================= */}
+              <div className="bg-black/40 rounded-2xl p-5 lg:p-8 border border-yellow-400/30">
+
+                <h4 className="text-xl lg:text-3xl font-black mb-6 lg:mb-8 text-yellow-400 text-center">
                   SÁBADO
                 </h4>
-                <div className="space-y-4">
+
+                <div className="space-y-3 lg:space-y-4">
+
                   {cronogramaSabado.map((item, index) => (
                     <div
                       key={index}
-                      className={`flex items-center justify-between rounded-xl p-4 ${
-                        item.destaque
+                      className={`
+                        flex flex-col sm:flex-row sm:items-center sm:justify-between
+                        gap-1 sm:gap-4
+                        rounded-xl p-3 lg:p-4
+                        ${item.destaque
                           ? "bg-yellow-600/20 border border-yellow-400/50"
-                          : "bg-green-900/30"
-                      }`}
+                          : "bg-green-900/30"}
+                      `}
                     >
+
+                      {/* horário */}
                       <span
-                        className={`font-bold ${
-                          item.destaque
-                            ? "text-yellow-400 font-black"
-                            : "text-white"
+                        className={`text-sm lg:text-base font-bold ${
+                          item.destaque ? "text-yellow-400 font-black" : "text-white"
                         }`}
                       >
                         {item.horario}
                       </span>
+
+                      {/* atividade */}
                       <span
-                        className={`${
-                          item.destaque
-                            ? "text-yellow-400 font-bold"
-                            : "text-gray-300"
+                        className={`text-sm lg:text-base ${
+                          item.destaque ? "text-yellow-400 font-bold" : "text-gray-300"
                         }`}
                       >
                         {item.atividade}
                       </span>
                     </div>
                   ))}
+
                 </div>
               </div>
 
-              {/* Domingo */}
-              <div className="bg-black/40 rounded-2xl p-8 border border-green-400/30">
-                <h4 className="text-3xl font-black mb-8 text-green-400 text-center">
+              {/* ================= DOMINGO ================= */}
+              <div className="bg-black/40 rounded-2xl p-5 lg:p-8 border border-green-400/30">
+
+                <h4 className="text-xl lg:text-3xl font-black mb-6 lg:mb-8 text-green-400 text-center">
                   DOMINGO
                 </h4>
-                <div className="space-y-4">
+
+                <div className="space-y-3 lg:space-y-4">
+
                   {cronogramaDomingo.map((item, index) => (
                     <div
                       key={index}
-                      className={`flex items-center justify-between rounded-xl p-4 ${
-                        item.destaque
+                      className={`
+                        flex flex-col sm:flex-row sm:items-center sm:justify-between
+                        gap-1 sm:gap-4
+                        rounded-xl p-3 lg:p-4
+                        ${item.destaque
                           ? "bg-green-600/20 border border-green-400/50"
-                          : "bg-green-900/30"
-                      }`}
+                          : "bg-green-900/30"}
+                      `}
                     >
+
                       <span
-                        className={`font-bold ${
-                          item.destaque
-                            ? "text-green-400 font-black"
-                            : "text-white"
+                        className={`text-sm lg:text-base font-bold ${
+                          item.destaque ? "text-green-400 font-black" : "text-white"
                         }`}
                       >
                         {item.horario}
                       </span>
+
                       <span
-                        className={`${
-                          item.destaque
-                            ? "text-green-400 font-bold"
-                            : "text-gray-300"
+                        className={`text-sm lg:text-base ${
+                          item.destaque ? "text-green-400 font-bold" : "text-gray-300"
                         }`}
                       >
                         {item.atividade}

@@ -6,30 +6,52 @@ const Footer = () => {
   const { edicaoAtual } = useEdicao();
 
   return (
-    <footer className="bg-black border-t border-yellow-400/20 py-12">
-      <div className="container mx-auto px-6">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-6">
-            <Mountain className="text-yellow-400 mr-3" size={32} />
-            <span className="text-2xl font-black text-white tracking-wider">
+    <footer className="bg-black border-t border-yellow-400/20 py-8 lg:py-12">
+      <div className="container mx-auto px-4 lg:px-6">
+
+        <div className="text-center space-y-5">
+
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2">
+            <Mountain className="text-yellow-400" size={24} />
+
+            <span className="text-lg lg:text-2xl font-black text-white tracking-wider">
               TRILHÃO DOS AMIGOS
             </span>
           </div>
-          <p className="text-gray-400 mb-4">
+
+          {/* Descrição */}
+          <p className="text-gray-400 text-sm lg:text-base">
             A maior aventura off-road da Serra da Mantiqueira
           </p>
-          <div className="flex justify-center space-x-8 text-sm text-gray-500">
+
+          {/* Contatos */}
+          <div
+            className="
+              flex 
+              flex-col 
+              gap-2 
+              text-sm 
+              text-gray-500
+              lg:flex-row 
+              lg:justify-center 
+              lg:gap-8
+            "
+          >
             <span>📍 Itamonte - MG</span>
             <span>📞 (35) 9999-9999</span>
             <span>📧 contato@trilhao.com.br</span>
           </div>
-           <div className="mt-8 text-xs text-gray-600">
-            © {edicaoAtual?.ano || new Date().getFullYear()} Trilhão Itamonte.
-            Todos os direitos reservados.
+
+          {/* Direitos */}
+          <div className="text-xs text-gray-600 pt-4 border-t border-white/10">
+            © {edicaoAtual?.ano || new Date().getFullYear()} Trilhão Itamonte. Todos os direitos reservados.
           </div>
-          <div className="mt-2 text-xs text-gray-600">
-            © Versão 1.0.0
+
+          <div className="text-xs text-gray-600">
+            Versão 1.0.0
           </div>
+
         </div>
       </div>
     </footer>

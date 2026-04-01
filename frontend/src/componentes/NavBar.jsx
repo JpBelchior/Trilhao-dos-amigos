@@ -1,5 +1,13 @@
-import React from "react";
-import { Mountain, UserPlus, Users, BarChart3 } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Mountain,
+  UserPlus,
+  Users,
+  BarChart3,
+  Menu,
+  X,
+} from "lucide-react";
+
 import { useNavbarFunctions } from "../hooks/useNavbarFunctions";
 import NavDropdown from "./DropDown";
 
@@ -17,81 +25,51 @@ const Navbar = () => {
     isActive,
   } = useNavbarFunctions();
 
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const inicioOptions = [
-    {
-      path: "/",
-      label: "Página Principal",  
-      isActive: isActive("/"),
-      dividerAfter: true,
-    },
-    {
-      path: "/edicoes-anteriores",
-      label: "Edições Anteriores",
-      isActive: isActive("/edicoes-anteriores"),
-    },
-    {
-      path: "/provas",
-      label: "Provas e Trajetos",
-      isActive: isActive("/provas"),
-    },
-    {
-      path: "/informacoes-local",
-      label: "Informações do Local",
-      isActive: isActive("/informacoes-local"),
-    },
+    { path: "/", label: "Página Principal", isActive: isActive("/") },
+    { path: "/edicoes-anteriores", label: "Edições Anteriores", isActive: isActive("/edicoes-anteriores") },
+    { path: "/provas", label: "Provas e Trajetos", isActive: isActive("/provas") },
+    { path: "/informacoes-local", label: "Informações do Local", isActive: isActive("/informacoes-local") },
   ];
 
-  
   const inscritosOptions = [
-    {
-      path: "/inscritos",
-      label: "Lista de Inscritos",
-      icon: Users,
-      isActive: isActive("/inscritos"),
-      dividerAfter: true,
-    },
-    {
-      path: "/estatisticas",
-      label: "Estatísticas",
-      icon: BarChart3,
-      isActive: isActive("/estatisticas"),
-    },
+    { path: "/inscritos", label: "Lista de Inscritos", icon: Users, isActive: isActive("/inscritos") },
+    { path: "/estatisticas", label: "Estatísticas", icon: BarChart3, isActive: isActive("/estatisticas") },
   ];
 
   return (
-    <nav className="bg-black/95 backdrop-blur-md shadow-2xl fixed top-0 left-0 right-0  z-50 border-b border-yellow-400/20">
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo Moderno */}
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-yellow-400/20 shadow-2xl">
+      <div className="container mx-auto px-4 lg:px-6">
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between h-16 lg:h-20">
+
+          {/* LOGO */}
           <div
-            className="flex items-center group cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer"
             onClick={() => irPara("/")}
           >
-            <div className="relative -top-3 -left-2 w-12 h-12  rounded-full shadow-yellow-400/25 transition-transform transform group-hover:scale-110">
-              <img
-                src="/logo.png"
-                alt="Logo"
-                className="w-20 h-20 object-contain "
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  e.target.nextSibling.style.display = "flex";
-                }}
-              />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-10 h-10 lg:w-16 lg:h-16 object-contain"
+            />
+
             <div>
-              <span className="text-3xl font-black text-white tracking-wider">
+              <span className="text-lg lg:text-3xl font-black text-white">
                 TRILHÃO DOS AMIGOS
               </span>
-              <div className="text-yellow-500 text-xs font-medium tracking-widest">
+              <div className="text-yellow-500 text-xs">
                 ITAMONTE • MG
               </div>
             </div>
           </div>
 
-          {/* Menu Navigation Moderno */}
-          <div className="flex space-x-2">
-            {/* Dropdown Menu - Início */}
+          {/* MENU DESKTOP */}
+          <div className="hidden lg:flex space-x-2">
+
             <NavDropdown
               isOpen={menuAberto}
               toggle={toggleMenu}
@@ -103,20 +81,14 @@ const Navbar = () => {
               dropdownRef={menuRef}
             />
 
-            {/* Cadastre-se */}
             <button
               onClick={() => irPara("/cadastro")}
-              className={`group flex items-center px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105 ${
-                isActive("/cadastro")
-                  ? "bg-yellow-500 text-black shadow-lg shadow-yellow-400/25"
-                  : "text-white hover:bg-yellow-500 hover:text-black hover:shadow-lg hover:shadow-yellow-400/25"
-              }`}
+              className="px-6 py-3 rounded-xl bg-yellow-500 text-black font-semibold"
             >
-              <UserPlus className="mr-2" size={20} />
+              <UserPlus className="inline mr-2" size={18} />
               Cadastre-se
             </button>
 
-            {/* Dropdown Menu - Inscritos */}
             <NavDropdown
               isOpen={inscritoAberto}
               toggle={toggleInscrito}
@@ -128,8 +100,34 @@ const Navbar = () => {
               dropdownRef={inscritoRef}
             />
           </div>
+
+          {/* BOTÃO MOBILE */}
+          <button
+            className="lg:hidden text-white"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </div>
+
+      {/* MENU MOBILE */}
+      {mobileOpen && (
+        <div className="lg:hidden bg-black flex flex-col px-6 py-4 space-y-3 text-white">
+          {[...inicioOptions, ...inscritosOptions].map((item) => (
+            <button
+              key={item.path}
+              onClick={() => {
+                irPara(item.path);
+                setMobileOpen(false);
+              }}
+              className="text-left"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
     </nav>
   );
 };

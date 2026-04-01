@@ -52,7 +52,7 @@ function AppContent() {
       {shouldShowNavbar && <Navbar />}
 
       {/* Espaçador para compensar a navbar fixa */}
-      <div className={shouldShowNavbar ? "pt-20" : ""}>
+      <div className={shouldShowNavbar ? "pt-16 lg:pt-20" : ""}>
         <Routes>
           {/* ================================ */}
           {/* ROTAS PÚBLICAS - SITE PRINCIPAL */}

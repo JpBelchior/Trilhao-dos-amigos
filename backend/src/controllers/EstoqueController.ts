@@ -14,7 +14,7 @@ export class EstoqueController {
     try {
       console.log("📦 [EstoqueController] Solicitação de estoque completo");
 
-      // 1. CHAMAR Service (sem validação necessária para GET simples)
+      // 1. CHAMAR Service 
       const resultado = await EstoqueService.obterEstoqueCompleto();
 
       if (!resultado.sucesso) {
