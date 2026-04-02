@@ -83,9 +83,13 @@ const Navbar = () => {
 
             <button
               onClick={() => irPara("/cadastro")}
-              className="px-6 py-3 rounded-xl bg-yellow-500 text-black font-semibold"
+              className={`flex items-center px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105 ${
+                isActive("/cadastro")
+                  ? "bg-yellow-500 text-black shadow-lg shadow-yellow-400/25"
+                  : "text-white hover:bg-yellow-500 hover:text-black hover:shadow-lg hover:shadow-yellow-400/25"
+              }`}
             >
-              <UserPlus className="inline mr-2" size={18} />
+              <UserPlus className="mr-2" size={18} />
               Cadastre-se
             </button>
 

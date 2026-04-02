@@ -66,8 +66,8 @@ const StatsSection = () => {
             </h4>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-black/40 rounded-2xl p-6 text-center">
-                <h5 className="text-xl font-bold text-green-400 mb-2">
-                  Kit Oficial
+                <h5 className="text-xl font-bold text-yellow-400 mb-2">
+                  KIT OFICIAL
                 </h5>
                 <p className="text-gray-300">
                   Leve para casa seu kit exclusivo do Trilhão, nele vem uma camisa oficial, pulseiras e adesivos comemorativos, além do trofeu e conclusão

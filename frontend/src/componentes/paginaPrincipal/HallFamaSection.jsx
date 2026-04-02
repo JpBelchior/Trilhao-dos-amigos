@@ -207,7 +207,7 @@ const HallFamaSection = () => {
             <div className="bg-gradient-to-r from-yellow-900/40 via-green-900/40 to-black/60 backdrop-blur-lg rounded-3xl p-10 border-2 border-yellow-400/50 relative overflow-hidden">
               <div className="text-center relative z-10">
                 <h3 className="text-3xl font-black text-yellow-400 mb-6">
-                  🏆 MELHOR RESULTADO DE TODOS OS TEMPOS
+                   MELHOR RESULTADO DE TODOS OS TEMPOS
                 </h3>
                 <p className="text-gray-300 text-lg leading-relaxed mb-6">
                   {melhorResultado.nome} de {melhorResultado.cidade}/
@@ -227,7 +227,7 @@ const HallFamaSection = () => {
                   conquistador, venha ser o primeiro!
                 </p>
                 <div className="text-2xl font-black text-yellow-400">
-                  SERÁ QUE VOCÊ SERÁ O PRIMEIRO? 🏔️
+                    VOCÊ PODE SER O PRIMEIRO!
                 </div>
               </div>
             </div>

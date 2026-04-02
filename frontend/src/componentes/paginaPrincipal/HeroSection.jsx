@@ -67,7 +67,7 @@ const HeroSection = ({ isVisible, scrollY }) => {
       <p className="text-gray-300">
         Uma trilha pelos morros de Itamonte. Estradas de terra, vegetação e
         travessias de rios testam sua capacidade de pilotar! Além disso, há um
-        desafio:{" "}
+        obstáculo:{" "}
         <span className="text-green-400 font-bold">O Morro do Desafio</span>.
       </p>
 

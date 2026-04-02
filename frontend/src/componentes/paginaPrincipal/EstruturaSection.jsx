@@ -40,10 +40,10 @@ const EstruturaSection = () => {
 
   const cronogramaDomingo = [
     { horario: "08:00", atividade: "Café da manhã e Entrega e Kits", destaque: false },
-    { horario: "09:30", atividade: "Saída dos Competidores", destaque: false },
+    { horario: "09:30", atividade: "Saída dos Competidores", destaque: true },
     { horario: "10:00", atividade: "Início dos Show", destaque: true },
     { horario: "12:00", atividade: "Almoço", destaque: false },
-    { horario: "14:30", atividade: "Abertura do Morro do Dasafio", destaque: false },
+    { horario: "14:30", atividade: "Abertura do Morro do Dasafio", destaque: true },
     { horario: "16:00", atividade: "Chegada dos Trilheiros", destaque: false },
     { horario: "18:00", atividade: "Premiação & Encerramento", destaque: false },
   ];
@@ -113,7 +113,7 @@ const EstruturaSection = () => {
               {infraestrutura.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-black/40 rounded-xl p-3 flex items-center"
+                  className="bg-black/40 rounded-xl p-3 flex justify-center items-center"
                 >
                   <span>
                     <strong className={item.color}></strong>{" "}
@@ -136,7 +136,6 @@ const EstruturaSection = () => {
               CRONOGRAMA
             </h3>
 
-            {/* GRID RESPONSIVA */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12">
 
               {/* ================= SÁBADO ================= */}
@@ -185,7 +184,7 @@ const EstruturaSection = () => {
               </div>
 
               {/* ================= DOMINGO ================= */}
-              <div className="bg-black/40 rounded-2xl p-5 lg:p-8 border border-green-400/30">
+              <div className="bg-black/40 rounded-2xl p-5 lg:p-8 border border-yellow-400/30">
 
                 <h4 className="text-xl lg:text-3xl font-black mb-6 lg:mb-8 text-yellow-400  text-center">
                   DOMINGO
