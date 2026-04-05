@@ -9,7 +9,7 @@ import {
 } from "sequelize";
 import sequelize from "../config/db";
 
-// 🏷️ Enum para as categorias de foto
+
 export enum CategoriaFoto {
   EDICOES_ANTERIORES = "edicoes_anteriores",
   HALL_FAMA = "hall_fama",
@@ -17,10 +17,14 @@ export enum CategoriaFoto {
   EVENTO_ATUAL = "evento_atual",
 }
 
-// 📸 Enum para status da foto
 export enum StatusFoto {
   ATIVO = "ativo",
   INATIVO = "inativo",
+}
+
+export enum TipoMidia {
+  FOTO = "foto",
+  VIDEO = "video",
 }
 
 
@@ -41,7 +45,7 @@ export interface IFoto {
   updatedAt?: Date;
 }
 
-// 🎯 Classe do modelo Foto
+// Classe do modelo Foto
 class Foto extends Model<InferAttributes<Foto>, InferCreationAttributes<Foto>> {
   declare id: CreationOptional<number>;
   declare titulo: string;
@@ -55,10 +59,11 @@ class Foto extends Model<InferAttributes<Foto>, InferCreationAttributes<Foto>> {
   declare nomeArquivo: string;
   declare caminhoArquivo: string;
   declare tipoArquivo: string;
+  declare tipo: CreationOptional<TipoMidia>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  // 🔗 Getter para URL pública da foto
+  //  Getter para URL pública da mídia
   get urlFoto(): NonAttribute<string> {
     return `/uploads/fotos/${this.nomeArquivo}`;
   }
@@ -155,10 +160,16 @@ Foto.init(
       allowNull: false,
       validate: {
         isIn: {
-          args: [["image/jpeg", "image/jpg", "image/png", "image/webp"]],
-          msg: "Tipo de arquivo não suportado. Use JPEG, PNG ou WebP",
+          args: [["image/jpeg", "image/jpg", "image/png", "image/webp", "video/mp4", "video/webm", "video/quicktime", "video/avi"]],
+          msg: "Tipo de arquivo não suportado.",
         },
       },
+    },
+
+    tipo: {
+      type: DataTypes.ENUM(...Object.values(TipoMidia)),
+      allowNull: false,
+      defaultValue: TipoMidia.FOTO,
     },
 
     createdAt: {
@@ -178,7 +189,7 @@ Foto.init(
     tableName: "fotos",
     modelName: "Foto",
 
-    // 📈 Índices para otimizar consultas
+    //  Índices para otimizar consultas
     indexes: [
       {
         fields: ["categoria"], 

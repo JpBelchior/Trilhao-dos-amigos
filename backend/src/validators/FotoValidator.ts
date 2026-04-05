@@ -60,25 +60,24 @@ export class FotoValidator {
 
     // Validar cada arquivo
     if (files) {
-      for (const file of files) {
-        const tiposPermitidos = [
-          "image/jpeg",
-          "image/jpg",
-          "image/png",
-          "image/webp",
-        ];
+      const tiposImagem = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      const tiposVideo = ["video/mp4", "video/webm", "video/quicktime", "video/avi"];
+      const tiposPermitidos = [...tiposImagem, ...tiposVideo];
 
+      for (const file of files) {
         if (!tiposPermitidos.includes(file.mimetype)) {
           errors.push(
-            `Arquivo ${file.originalname} tem tipo inválido. Use JPEG, PNG ou WebP`
+            `Arquivo ${file.originalname} tem tipo inválido. Use JPEG, PNG, WebP, MP4, WebM ou MOV`
           );
         }
 
-        if (file.size > 10 * 1024 * 1024) {
-          // 10MB
-          errors.push(
-            `Arquivo ${file.originalname} é muito grande. Máximo 10MB`
-          );
+        const limiteBytes = tiposVideo.includes(file.mimetype)
+          ? 100 * 1024 * 1024  // 100MB para vídeos
+          : 10 * 1024 * 1024;  // 10MB para fotos
+
+        if (file.size > limiteBytes) {
+          const limite = tiposVideo.includes(file.mimetype) ? "100MB" : "10MB";
+          errors.push(`Arquivo ${file.originalname} é muito grande. Máximo ${limite}`);
         }
       }
     }

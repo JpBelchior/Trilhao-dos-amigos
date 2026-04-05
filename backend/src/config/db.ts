@@ -50,7 +50,7 @@ export const testConnection = async (): Promise<boolean> => {
 // Função para sincronizar o banco (criar tabelas)
 export const syncDatabase = async (force: boolean = false): Promise<void> => {
   try {
-    await sequelize.sync({ force }); // force: true apaga e recria as tabelas
+    await sequelize.sync({ force, alter: !force }); // alter: true atualiza colunas sem apagar dados
     console.log("✅ Banco de dados sincronizado.");
   } catch (error) {
     console.error("❌ Erro ao sincronizar banco de dados:", error);

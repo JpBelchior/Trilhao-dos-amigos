@@ -1,26 +1,16 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
-// ========================================
-// RATE LIMITER PARA AUTENTICAÇÃO
-// ========================================
-// Protege contra tentativas de força bruta em login
 export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // Máximo 5 tentativas
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: {
     sucesso: false,
     erro: 'Muitas tentativas de login',
     detalhes: 'Você excedeu o limite de tentativas. Tente novamente em 15 minutos.',
   },
-  standardHeaders: true, // Retorna info de rate limit nos headers
-  legacyHeaders: false, // Desabilita headers antigos (X-RateLimit-*)
-  
-  // Função para gerar chave única por IP
-  keyGenerator: (req) => {
-    return req.ip || 'unknown';
-  },
-
-  // Handler customizado quando limite é atingido
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? ''),
   handler: (req, res) => {
     console.warn(`⚠️ [RateLimit] IP bloqueado (auth): ${req.ip}`);
     res.status(429).json({
@@ -31,13 +21,9 @@ export const authLimiter = rateLimit({
   },
 });
 
-// ========================================
-// RATE LIMITER PARA CADASTRO
-// ========================================
-// Protege contra spam de cadastros
 export const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hora
-  max: 10, // Máximo 3 cadastros por hora
+  windowMs: 60 * 60 * 1000,
+  max: 10,
   message: {
     sucesso: false,
     erro: 'Limite de cadastros atingido',
@@ -45,11 +31,7 @@ export const registerLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  
-  keyGenerator: (req) => {
-    return req.ip || 'unknown';
-  },
-
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? ''),
   handler: (req, res) => {
     console.warn(`⚠️ [RateLimit] IP bloqueado (cadastro): ${req.ip}`);
     res.status(429).json({
@@ -60,13 +42,9 @@ export const registerLimiter = rateLimit({
   },
 });
 
-// ========================================
-// RATE LIMITER PARA PAGAMENTO
-// ========================================
-// Protege contra spam de criação de pagamentos PIX
 export const paymentLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutos
-  max: 10, // Máximo 5 pagamentos em 10 minutos
+  windowMs: 10 * 60 * 1000,
+  max: 10,
   message: {
     sucesso: false,
     erro: 'Limite de tentativas de pagamento atingido',
@@ -74,11 +52,7 @@ export const paymentLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  
-  keyGenerator: (req) => {
-    return req.ip || 'unknown';
-  },
-
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? ''),
   handler: (req, res) => {
     console.warn(`⚠️ [RateLimit] IP bloqueado (pagamento): ${req.ip}`);
     res.status(429).json({
@@ -89,13 +63,9 @@ export const paymentLimiter = rateLimit({
   },
 });
 
-// ========================================
-// RATE LIMITER GERAL PARA API
-// ========================================
-// Protege contra abuso geral da API
 export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 3000, 
+  windowMs: 15 * 60 * 1000,
+  max: 3000,
   message: {
     sucesso: false,
     erro: 'Muitas requisições',
@@ -103,11 +73,7 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  
-  keyGenerator: (req) => {
-    return req.ip || 'unknown';
-  },
-
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? ''),
   handler: (req, res) => {
     console.warn(`⚠️ [RateLimit] IP bloqueado (API geral): ${req.ip}`);
     res.status(429).json({

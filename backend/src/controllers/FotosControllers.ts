@@ -23,7 +23,8 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const timestamp = Date.now();
     const extensao = path.extname(file.originalname);
-    const nomeUnico = `foto_${timestamp}_${Math.random()
+    const prefixo = file.mimetype.startsWith("video/") ? "video" : "foto";
+    const nomeUnico = `${prefixo}_${timestamp}_${Math.random()
       .toString(36)
       .substring(2, 15)}${extensao}`;
     cb(null, nomeUnico);
@@ -40,12 +41,16 @@ const fileFilter = (
     "image/jpg",
     "image/png",
     "image/webp",
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    "video/avi",
   ];
 
   if (tiposPermitidos.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Tipo de arquivo não suportado. Use JPEG, PNG ou WebP"));
+    cb(new Error("Tipo de arquivo não suportado. Use JPEG, PNG, WebP, MP4, WebM ou MOV"));
   }
 };
 
@@ -53,7 +58,7 @@ export const uploadMiddleware = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: 100 * 1024 * 1024, // 100MB (comporta fotos e vídeos curtos)
   },
 });
 

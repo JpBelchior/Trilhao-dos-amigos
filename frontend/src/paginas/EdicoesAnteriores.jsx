@@ -12,7 +12,7 @@ const EdicoesAnteriores = () => {
             EDIÇÕES <span className="text-yellow-400">ANTERIORES</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Relembre os momentos e veja a evolução do Trilhão ao longo dos anos
+            Veja a evolução do Trilhão ao longo dos anos e o que podemos esperar para as próximas edições
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>

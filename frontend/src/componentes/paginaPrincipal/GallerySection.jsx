@@ -1,55 +1,23 @@
-import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import SimpleImage from "../SimpleImage";
 import LoadingComponent from "../Loading";
-import { apiClient } from "../../services/api";
 import ErroComponent from "../Erro";
-import { formatarEdicao } from "../../hooks/useEdicao";
+import { useGallery } from "../../hooks/useGallery";
 
 const GallerySection = () => {
-  const [fotos, setFotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState("");
-  const [currentPhoto, setCurrentPhoto] = useState(0);
-
-
-  const carregarFotos = async () => {
-    try {
-      setLoading(true);
-      setErro("");
-
-      const data = await apiClient.get("/fotos/galeria/edicoes_anteriores");
-
-      if (data.sucesso && data.dados.fotos) {
-        setFotos(data.dados.fotos);
-      } else {
-        console.warn("⚠️ [GallerySection] Nenhuma foto encontrada");
-        setFotos([]);
-      }
-    } catch (error) {
-      console.error("❌ [GallerySection] Erro ao carregar fotos:", error);
-      setErro("Erro ao carregar galeria");
-      setFotos([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    carregarFotos();
-  }, []);
-
-  const construirUrlFoto = (foto) => {
-    if (foto.urlFoto?.startsWith("/uploads/")) {
-      return `http://localhost:8000${foto.urlFoto}`;
-    }
-    return foto.urlFoto || "/api/placeholder/800/500";
-  };
-
-  const proximaFoto = () =>
-    setCurrentPhoto((prev) => (prev + 1) % fotos.length);
-  const fotoAnterior = () =>
-    setCurrentPhoto((prev) => (prev - 1 + fotos.length) % fotos.length);
+  const {
+    fotos,
+    loading,
+    erro,
+    currentPhoto,
+    setCurrentPhoto,
+    carregarFotos,
+    proximaFoto,
+    fotoAnterior,
+    handleVideoEnded,
+    construirUrlFoto,
+    formatarBadgeEdicao,
+  } = useGallery();
 
   if (loading) {
     return (
@@ -61,12 +29,10 @@ const GallerySection = () => {
     );
   }
 
-  // Erro
   if (erro) {
     return <ErroComponent mensagem={erro} onTentarNovamente={carregarFotos} />;
   }
 
-  // Nenhuma foto
   if (fotos.length === 0) {
     return (
       <section className="py-20 bg-black">
@@ -81,6 +47,7 @@ const GallerySection = () => {
   }
 
   const fotoAtual = fotos[currentPhoto];
+  const badgeEdicao = formatarBadgeEdicao(fotoAtual);
 
   return (
     <section className="py-20 bg-black">
@@ -99,38 +66,52 @@ const GallerySection = () => {
         {/* Foto principal */}
         <div className="max-w-6xl mx-auto relative mb-8 group">
           <div className="aspect-video rounded-2xl overflow-hidden bg-gray-800">
-            <SimpleImage
-              src={construirUrlFoto(fotoAtual)}
-              alt={fotoAtual.titulo}
-              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
-            />
+            {fotoAtual.tipo === "video" ? (
+              <video
+                key={fotoAtual.id}
+                src={construirUrlFoto(fotoAtual)}
+                className="w-full h-full object-cover"
+                controls
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                onEnded={handleVideoEnded}
+              />
+            ) : (
+              <SimpleImage
+                src={construirUrlFoto(fotoAtual)}
+                alt={fotoAtual.titulo}
+                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+              />
+            )}
 
             {/* Overlay com Edição, Título e Descrição */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
               <div className="absolute bottom-6 left-6 text-white max-w-2xl">
-                {/* 🆕 Badge da Edição */}
-                {fotoAtual.edicao && (
+                {/* Badge da Edição */}
+                {badgeEdicao && (
                   <div className="mb-3">
                     <span className="bg-yellow-500 text-black text-sm font-bold px-4 py-1.5 rounded-full shadow-lg">
-                      {formatarEdicao(fotoAtual.edicao)}
+                      {badgeEdicao}
                     </span>
                   </div>
                 )}
-                
+
                 {/* Título */}
                 <h3 className="text-2xl md:text-3xl font-bold mb-2 drop-shadow-lg">
                   {fotoAtual.titulo}
                 </h3>
-                
-                {/* 🆕 Descrição */}
+
+                {/* Descrição */}
                 {fotoAtual.descricao && (
                   <p className="text-gray-200 text-base md:text-lg drop-shadow-lg">
                     {fotoAtual.descricao}
                   </p>
                 )}
-                
-                {/* Stats (se existir) */}
+
+                {/* Stats */}
                 {fotoAtual.stats && (
                   <p className="text-yellow-400 text-sm md:text-base mt-2 font-semibold drop-shadow-lg">
                     {fotoAtual.stats}
@@ -182,12 +163,20 @@ const GallerySection = () => {
                 }`}
                 aria-label={`Ver ${foto.titulo}`}
               >
-                <SimpleImage
-                  src={construirUrlFoto(foto)}
-                  alt={foto.titulo}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                {foto.tipo === "video" ? (
+                  <video
+                    src={construirUrlFoto(foto)}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                ) : (
+                  <SimpleImage
+                    src={construirUrlFoto(foto)}
+                    alt={foto.titulo}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                )}
               </button>
             ))}
 

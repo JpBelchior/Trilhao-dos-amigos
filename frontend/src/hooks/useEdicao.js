@@ -77,6 +77,12 @@ export function calcularEdicao(ano) {
   return { edicao, numeroEdicao };
 }
 
+export function calcularAnoPorEdicao(edicao) {
+  const numero = parseInt(edicao.toString().replace(/\D/g, ''));
+  if (!numero) return null;
+  return ANO_PRIMEIRA_EDICAO + numero - 1;
+}
+
 export function formatarEdicao(edicao) {
   if (!edicao) return null;
 

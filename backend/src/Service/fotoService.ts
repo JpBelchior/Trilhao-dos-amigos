@@ -73,7 +73,7 @@ export class FotoService {
       });
 
       const fotosUpload: Foto[] = [];
-      const { titulo, descricao, stats, categoria, edicao, ano } = dados;
+      const { titulo, descricao, stats, categoria, edicao, ano, tipo } = dados;
 
       // Garantir que diretório existe
       this.garantirDiretorioUpload();
@@ -94,6 +94,7 @@ export class FotoService {
           edicao:
             categoria === CategoriaFoto.EDICOES_ANTERIORES ? edicao : null,
           ano: ano ? parseInt(ano) : undefined,
+          tipo: tipo || "foto",
           ordem: proximaOrdem + i,
           nomeArquivo: file.filename,
           caminhoArquivo: file.path,
@@ -190,6 +191,7 @@ export class FotoService {
             ordem: foto.ordem,
             status: foto.status,
             urlFoto: foto.urlFoto,
+            tipo: foto.tipo,
             tipoArquivo: foto.tipoArquivo,
             createdAt: foto.createdAt,
           })),
@@ -243,6 +245,7 @@ export class FotoService {
             stats: foto.stats,
             edicao: foto.edicao,
             ano: foto.ano,
+            tipo: foto.tipo,
             urlFoto: foto.urlFoto,
           })),
           total: fotos.length,
