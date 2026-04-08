@@ -20,19 +20,23 @@ const ProvasSection = () => {
         <div className="mb-20">
           <div className="max-w-5xl mx-auto">
             <div className="bg-gradient-to-r from-green-900/50 to-black/50 backdrop-blur-lg rounded-3xl p-8 border border-green-400/20">
-              <h3 className="text-3xl font-black text-center text-white mb-6">
+              <h3 className="text-3xl font-black text-center text-white mb-2">
                 <MapPin className="inline mr-3 text-yellow-400" size={32} />
-                MAPA DO TRAJETO
+                PRÉVIA DO TRAJETO
               </h3>
+              <p className="text-center text-gray-400 mb-6">
+                O mapa está incompleto — mostramos só um pedacinho.
+                O resto você descobre chegando lá e vivendo esse dia!
+              </p>
               <div className="w-full h-96 rounded-2xl overflow-hidden border-2 border-yellow-400/30">
                 <TrilhaoMap />
               </div>
-              <p className="text-center text-gray-400 mt-6 text-lg">
+              <p className="text-center text-gray-500 mt-6 text-sm italic">
                 <PointerIcon
                   className="inline mr-2 text-yellow-400"
-                  size={20}
+                  size={16}
                 />
-                Clique nos marcadores para explorar cada ponto da aventura
+                Clique nos marcadores para ver os pontos que revelamos
               </p>
             </div>
           </div>
@@ -52,12 +56,12 @@ const ProvasSection = () => {
                     PROVA 1
                   </span>
                   <span className="text-yellow-400 text-sm font-semibold">
-                    10:30H
+                    9:30H
                   </span>
                 </div>
                 <h3 className="text-4xl font-black text-white">TRILHA</h3>
                 <p className="text-green-400 text-xl font-semibold">
-                  25km de Adrenalina
+                50km de Adrenalina
                 </p>
               </div>
             </div>
@@ -82,7 +86,7 @@ const ProvasSection = () => {
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
                  <div className="w-3 h-3 bg-green-400 rounded-full mr-4"></div>
                   <span>
-                    <strong className="text-green-400">Distancia:</strong> 25 Km Off Road
+                    <strong className="text-green-400">Distancia:</strong> 50 Km Off Road
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">

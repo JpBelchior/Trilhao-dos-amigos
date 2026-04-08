@@ -9,7 +9,7 @@ const TrilhaoMap = () => {
   useEffect(() => {
     const buscarTrajeto = async () => {
       try {
-        console.log("📍 Buscando trajeto GPX do backend...");
+        console.log(" Buscando trajeto GPX do backend...");
         
         const response = await fetch("http://localhost:8000/api/trajeto/atual");
         const data = await response.json();
@@ -59,12 +59,11 @@ const TrilhaoMap = () => {
       const L = window.L;
 
       
-      let center, trilhaRoute, startPoint, endPoint, barrancoPoint;
+      let center, trilhaRoute, startPoint, endPoint, barrancoPoint, atracaoPoint;
 
       if (trajetoGPX && trajetoGPX.coordenadas) {
         // 🎯 USAR DADOS DO GPX
-        console.log("🗺️ Usando trajeto do GPX com", trajetoGPX.coordenadas.length, "pontos");
-        
+
         trilhaRoute = trajetoGPX.coordenadas;
         startPoint = trilhaRoute[0];
         endPoint = trilhaRoute[trilhaRoute.length - 1];
@@ -72,8 +71,14 @@ const TrilhaoMap = () => {
         // Calcular ponto médio para centro do mapa
         center = trilhaRoute[Math.floor(trilhaRoute.length / 2)];
         
-        // Barranco (aproximadamente 70% do trajeto)
-        barrancoPoint = trilhaRoute[Math.floor(trilhaRoute.length * 0.7)];
+        // Local das atrações (fixo)
+        atracaoPoint = [-22.3121252, -44.8171325];
+
+        // Barranco: ponto médio entre largada (endPoint) e local das atrações
+        barrancoPoint = [
+          (endPoint[0] + atracaoPoint[0]) / 2,
+          (endPoint[1] + atracaoPoint[1]) / 2,
+        ];
         
       } else {
         // 📍 USAR COORDENADAS PADRÃO (fallback)
@@ -82,17 +87,12 @@ const TrilhaoMap = () => {
         center = [-22.2875, -44.8647];
         startPoint = [-22.2875, -44.8647];
         endPoint = [-22.3156, -44.8234];
-        barrancoPoint = [-22.32, -44.83];
-        
-        trilhaRoute = [
-          [-22.2875, -44.8647],
-          [-22.292, -44.859],
-          [-22.298, -44.852],
-          [-22.302, -44.845],
-          [-22.308, -44.838],
-          [-22.312, -44.832],
-          [-22.3156, -44.8234],
+        atracaoPoint = [-22.3121252, -44.8171325];
+        barrancoPoint = [
+          (endPoint[0] + atracaoPoint[0]) / 2,
+          (endPoint[1] + atracaoPoint[1]) / 2,
         ];
+        
       }
 
       // Criar o mapa
@@ -106,14 +106,21 @@ const TrilhaoMap = () => {
 
       // Ícones customizados
       const startIcon = L.divIcon({
+        html: '<div style="background: #eab308; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white ;">?</div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        className: "custom-marker",
+      });
+
+      const endIcon = L.divIcon({
         html: '<div style="background: #16a34a; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: bold;">🏁</div>',
         iconSize: [25, 25],
         iconAnchor: [12, 12],
         className: "custom-marker",
       });
 
-      const endIcon = L.divIcon({
-        html: '<div style="background: #dc2626; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: bold;">🏆</div>',
+      const atracaoIcon = L.divIcon({
+        html: '<div style="background: #7c3aed; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: bold;">🎪</div>',
         iconSize: [25, 25],
         iconAnchor: [12, 12],
         className: "custom-marker",
@@ -126,48 +133,54 @@ const TrilhaoMap = () => {
         className: "custom-marker",
       });
 
-      // Marcador de LARGADA
+      // Marcador MISTERIOSO (início do GPX)
       L.marker(startPoint, { icon: startIcon }).addTo(map).bindPopup(`
+        <div style="text-align: center; min-width: 220px;">
+          <h3 style="font-weight: bold; color: #eab308; margin-bottom: 8px; font-size: 16px;"> Quer descobrir mais? </h3>
+          <p style="color: #374151; margin: 6px 0; font-size: 13px;">O restante da trilha é um misterio...</p>
+          <p style="font-weight: bold; color: #ea580c; margin: 8px 0; font-size: 13px;">Se inscreva e venha participar dessa aventura!</p>
+        </div>
+      `);
+
+      // Marcador de LARGADA (fim do GPX)
+      L.marker(endPoint, { icon: endIcon }).addTo(map).bindPopup(`
         <div style="text-align: center; min-width: 200px;">
-          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> LARGADA</h3>
+          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;">🏁 LARGADA</h3>
           <p style="margin: 4px 0;">Ilha Grande</p>
           <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Itamonte/MG</p>
           <p style="font-size: 14px; font-weight: 600; color: #ea580c; margin: 4px 0;">
-            Horário: 10:30h
+            Horário: 9:30h
           </p>
           ${trajetoGPX ? `
             <p style="font-size: 14px; font-weight: 600; color: #16a34a; margin: 4px 0;">
-              📊 Distância: ${trajetoGPX.distanciaKm} km
+               Distância: 50 km
             </p>
             ${trajetoGPX.ganhoElevacao ? `
               <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">
-                ⬆️ Elevação: ${trajetoGPX.ganhoElevacao}m
+                 Elevação: ${trajetoGPX.ganhoElevacao}m
               </p>
             ` : ''}
           ` : ''}
         </div>
       `);
 
-      // Marcador de CHEGADA
-      L.marker(endPoint, { icon: endIcon }).addTo(map).bindPopup(`
+      // Marcador das ATRAÇÕES
+      L.marker(atracaoPoint, { icon: atracaoIcon }).addTo(map).bindPopup(`
         <div style="text-align: center; min-width: 200px;">
-          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> CHEGADA</h3>
-          <p style="margin: 4px 0;">Ilha Grande</p>
-          <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">25km de trilha</p>
-          <p style="font-size: 14px; font-weight: 600; color: #2563eb; margin: 4px 0;">
-            Chegando pelas aguas do rio Capivari
-          </p>
+          <h3 style="font-weight: bold; color: #7c3aed; margin-bottom: 8px;"> LOCAL DAS ATRAÇÕES</h3>
+          <p style="margin: 4px 0;">Centro Comunitário</p>
+          <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Estrada do Picuzinho, Km 5</p>
+          <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Ilha Grande - Itamonte/MG</p>
         </div>
       `);
 
       // Marcador do BARRANCO
       L.marker(barrancoPoint, { icon: barrancoIcon }).addTo(map).bindPopup(`
         <div style="text-align: center; min-width: 200px;">
-          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> BARRANCO</h3>
+          <h3 style="font-weight: bold; color: #166534; margin-bottom: 8px;"> BARRANCO DO DESAFIO</h3>
           <p style="margin: 4px 0;">Prova da Subida</p>
-          <p style="font-size: 14px; color: #6b7280; margin: 4px 0;">Barranco dos Campeões</p>
           <p style="font-size: 14px; font-weight: 600; color: #dc2626; margin: 4px 0;">
-            Prêmio: R$ 1.000
+            Prêmio: R$ 1.500 R$
           </p>
         </div>
       `);

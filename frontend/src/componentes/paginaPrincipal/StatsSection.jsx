@@ -26,7 +26,7 @@ const StatsSection = () => {
     },
     {
       icon: Target,
-      number: "25KM",
+      number: "50KM",
       label: "Trilha Off-Road",
       bgColor: "from-green-400 to-green-600",
       textColor: "text-green-400",

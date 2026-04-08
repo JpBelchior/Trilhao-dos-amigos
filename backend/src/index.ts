@@ -180,6 +180,16 @@ app.get("/", (req, res) => {
 });
 
 
+app.get("/reimportar-gpx", async (req, res) => {
+  try {
+    const { importarGPXdaPasta } = await import("./seeds/importarGPX");
+    await importarGPXdaPasta();
+    res.json({ sucesso: true, mensagem: "Trajeto GPX reimportado com sucesso!" });
+  } catch (error) {
+    res.status(500).json({ sucesso: false, erro: "Erro ao reimportar GPX" });
+  }
+});
+
 app.get("/seed", async (req, res) => {
   try {
     console.log("\n🌱 ========================================");

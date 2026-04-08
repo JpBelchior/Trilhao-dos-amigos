@@ -41,7 +41,7 @@ const HeroSection = ({ isVisible, scrollY }) => {
     {/* Stats */}
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
       <div className="bg-black/40 backdrop-blur-lg border border-yellow-400/30 rounded-2xl p-4">
-        <div className="text-2xl md:text-3xl font-black text-yellow-400">25KM</div>
+        <div className="text-2xl md:text-3xl font-black text-yellow-400">50KM</div>
         <div className="text-sm text-gray-300">Trilha Off-Road</div>
       </div>
 

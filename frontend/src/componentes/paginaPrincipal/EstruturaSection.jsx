@@ -33,7 +33,7 @@ const EstruturaSection = () => {
       { horario: "08:00", atividade: "Abertura do Morro para Treinos", destaque: false },
       { horario: "09:00", atividade: "Treino da Manhã", destaque: true },
       { horario: "12:00", atividade: "Almoço", destaque: false },
-      { horario: "14:00", atividade: "Treino da Tare", destaque: true },
+      { horario: "14:00", atividade: "Treino da Tarde", destaque: true },
       { horario: "16:00", atividade: "Show ao Vivo & Barraquinhas ", destaque: false },
       { horario: "17:00", atividade: "Encerramento ", destaque: false },
     ];
