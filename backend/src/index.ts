@@ -278,22 +278,31 @@ const startServer = async () => {
             "./controllers/ParticipanteController"
           );
           await ParticipanteController.executarVerificacaoAutomatica();
+
+          const { PedidoCamisetaAvulsaService } = await import(
+            "./Service/PedidoCamisetaAvulsaService"
+          );
+          await PedidoCamisetaAvulsaService.cancelarPedidosExpirados();
         } catch (error) {
           console.error("❌ Erro na primeira verificação:", error);
         }
       }, 60 * 1000); // 1 minuto
 
-     
       setInterval(async () => {
         try {
           const { ParticipanteController } = await import(
             "./controllers/ParticipanteController"
           );
           await ParticipanteController.executarVerificacaoAutomatica();
+
+          const { PedidoCamisetaAvulsaService } = await import(
+            "./Service/PedidoCamisetaAvulsaService"
+          );
+          await PedidoCamisetaAvulsaService.cancelarPedidosExpirados();
         } catch (error) {
           console.error("❌ Erro na verificação automática:", error);
         }
-      }, 15 * 60 * 1000); 
+      }, 15 * 60 * 1000);
 
       console.log(
         "✅ Verificação automática configurada para executar a cada 15 minutos"

@@ -12,7 +12,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-
+import LoadingComponent from "../componentes/Loading";
+import ErroComponent from "../componentes/Erro";
 import usePagamento from "../hooks/usePagamento";
 
 const Pagamento = () => {
@@ -55,48 +56,23 @@ const Pagamento = () => {
   // ========================================
   if (loading.gerandoPix) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 flex items-center justify-center">
-        <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30 text-center max-w-md">
-          <Loader2
-            className="animate-spin text-green-400 mx-auto mb-4"
-            size={48}
-          />
-          <h2 className="text-2xl font-bold text-white mb-2">Gerando PIX...</h2>
-          <p className="text-gray-300">
-            Estamos preparando seu pagamento via Mercado Pago. Aguarde...
-          </p>
-        </div>
-      </div>
+      <LoadingComponent
+        variant="pix"
+        loading="Gerando PIX..."
+        subtitulo="Estamos preparando seu pagamento via Mercado Pago. Aguarde..."
+      />
     );
   }
 
   // 2️⃣ Erro ao gerar PIX
   if (erro && !dadosPix) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 flex items-center justify-center p-6">
-        <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-red-400/30 text-center max-w-md">
-          <AlertCircle className="text-red-400 mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Erro ao Gerar Pagamento
-          </h2>
-          <p className="text-red-300 mb-6">{erro}</p>
-
-          <div className="space-y-3">
-            <button
-              onClick={gerarPix}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all"
-            >
-              Tentar Novamente
-            </button>
-            <button
-              onClick={cancelarPagamento}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all"
-            >
-              Voltar ao Cadastro
-            </button>
-          </div>
-        </div>
-      </div>
+      <ErroComponent
+        erro={erro}
+        onTentarNovamente={gerarPix}
+        onVoltar={cancelarPagamento}
+        mostrarVoltar={false}
+      />
     );
   }
 

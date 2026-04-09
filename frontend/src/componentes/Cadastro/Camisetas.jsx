@@ -1,6 +1,6 @@
 import React from "react";
-import { Shirt, AlertCircle, Gift, Plus, Trash2 } from "lucide-react";
-import { InputTextarea } from "../form";
+import { Shirt, AlertCircle, Gift } from "lucide-react";
+import { InputTextarea, SeletorCamisas } from "../form";
 
 const StepCamisetas = ({
   formData,
@@ -125,142 +125,16 @@ const StepCamisetas = ({
           Quer mais camisetas? Adicione quantas quiser (pode repetir tamanho/tipo)
         </p>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-          {/* TAMANHO DA CAMISETA EXTRA */}
-          <div>
-            <label className="block text-white font-semibold mb-2">
-              Tamanho
-            </label>
-            <select
-              value={camisetaExtra.tamanho}
-              onChange={(e) =>
-                setCamisetaExtra((prev) => ({
-                  ...prev,
-                  tamanho: e.target.value,
-                }))
-              }
-              className="w-full bg-black/50 border border-yellow-400/50 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/30"
-            >
-              {Object.values(TamanhoCamiseta).map((tamanho) => {
-                const disponivel = verificarDisponibilidade(
-                  tamanho,
-                  camisetaExtra.tipo
-                );
-                return (
-                  <option
-                    key={tamanho}
-                    value={tamanho}
-                    disabled={disponivel <= 0}
-                  >
-                    {tamanho} - {disponivel} disponíveis
-                    {disponivel <= 0 ? " (ESGOTADO)" : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          {/* TIPO DA CAMISETA EXTRA */}
-          <div>
-            <label className="block text-white font-semibold mb-2">Tipo</label>
-            <select
-              value={camisetaExtra.tipo}
-              onChange={(e) =>
-                setCamisetaExtra((prev) => ({ ...prev, tipo: e.target.value }))
-              }
-              className="w-full bg-black/50 border border-yellow-400/50 rounded-xl px-4 py-3 text-white focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/30"
-            >
-              {Object.values(TipoCamiseta).map((tipo) => {
-                const disponivel = verificarDisponibilidade(
-                  camisetaExtra.tamanho,
-                  tipo
-                );
-                return (
-                  <option key={tipo} value={tipo} disabled={disponivel <= 0}>
-                    {tipo === "manga_curta" ? "Manga Curta" : "Manga Longa"} -{" "}
-                    {disponivel} disponíveis
-                    {disponivel <= 0 ? " (ESGOTADO)" : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </div>
-
-        {/* BOTÃO ADICIONAR CAMISETA EXTRA */}
-        <button
-          onClick={adicionarCamisetaExtra}
-          disabled={
-            verificarDisponibilidade(
-              camisetaExtra.tamanho,
-              camisetaExtra.tipo
-            ) <= 0
-          }
-          className={`w-full py-3 px-6 rounded-xl font-bold transition-all flex items-center justify-center ${
-            verificarDisponibilidade(
-              camisetaExtra.tamanho,
-              camisetaExtra.tipo
-            ) > 0
-              ? "bg-yellow-500 hover:bg-yellow-600 text-black"
-              : "bg-gray-600 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          <Plus className="mr-2" size={20} />
-          Adicionar Camiseta Extra (+R$ 50,00)
-        </button>
-
-        {/* LISTA DE CAMISETAS EXTRAS ADICIONADAS */}
-        {formData.camisetasExtras.length > 0 && (
-          <div className="mt-6 space-y-2">
-            <h4 className="font-bold text-yellow-400 mb-3 flex items-center">
-              <Shirt className="mr-2" size={18} />
-              Camisetas Extras Selecionadas ({formData.camisetasExtras.length})
-            </h4>
-            {formData.camisetasExtras.map((extra, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center bg-black/40 rounded-xl p-4 border border-yellow-400/30 hover:border-yellow-400/50 transition-all"
-              >
-                <div className="flex items-center space-x-3">
-                  <Shirt className="text-yellow-400" size={20} />
-                  <div>
-                    <span className="text-white font-semibold">
-                      {extra.tamanho} -{" "}
-                      {extra.tipo === "manga_curta"
-                        ? "Manga Curta"
-                        : "Manga Longa"}
-                    </span>
-                    <div className="text-xs text-gray-400">
-                      Item #{index + 1}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-green-400 font-bold">R$ 50,00</span>
-                  <button
-                    onClick={() => removerCamisetaExtra(index)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded-lg transition-all"
-                    title="Remover camiseta"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* TOTAL DE EXTRAS */}
-            <div className="mt-4 bg-yellow-900/50 rounded-xl p-4 border border-yellow-400/50">
-              <div className="flex justify-between items-center">
-                <span className="text-white font-semibold">
-                  Subtotal Extras:
-                </span>
-                <span className="text-yellow-400 font-bold text-lg">
-                  R$ {(formData.camisetasExtras.length * 50.0).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+        <SeletorCamisas
+          camisas={formData.camisetasExtras}
+          camisaSelecionada={camisetaExtra}
+          setCamisaSelecionada={setCamisetaExtra}
+          adicionarCamisa={adicionarCamisetaExtra}
+          removerCamisa={removerCamisetaExtra}
+          getDisponibilidade={verificarDisponibilidade}
+          TamanhoCamiseta={TamanhoCamiseta}
+          TipoCamiseta={TipoCamiseta}
+        />
       </div>
 
       {/* OBSERVAÇÕES */}

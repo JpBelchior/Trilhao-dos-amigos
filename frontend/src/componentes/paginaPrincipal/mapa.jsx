@@ -81,8 +81,8 @@ const TrilhaoMap = () => {
         ];
         
       } else {
-        // 📍 USAR COORDENADAS PADRÃO (fallback)
-        console.log("📍 Usando coordenadas padrão (GPX não disponível)");
+        //USAR COORDENADAS PADRÃO 
+        console.log("  GPX não disponível");
         
         center = [-22.2875, -44.8647];
         startPoint = [-22.2875, -44.8647];

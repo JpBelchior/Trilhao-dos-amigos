@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy } from "lucide-react";
+import { Trophy, ShoppingBag } from "lucide-react";
 
 const CTASection = () => {
   const navigate = useNavigate();
@@ -25,14 +25,22 @@ const CTASection = () => {
             na Serra da Mantiqueira!
           </p>
 
-          {/* CTA Buttons Épicos */}
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <button
-              className="group bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black px-8 py-3 rounded-3xl text-2xl transition-all transform hover:scale-110 hover:shadow-2xl hover:shadow-yellow-400/25 flex items-center"
+              className="group bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black px-8 py-3 rounded-3xl text-2xl transition-all transform hover:scale-110  hover:shadow-yellow-400/25 flex items-center"
               onClick={() => navigate("/cadastro")}
             >
               <Trophy className="mr-4 group-hover:animate-pulse" size={32} />
               GARANTIR MINHA VAGA
+            </button>
+
+            <button
+              className="group bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black px-8 py-3 rounded-3xl text-2xl transition-all transform hover:scale-110  hover:shadow-yellow-400/25 flex items-center"
+              onClick={() => navigate("/comprar-camisa")}
+            >
+              <ShoppingBag className="mr-3 group-hover:animate-pulse" size={26} />
+              COMPRAR CAMISA
             </button>
           </div>
 

@@ -38,31 +38,36 @@ const AdminDashboard = () => {
       setErro(null);
       console.log("📊 [Dashboard] Carregando estatísticas...");
 
-      // Carregar participantes usando fetchAuth (requisição autenticada)
-      const participantesResponse = await fetchAuth(
-        "http://localhost:8000/api/participantes"
-      );
-      const participantesData = await participantesResponse.json();
+      // Carregar dados em paralelo
+      const [participantesResponse, estoqueResponse, avulsosResponse] = await Promise.all([
+        fetchAuth("http://localhost:8000/api/participantes"),
+        fetchAuth("http://localhost:8000/api/estoque/resumo"),
+        fetchAuth("http://localhost:8000/api/pedido-camisa/admin/lista"),
+      ]);
 
-      // Carregar estoque
-      const estoqueResponse = await fetchAuth(
-        "http://localhost:8000/api/estoque/resumo"
-      );
+      const participantesData = await participantesResponse.json();
       const estoqueData = await estoqueResponse.json();
+      const avulsosData = await avulsosResponse.json();
 
       if (participantesData.sucesso && estoqueData.sucesso) {
         const participantes = participantesData.dados.participantes || [];
         const confirmados = participantes.filter(
           (p) => p.statusPagamento === "confirmado"
         );
-        const pendentes = participantes.filter(
-          (p) => p.statusPagamento === "pendente"
-        );
 
-        // Calcular receita total
-        const receita = confirmados.reduce((total, p) => {
+        // Receita de participantes (inclui camisetas extras de participantes via valorInscricao)
+        const receitaParticipantes = confirmados.reduce((total, p) => {
           return total + parseFloat(p.valorInscricao || 0);
         }, 0);
+
+        // Receita de pedidos avulsos confirmados de não-participantes
+        // (avulsos de participantes são destruídos na confirmação e já entram em valorInscricao)
+        const pedidosAvulsos = avulsosData?.dados?.pedidos || [];
+        const receitaAvulsos = pedidosAvulsos
+          .filter((p) => p.statusPagamento === "confirmado")
+          .reduce((total, p) => total + parseFloat(p.valorTotal || 0), 0);
+
+        const receita = receitaParticipantes + receitaAvulsos;
 
         setEstatisticas({
           totalParticipantes: participantes.length,

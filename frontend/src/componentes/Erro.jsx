@@ -14,7 +14,9 @@ import {
 const ErroComponent = ({
   erro = "Erro desconhecido",
   onTentarNovamente,
-
+  onVoltar,
+  mostrarVoltar = true,
+  bg = "from-green-900 via-black to-green-900",
   className = "",
 }) => {
   const navigate = useNavigate();
@@ -120,7 +122,7 @@ const ErroComponent = ({
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br from-black via-gray-900 to-black py-20 ${className}`}
+      className={`min-h-screen bg-gradient-to-br ${bg} py-20 ${className}`}
     >
       <div className="container mx-auto px-6">
         <div className="max-w-2xl mx-auto bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-gray-600/30 text-center">
@@ -153,20 +155,21 @@ const ErroComponent = ({
               </button>
             )}
 
-            {/* Botão Voltar ao Início - aparece se mostrarVoltar = true */}
-
-            <button
-              onClick={() => navigate("/")}
-              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center"
-            >
-              <Home className="mr-2" size={20} />
-              Voltar ao Início
-            </button>
+            {/* Botão Voltar ao Início */}
+            {mostrarVoltar && (
+              <button
+                onClick={() => navigate("/")}
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center"
+              >
+                <Home className="mr-2" size={20} />
+                Voltar ao Início
+              </button>
+            )}
 
             {/* Se for erro de pagamento, botão para voltar ao cadastro */}
             {tipoErro === "pagamento" && (
               <button
-                onClick={() => navigate("/cadastro")}
+                onClick={onVoltar || (() => navigate("/cadastro"))}
                 className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
               >
                 <ArrowLeft className="mr-2" size={20} />

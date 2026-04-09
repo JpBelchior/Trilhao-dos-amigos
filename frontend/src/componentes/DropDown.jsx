@@ -21,7 +21,7 @@ const NavDropdown = ({
             : "text-white hover:bg-yellow-500 hover:text-black hover:shadow-lg hover:shadow-yellow-400/25"
         }`}
       >
-        <Icon className="mr-2 group-hover:animate-bounce" size={20} />
+        <Icon className="mr-2 " size={20} />
         {label}
         <ChevronDown
           className={`ml-2 transition-transform duration-200 ${

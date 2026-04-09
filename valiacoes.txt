@@ -1,0 +1,24 @@
+2. MÉDIO — Webhook sem verificação de assinatura
+Arquivo: backend/src/routes/Pagamento/pagamento.ts:15
+
+O POST /api/pagamento/webhook não valida a assinatura x-signature do Mercado Pago (existe um mercadoPagoValidator.ts mas ele não é usado nessa rota). Um atacante pode forjar uma chamada de webhook com um data.id de qualquer pagamento pendente e confirmar sem pagar.
+
+Como corrigir
+Fix 1 — Remover o endpoint de simulação em produção (ou proteger com autenticação de admin):
+
+
+// pagamento.ts
+if (process.env.NODE_ENV !== 'production') {
+  router.put("/status/:id", PagamentoController.simularStatusPagamento);
+}
+// OU, se quiser manter para testes manuais, proteja com auth:
+router.put("/status/:id", verificarAutenticacao, PagamentoController.simularStatusPagamento);
+
+Fix 2 — Validar assinatura no webhook:
+
+
+// pagamento.ts
+router.post("/webhook", validarAssinaturaMP, PagamentoController.receberWebhook);
+Usando o mercadoPagoValidator.ts que já existe mas não está sendo aplicado na rota.
+
+O fluxo de valor em si está seguro — o preço é calculado no backend com PRECO_CAMISA = 50.0 e o PIX é gerado com o valor do banco de dados, não do frontend. O problema está no bypass completo do pagamento via o endpoint de simulação exposto.

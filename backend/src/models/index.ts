@@ -9,6 +9,8 @@ import CampeaoBarranco from "./CampeoesMorro";
 import Gerente from "./Gerente";
 import Foto from "./Foto";
 import Trajeto from "./Trajeto";
+import PedidoCamisetaAvulsa from "./PedidoCamisetaAvulsa";
+import ItemPedidoCamisetaAvulsa from "./ItemPedidoCamisetaAvulsa";
 
 // ============ DEFINIR RELACIONAMENTOS ============
 
@@ -25,6 +27,29 @@ CamisetaExtra.belongsTo(Participante, {
   as: "participante",
 });
 
+// 3. PedidoCamisetaAvulsa pode pertencer a um Participante (opcional)
+PedidoCamisetaAvulsa.belongsTo(Participante, {
+  foreignKey: "participanteId",
+  as: "participante",
+});
+
+Participante.hasMany(PedidoCamisetaAvulsa, {
+  foreignKey: "participanteId",
+  as: "pedidosAvulsos",
+});
+
+// 4. PedidoCamisetaAvulsa tem muitos itens
+PedidoCamisetaAvulsa.hasMany(ItemPedidoCamisetaAvulsa, {
+  foreignKey: "pedidoId",
+  as: "itens",
+  onDelete: "CASCADE",
+});
+
+ItemPedidoCamisetaAvulsa.belongsTo(PedidoCamisetaAvulsa, {
+  foreignKey: "pedidoId",
+  as: "pedido",
+});
+
 // ============ EXPORTAR TODOS OS MODELOS ============
 
 export {
@@ -36,9 +61,10 @@ export {
   Gerente,
   Foto,
   Trajeto,
+  PedidoCamisetaAvulsa,
+  ItemPedidoCamisetaAvulsa,
 };
 
-// Export default com todos os modelos organizados
 export default {
   sequelize,
   Participante,
@@ -48,4 +74,6 @@ export default {
   Gerente,
   Foto,
   Trajeto,
+  PedidoCamisetaAvulsa,
+  ItemPedidoCamisetaAvulsa,
 };

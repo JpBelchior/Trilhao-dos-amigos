@@ -92,7 +92,7 @@ const HeroSection = ({ isVisible, scrollY }) => {
         onClick={() => abrirNoGoogleMaps(coordenadas.lat, coordenadas.lng)}
         className="bg-black/40 rounded-xl p-3 mt-4 w-full max-w-xs mx-auto hover:bg-green-600/30 transition-all cursor-pointer border border-green-400/30 hover:border-green-400/60 group"
       >
-        <p className="text-green-400 font-bold group-hover:text-green-300">
+        <p className="text-green-400  group-hover:text-green-300">
           Ver Localização no Mapa
         </p>
       </button>

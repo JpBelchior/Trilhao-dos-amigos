@@ -170,6 +170,44 @@ export interface ILoginGerenteDTO {
   senha: string;
 }
 
+// Interface para Pedido de Camiseta Avulsa (cabeçalho do pedido)
+export interface IPedidoCamisetaAvulsa {
+  id?: number;
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  valorTotal: number;
+  participanteId?: number;
+  statusPagamento: StatusPagamento;
+  mercadoPagoId?: string;
+  externalReference?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Interface para Item de Pedido Avulso
+export interface IItemPedidoCamisetaAvulsa {
+  id?: number;
+  pedidoId: number;
+  tamanho: TamanhoCamiseta;
+  tipo: TipoCamiseta;
+  quantidade: number;
+  statusEntrega: StatusEntrega;
+  dataEntrega?: Date;
+  entreguePor?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ICriarPedidoCamisetaAvulsaDTO {
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  itens: Array<{ tamanho: TamanhoCamiseta; tipo: TipoCamiseta; quantidade: number }>;
+}
+
 export interface IGerenteResponse {
   id: number;
   nome: string;

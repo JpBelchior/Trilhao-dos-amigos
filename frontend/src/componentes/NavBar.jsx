@@ -6,6 +6,7 @@ import {
   BarChart3,
   Menu,
   X,
+  ShoppingBag,
 } from "lucide-react";
 
 import { useNavbarFunctions } from "../hooks/useNavbarFunctions";
@@ -93,6 +94,18 @@ const Navbar = () => {
               Cadastre-se
             </button>
 
+            <button
+              onClick={() => irPara("/comprar-camisa")}
+              className={`flex items-center px-6 py-3 rounded-xl transition-all font-semibold transform hover:scale-105 ${
+                isActive("/comprar-camisa")
+                  ? "bg-yellow-500 text-black shadow-lg shadow-yellow-400/25"
+                  : "text-white hover:bg-yellow-500 hover:text-black hover:shadow-lg hover:shadow-yellow-400/25"
+              }`}
+            >
+              <ShoppingBag className="mr-2" size={18} />
+              Comprar Camisa
+            </button>
+
             <NavDropdown
               isOpen={inscritoAberto}
               toggle={toggleInscrito}
@@ -130,6 +143,26 @@ const Navbar = () => {
               {item.label}
             </button>
           ))}
+          <button
+            onClick={() => {
+              irPara("/cadastro");
+              setMobileOpen(false);
+            }}
+            className="text-left text-yellow-400 font-bold flex items-center gap-2"
+          >
+            <UserPlus size={16} />
+            Cadastre-se
+          </button>
+          <button
+            onClick={() => {
+              irPara("/comprar-camisa");
+              setMobileOpen(false);
+            }}
+            className="text-left text-yellow-400 font-bold flex items-center gap-2"
+          >
+            <ShoppingBag size={16} />
+            Comprar Camisa
+          </button>
         </div>
       )}
     </nav>

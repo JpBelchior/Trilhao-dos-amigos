@@ -114,7 +114,7 @@ CamisetaExtra.init(
         );
 
         if (participante) {
-          participante.valorInscricao += camisetaExtra.preco;
+          participante.valorInscricao = Number(participante.valorInscricao) + Number(camisetaExtra.preco);
           await participante.save();
         }
 
@@ -140,7 +140,7 @@ CamisetaExtra.init(
         );
 
         if (participante) {
-          participante.valorInscricao -= camisetaExtra.preco;
+          participante.valorInscricao = Number(participante.valorInscricao) - Number(camisetaExtra.preco);
           await participante.save();
         }
 

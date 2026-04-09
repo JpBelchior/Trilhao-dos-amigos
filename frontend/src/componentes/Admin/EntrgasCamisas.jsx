@@ -5,6 +5,7 @@ import {
   AlertCircle,
   User,
   MapPin,
+  ShoppingBag,
 } from "lucide-react";
 import LoadingComponent from "../Loading";
 import ErroComponent from "../Erro";
@@ -19,6 +20,7 @@ const TabelaCamisasReservadas = () => {
   const {
     // Dados
     participantesFiltrados,
+    pedidosAvulsos,
 
     // Estados
     loading,
@@ -26,6 +28,7 @@ const TabelaCamisasReservadas = () => {
     expandido,
     filtroNome,
     loadingButtons,
+    loadingButtonsAvulsos,
 
     // Estatísticas
     estatisticas,
@@ -37,6 +40,7 @@ const TabelaCamisasReservadas = () => {
     // Funções de API
     carregarDados,
     toggleEntrega,
+    toggleEntregaAvulso,
 
     // Constantes
     TipoCamiseta,
@@ -323,6 +327,106 @@ const TabelaCamisasReservadas = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* ========== SEÇÃO AVULSOS ========== */}
+          {pedidosAvulsos.length > 0 && (
+            <div className="mt-8 border-t border-gray-700 pt-6">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
+                <ShoppingBag size={20} className="text-green-400" />
+                Compras Avulsas de Camisa
+                <span className="text-sm text-gray-400 font-normal">({pedidosAvulsos.length})</span>
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-600">
+                      <th className="text-left py-4 px-4 text-gray-300">Comprador</th>
+                      <th className="text-center py-4 px-4 text-gray-300">Pagamento</th>
+                      <th className="text-center py-4 px-4 text-gray-300">Camisas</th>
+                      <th className="text-center py-4 px-4 text-gray-300">Status Geral</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pedidosAvulsos.map((pedido) => {
+                      const pago = pedido.statusPagamento === "confirmado";
+                      const itensDoP = pedido.itens || [];
+                      const todasEntregues = itensDoP.length > 0 && itensDoP.every((i) => i.statusEntrega === "entregue");
+                      const totalCamisas = itensDoP.reduce((s, i) => s + i.quantidade, 0);
+
+                      return (
+                        <tr key={pedido.id} className="border-b border-gray-700 hover:bg-gray-800/30">
+                          <td className="py-4 px-4">
+                            <p className="text-white font-medium">{pedido.nome}</p>
+                            {pedido.participante ? (
+                              <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded font-bold">
+                                PARTICIPANTE #{pedido.participante.numeroInscricao}
+                              </span>
+                            ) : (
+                              <span className="text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded font-bold">
+                                AVULSO
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-center py-4 px-4">
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${pago ? "bg-green-500 text-white" : "bg-yellow-600 text-white"}`}>
+                              {pago ? "PAGO" : "PENDENTE"}
+                            </span>
+                          </td>
+                          <td className="text-center py-4 px-4">
+                            <div className="flex flex-col items-center gap-2">
+                              {itensDoP.map((item) => {
+                                const buttonKey = `avulso-item-${item.id}`;
+                                const isLoadingBtn = loadingButtonsAvulsos[buttonKey];
+                                const entregue = item.statusEntrega === "entregue";
+                                return (
+                                  <button
+                                    key={item.id}
+                                    onClick={() => pago && toggleEntregaAvulso(item.id)}
+                                    disabled={isLoadingBtn || !pago}
+                                    className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
+                                      !pago
+                                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                                        : isLoadingBtn
+                                        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                                        : entregue
+                                        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                                        : "bg-yellow-600 hover:bg-yellow-700 text-white cursor-pointer"
+                                    }`}
+                                  >
+                                    {isLoadingBtn && (
+                                      <Loader2 className="animate-spin inline-block w-3 h-3 mr-1" />
+                                    )}
+                                    {item.tamanho} - {TipoCamiseta[item.tipo]}
+                                    {item.quantidade > 1 && ` ×${item.quantidade}`}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </td>
+                          <td className="text-center py-4 px-4">
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`px-3 py-1 rounded text-xs font-bold ${
+                                !pago
+                                  ? "bg-gray-600 text-gray-300"
+                                  : todasEntregues
+                                  ? "bg-green-500 text-white"
+                                  : "bg-orange-500 text-white"
+                              }`}>
+                                {!pago ? "AGUARD. PGTO" : todasEntregues ? "COMPLETO" : "PENDENTE"}
+                              </span>
+                              <span className="text-gray-400 text-xs">
+                                {totalCamisas} camisa{totalCamisas !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </>

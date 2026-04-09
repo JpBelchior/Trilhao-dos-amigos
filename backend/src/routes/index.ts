@@ -9,7 +9,9 @@ import campeoesRoutes from "./Campeoes/campeoes";
 import entregaRoutes from "./Entregas/entregas";
 import fotoRoutes from "./Fotos/fotos";
 import camisetasExtrasRoutes from "./CamisasExtras/camisetasExtrasRoutes";
-import trajetoRoutes from "./Trajeto/trajeto"
+import trajetoRoutes from "./Trajeto/trajeto";
+import pedidoCamisetaAvulsaRoutes from "./PedidoCamisetaAvulsa/pedidoCamisetaAvulsaRoutes";
+
 const router = Router();
 
 // Rota de teste da API
@@ -63,5 +65,7 @@ router.use("/fotos", fotoRoutes);
 // Rotas de trajeto
 router.use("/trajeto", trajetoRoutes);
 
+// Rotas de pedidos de camisetas avulsas
+router.use("/pedido-camisa", pedidoCamisetaAvulsaRoutes);
 
 export default router;

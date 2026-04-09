@@ -335,28 +335,31 @@ export class PagamentoService {
 
     let participanteConfirmado = false;
 
-    // Se aprovado, confirmar participante
+    // Se aprovado, confirmar participante ou pedido avulso
     if (foiAprovado && pagamento.external_reference) {
-      console.log(`✅ [Status] Pagamento aprovado! Confirmando participante...`);
-
-      // ✅ CORREÇÃO: Extrair o número de inscrição
       const partes = pagamento.external_reference.split('_');
-      const numeroInscricao = partes[1];
-      
-      console.log(`🔍 [Status] External Reference: ${pagamento.external_reference}`);
-      console.log(`🔍 [Status] Número de inscrição: ${numeroInscricao}`);
+      const codigoReferencia = partes[1]; // "TRI2026006" ou "AVU001"
 
-      if (numeroInscricao) {
-        // ✅ Passar apenas o número de inscrição
+      console.log(`🔍 [Status] External Reference: ${pagamento.external_reference}`);
+      console.log(`🔍 [Status] Código de referência: ${codigoReferencia}`);
+
+      if (codigoReferencia?.startsWith('AVU')) {
+        // Pedido avulso de camisa
+        console.log(`✅ [Status] Pagamento avulso aprovado! Confirmando pedido...`);
+        const { PedidoCamisetaAvulsaService } = await import("./PedidoCamisetaAvulsaService");
+        const resultado = await PedidoCamisetaAvulsaService.confirmarPedido(pagamento.external_reference);
+        participanteConfirmado = resultado.sucesso || false;
+      } else if (codigoReferencia) {
+        // Participante do evento
+        console.log(`✅ [Status] Pagamento aprovado! Confirmando participante...`);
         const resultado = await ParticipanteController.confirmarParticipante(
-          numeroInscricao, // ✅ CORRETO
+          codigoReferencia,
           {
             id: pagamento.id!.toString(),
             external_reference: pagamento.external_reference,
             date_approved: pagamento.date_approved,
           }
         );
-
         participanteConfirmado = resultado.sucesso || false;
       }
     }
@@ -484,38 +487,48 @@ public static async simularStatus(
 
     // Se aprovado E tem external_reference, confirmar participante
     if (foiAprovado && externalReference) {
-      console.log(`✅ [Simular] Simulando aprovação! Confirmando participante...`);
-
-      // ✅ CORREÇÃO: Extrair o número de inscrição do external_reference
       const partes = externalReference.split('_');
-      const numeroInscricao = partes[1]; // TRI2026006
-      
-      console.log(`🔍 [Simular] External Reference completo: ${externalReference}`);
-      console.log(`🔍 [Simular] Número de inscrição extraído: ${numeroInscricao}`);
+      const codigoReferencia = partes[1]; // "TRI2026006" ou "AVU001"
 
-      if (!numeroInscricao) {
-        console.error(`❌ [Simular] Não foi possível extrair o número de inscrição`);
+      console.log(`🔍 [Simular] External Reference completo: ${externalReference}`);
+      console.log(`🔍 [Simular] Código de referência: ${codigoReferencia}`);
+
+      if (!codigoReferencia) {
+        console.error(`❌ [Simular] Não foi possível extrair o código de referência`);
         return {
           sucesso: false,
-          erro: "Número de inscrição não encontrado no external_reference",
+          erro: "Código de referência não encontrado no external_reference",
         };
       }
 
-      const resultado = await ParticipanteController.confirmarParticipante(
-        numeroInscricao, // ✅ CORRETO: "TRI2026006"
-        {
-          id: pagamentoId,
-          external_reference: externalReference, // Mantém o completo aqui para log
-          date_approved: dateApproved || new Date().toISOString(),
+      if (codigoReferencia.startsWith('AVU')) {
+        // Pedido avulso de camisa
+        console.log(`✅ [Simular] Simulando aprovação de pedido avulso!`);
+        const { PedidoCamisetaAvulsaService } = await import("./PedidoCamisetaAvulsaService");
+        const resultado = await PedidoCamisetaAvulsaService.confirmarPedido(externalReference);
+        participanteConfirmado = resultado.sucesso || false;
+        if (participanteConfirmado) {
+          console.log(`🎉 [Simular] Pedido avulso confirmado com sucesso!`);
+        } else {
+          console.warn(`⚠️ [Simular] Falha ao confirmar pedido avulso:`, resultado.erro);
         }
-      );
-
-      participanteConfirmado = resultado.sucesso || false;
-
-      if (participanteConfirmado) {
-        console.log(`🎉 [Simular] Participante confirmado com sucesso!`);
       } else {
-        console.warn(`⚠️ [Simular] Falha ao confirmar participante:`, resultado.erro);
+        // Participante do evento
+        console.log(`✅ [Simular] Simulando aprovação! Confirmando participante...`);
+        const resultado = await ParticipanteController.confirmarParticipante(
+          codigoReferencia,
+          {
+            id: pagamentoId,
+            external_reference: externalReference,
+            date_approved: dateApproved || new Date().toISOString(),
+          }
+        );
+        participanteConfirmado = resultado.sucesso || false;
+        if (participanteConfirmado) {
+          console.log(`🎉 [Simular] Participante confirmado com sucesso!`);
+        } else {
+          console.warn(`⚠️ [Simular] Falha ao confirmar participante:`, resultado.erro);
+        }
       }
     }
 

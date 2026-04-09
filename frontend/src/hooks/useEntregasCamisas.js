@@ -24,6 +24,8 @@ export const useEntregasCamisas = () => {
   const [erro, setErro] = useState(null);
   const [participantesReservados, setParticipantesReservados] = useState([]);
   const [resumoEntregas, setResumoEntregas] = useState({});
+  const [pedidosAvulsos, setPedidosAvulsos] = useState([]);
+  const [loadingButtonsAvulsos, setLoadingButtonsAvulsos] = useState({});
 
   // ========================================
   // ESTADOS DE UI
@@ -49,9 +51,10 @@ export const useEntregasCamisas = () => {
       setLoading(true);
       setErro(null);
 
-      const [participantesData, resumoData] = await Promise.all([
+      const [participantesData, resumoData, avulsosData] = await Promise.all([
         authApi.get("/participantes"),
         authApi.get("/entrega/resumo"),
+        authApi.get("/pedido-camisa/admin/lista"),
       ]);
 
       // Processar participantes
@@ -74,8 +77,14 @@ export const useEntregasCamisas = () => {
 
       // Processar resumo de entregas
       if (resumoData.sucesso) {
-        setResumoEntregas(resumoData.dados || {}); // ✅ CORRIGIDO: dados direto, não dados.resumo
+        setResumoEntregas(resumoData.dados || {});
         console.log("✅ [useEntregasCamisas] Resumo carregado:", resumoData.dados);
+      }
+
+      // Processar pedidos avulsos
+      if (avulsosData.sucesso) {
+        setPedidosAvulsos(avulsosData.dados?.pedidos || []);
+        console.log(`✅ [useEntregasCamisas] ${avulsosData.dados?.pedidos?.length || 0} pedidos avulsos`);
       }
     } catch (error) {
       console.error("❌ [useEntregasCamisas] Erro ao carregar dados:", error);
@@ -137,6 +146,30 @@ export const useEntregasCamisas = () => {
     }
   };
 
+  const toggleEntregaAvulso = async (itemId) => {
+    const buttonKey = `avulso-item-${itemId}`;
+    try {
+      setLoadingButtonsAvulsos((prev) => ({ ...prev, [buttonKey]: true }));
+      const data = await authApi.put(`/pedido-camisa/admin/item/${itemId}/entrega`, {});
+      if (data.sucesso) {
+        await carregarDados();
+        return { sucesso: true };
+      } else {
+        throw new Error(data.erro || "Erro ao atualizar entrega");
+      }
+    } catch (error) {
+      console.error("❌ [useEntregasCamisas] Erro ao atualizar entrega avulsa:", error);
+      alert(error.message || "Erro ao atualizar entrega");
+      return { sucesso: false };
+    } finally {
+      setLoadingButtonsAvulsos((prev) => {
+        const newState = { ...prev };
+        delete newState[`avulso-item-${itemId}`];
+        return newState;
+      });
+    }
+  };
+
   // ========================================
   // FUNÇÕES - PROCESSAMENTO DE DADOS
   // ========================================
@@ -185,39 +218,50 @@ export const useEntregasCamisas = () => {
 
   /**
    * 🔍 Filtrar participantes por nome ou número de inscrição
-   * Usa useMemo para performance
    */
   const participantesFiltrados = useMemo(() => {
-    if (!filtroNome.trim()) {
-      return participantesReservados;
-    }
-
+    if (!filtroNome.trim()) return participantesReservados;
     const termo = filtroNome.toLowerCase().trim();
-
     return participantesReservados.filter((participante) => {
       const nome = participante.nome?.toLowerCase() || "";
       const numeroInscricao = participante.numeroInscricao?.toString() || "";
-
       return nome.includes(termo) || numeroInscricao.includes(termo);
     });
   }, [participantesReservados, filtroNome]);
 
   /**
-   * 📊 Calcular estatísticas de entregas
-   * Agora usa o array normalizado de camisetas
+   * 🔍 Filtrar pedidos avulsos pelo mesmo filtro
+   */
+  const pedidosAvulsosFiltrados = useMemo(() => {
+    if (!filtroNome.trim()) return pedidosAvulsos;
+    const termo = filtroNome.toLowerCase().trim();
+    return pedidosAvulsos.filter((p) => p.nome?.toLowerCase().includes(termo));
+  }, [pedidosAvulsos, filtroNome]);
+
+  /**
+   * 📊 Calcular estatísticas de entregas (participantes + avulsos)
    */
   const estatisticas = useMemo(() => {
     let totalReservadas = 0;
     let totalEntregues = 0;
 
+    // Participantes
     participantesReservados.forEach((participante) => {
       participante.camisetas?.forEach((camiseta) => {
         totalReservadas++;
-        if (camiseta.entregue) {
-          totalEntregues++;
-        }
+        if (camiseta.entregue) totalEntregues++;
       });
     });
+
+    // Avulsos confirmados — somar por item
+    pedidosAvulsos
+      .filter((p) => p.statusPagamento === "confirmado")
+      .forEach((p) => {
+        (p.itens || []).forEach((item) => {
+          totalReservadas += item.quantidade;
+          if (item.statusEntrega === "entregue") totalEntregues += item.quantidade;
+        });
+      });
 
     const paraEntrega = totalReservadas - totalEntregues;
 
@@ -230,7 +274,7 @@ export const useEntregasCamisas = () => {
           ? ((totalEntregues / totalReservadas) * 100).toFixed(1)
           : 0,
     };
-  }, [participantesReservados]);
+  }, [participantesReservados, pedidosAvulsos]);
 
   // ========================================
   // RETORNO DO HOOK
@@ -257,7 +301,12 @@ export const useEntregasCamisas = () => {
 
     // Funções de API
     carregarDados,
-    toggleEntrega, // Função unificada para marcar/desmarcar
+    toggleEntrega,
+    toggleEntregaAvulso,
+
+    // Dados avulsos
+    pedidosAvulsos: pedidosAvulsosFiltrados,
+    loadingButtonsAvulsos,
 
     // Constantes
     TipoCamiseta,

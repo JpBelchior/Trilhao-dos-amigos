@@ -34,8 +34,11 @@ import EstoqueAdmin from "./paginas/Admin/Estoque";
 import GerenciarFotos from "./paginas/Admin/GerenciarFotos";
 import PagamentoConfirmado from "./paginas/PagamentoConfirmado";
 import AdminCampeoes from "./paginas/Admin/AdminCampeoes";
-import AdminRelatorios from "./paginas/Admin/AdminRelatorios"
+import AdminRelatorios from "./paginas/Admin/AdminRelatorios";
 import ScrollToTop from "./componentes/scrollToTop";
+import ComprarCamisa from "./paginas/ComprarCamisa";
+import PagamentoCamisa from "./paginas/PagamentoCamisa";
+import PedidoCamisaConfirmado from "./paginas/PedidoCamisaConfirmado";
 // Componente interno que tem acesso ao useLocation
 function AppContent() {
   const location = useLocation();
@@ -66,6 +69,9 @@ function AppContent() {
           <Route path="/provas" element={<Provas />} />
           <Route path="/informacoes-local" element={<InformacoesLocal />} />
           <Route path="/pagamento-confirmado" element={<PagamentoConfirmado />} />
+          <Route path="/comprar-camisa" element={<ComprarCamisa />} />
+          <Route path="/pagamento-camisa" element={<PagamentoCamisa />} />
+          <Route path="/pedido-camisa-confirmado" element={<PedidoCamisaConfirmado />} />
 
           {/* ================================ */}
           {/* AUTENTICAÇÃO */}

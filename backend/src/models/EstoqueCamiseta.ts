@@ -37,6 +37,8 @@ class EstoqueCamiseta
   ): Promise<number> {
     const Participante = (await import("./Participante")).default;
     const CamisetaExtra = (await import("./CamisasExtras")).default;
+    const PedidoCamisetaAvulsa = (await import("./PedidoCamisetaAvulsa")).default;
+    const { Op } = await import("sequelize");
 
     // Contar camisetas grátis (1 por participante)
     const camisetasGratis = await Participante.count({
@@ -46,7 +48,7 @@ class EstoqueCamiseta
       },
     });
 
-    // Contar camisetas extras
+    // Contar camisetas extras de participantes
     const camisetasExtras = await CamisetaExtra.count({
       where: {
         tamanho: tamanho,
@@ -54,7 +56,24 @@ class EstoqueCamiseta
       },
     });
 
-    return camisetasGratis + camisetasExtras;
+    // Contar itens de pedidos avulsos (de pedidos não cancelados)
+    const ItemPedidoCamisetaAvulsa = (await import("./ItemPedidoCamisetaAvulsa")).default;
+    const itensAvulsos = await ItemPedidoCamisetaAvulsa.findAll({
+      where: { tamanho, tipo },
+      include: [{
+        model: PedidoCamisetaAvulsa,
+        as: "pedido",
+        where: { statusPagamento: { [Op.ne]: "cancelado" } },
+        attributes: [],
+      }],
+      attributes: ["quantidade"],
+    });
+    const camisetasAvulsas = itensAvulsos.reduce(
+      (soma, item) => soma + item.quantidade,
+      0
+    );
+
+    return camisetasGratis + camisetasExtras + camisetasAvulsas;
   }
 
   // Método para atualizar quantidade reservada
