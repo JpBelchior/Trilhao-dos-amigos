@@ -28,9 +28,6 @@ const HallFamaSection = () => {
     );
   }
 
-  // ========================================
-  // RENDERIZAÇÃO PRINCIPAL - APENAS UI
-  // ========================================
   return (
     <section className="py-20 bg-black">
       <div className="container mx-auto px-6">
@@ -224,7 +221,7 @@ const HallFamaSection = () => {
                     {calcularDistanciaFaltou(melhorResultado.resultadoAltura)}
                   </span>{" "}
                   para conquistar o topo! O topo continua esperando pelo seu
-                  conquistador, venha ser o primeiro!
+                  conquistador...
                 </p>
                 <div className="text-2xl font-black text-yellow-400">
                     VOCÊ PODE SER O PRIMEIRO!

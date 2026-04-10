@@ -1,6 +1,7 @@
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { Participante } from "../models";
 import { ParticipanteController } from "../controllers/ParticipanteController";
+import { IApiResponse } from "../types/models";
 
 // ========================================
 // CONFIGURAÇÃO MERCADO PAGO COM VALIDAÇÃO
@@ -31,26 +32,12 @@ const payment = new Payment(client);
 // INTERFACES
 // ========================================
 
-export interface CriarPixResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
-  detalhes?: string;
+export interface ConsultarStatusResult extends IApiResponse {
+  participanteConfirmado?: boolean;
 }
 
-export interface ConsultarStatusResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
+export interface ProcessarWebhookResult extends IApiResponse {
   participanteConfirmado?: boolean;
-  detalhes?: string;
-}
-
-export interface ProcessarWebhookResult {
-  sucesso: boolean;
-  participanteConfirmado?: boolean;
-  erro?: string;
-  detalhes?: string;
 }
 
 // ========================================
@@ -145,7 +132,7 @@ export class PagamentoService {
   public static async criarPix(
     participante: any,
     valorTotal: number
-  ): Promise<CriarPixResult> {
+  ): Promise<IApiResponse> {
     const logPrefix = `[PIX ${participante.numeroInscricao}]`;
 
     try {

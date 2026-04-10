@@ -19,7 +19,7 @@ export const useHallFama = () => {
   // ========================================
   // CONSTANTES
   // ========================================
-  const ALTURA_TOPO = 100; // Altura total do morro em metros
+  const ALTURA_TOPO = 300; // Altura total do morro em metros
 
   // ========================================
   // CARREGAR DADOS AO MONTAR
@@ -132,7 +132,7 @@ export const useHallFama = () => {
    */
   const calcularDistanciaFaltou = (altura) => {
     const faltou = ALTURA_TOPO - altura;
-    return faltou > 0 ? `${faltou.toFixed(1)}m` : "CONQUISTOU!";
+    return faltou > 0 ? `${faltou.toFixed(2)}m` : "CONQUISTOU!";
   };
 
   // ========================================

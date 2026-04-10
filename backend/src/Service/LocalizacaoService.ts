@@ -1,17 +1,11 @@
 import { IBGEService } from "./IBGEService";
-
-export interface LocalizacaoResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
-  detalhes?: string;
-}
+import { IApiResponse } from "../types/models";
 
 export class LocalizacaoService {
   /**
    * Listar todos os estados
    */
-  public static async listarEstados(): Promise<LocalizacaoResult> {
+  public static async listarEstados(): Promise<IApiResponse> {
     try {
       console.log("📍 [LocalizacaoService] Buscando estados do IBGE");
 
@@ -43,7 +37,7 @@ export class LocalizacaoService {
    */
   public static async listarCidadesPorEstado(
     estado: string
-  ): Promise<LocalizacaoResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(`📍 [LocalizacaoService] Buscando cidades do ${estado}`);
 
@@ -85,7 +79,7 @@ export class LocalizacaoService {
   public static async buscarCidades(
     nome: string,
     estado?: string
-  ): Promise<LocalizacaoResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(
         `🔍 [LocalizacaoService] Buscando cidades com nome "${nome}"`
@@ -119,7 +113,7 @@ export class LocalizacaoService {
   public static async validarLocalizacao(
     estado: string,
     cidade: string
-  ): Promise<LocalizacaoResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(`✅ [LocalizacaoService] Validando: ${cidade}/${estado}`);
 

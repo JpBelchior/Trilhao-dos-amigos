@@ -1,5 +1,6 @@
 // frontend/src/componentes/Admin/ModalCampeao.jsx
 import React, { useState, useEffect } from "react";
+import { calcularEdicao } from "../../hooks/useEdicao";
 import {
   X,
   Trophy,
@@ -59,7 +60,15 @@ const ModalCampeao = ({
   }, [campeao, isOpen]);
 
   const handleChange = (campo, valor) => {
-    setFormData((prev) => ({ ...prev, [campo]: valor }));
+    if (campo === "ano") {
+      setFormData((prev) => ({
+        ...prev,
+        ano: valor,
+        edicao: calcularEdicao(valor).edicao,
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [campo]: valor }));
+    }
   };
 
   const handleSalvar = async () => {
@@ -315,9 +324,9 @@ const ModalCampeao = ({
                 <input
                   type="text"
                   value={formData.edicao}
-                  onChange={(e) => handleChange("edicao", e.target.value)}
-                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:border-yellow-400 focus:outline-none"
-                  placeholder="Ex: 8ª Edição"
+                  readOnly
+                  className="w-full bg-gray-700 text-yellow-400 font-semibold rounded-lg px-4 py-3 border border-gray-600 cursor-not-allowed"
+                  placeholder="Calculado automaticamente pelo ano"
                 />
               ) : (
                 <p className="text-yellow-400 font-semibold">{campeao.edicao}</p>
@@ -337,8 +346,8 @@ const ModalCampeao = ({
                   onChange={(e) => handleChange("ano", e.target.value)}
                   className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:border-yellow-400 focus:outline-none"
                   placeholder="Ex: 2024"
-                  min="2000"
-                  max="2100"
+                  min="2018"
+                  max={new Date().getFullYear()}
                 />
               ) : (
                 <p className="text-white">{campeao.ano}</p>

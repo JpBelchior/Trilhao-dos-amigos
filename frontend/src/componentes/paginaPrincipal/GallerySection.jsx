@@ -1,3 +1,4 @@
+import { useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import SimpleImage from "../SimpleImage";
 import LoadingComponent from "../Loading";
@@ -5,6 +6,20 @@ import ErroComponent from "../Erro";
 import { useGallery } from "../../hooks/useGallery";
 
 const GallerySection = () => {
+  const observerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const sectionRef = useCallback((node) => {
+    if (observerRef.current) observerRef.current.disconnect();
+    if (node) {
+      observerRef.current = new IntersectionObserver(
+        ([entry]) => setIsVisible(entry.isIntersecting),
+        { threshold: 0.1 }
+      );
+      observerRef.current.observe(node);
+    }
+  }, []);
+
   const {
     fotos,
     loading,
@@ -17,7 +32,7 @@ const GallerySection = () => {
     handleVideoEnded,
     construirUrlFoto,
     formatarBadgeEdicao,
-  } = useGallery();
+  } = useGallery(isVisible);
 
   if (loading) {
     return (
@@ -50,7 +65,7 @@ const GallerySection = () => {
   const badgeEdicao = formatarBadgeEdicao(fotoAtual);
 
   return (
-    <section className="py-20 bg-black">
+    <section ref={sectionRef} className="py-20 bg-black">
       <div className="container mx-auto px-6">
         {/* Título da Seção */}
         <div className="text-center mb-16">
@@ -73,7 +88,6 @@ const GallerySection = () => {
                 className="w-full h-full object-cover"
                 controls
                 autoPlay
-                muted
                 playsInline
                 preload="auto"
                 onEnded={handleVideoEnded}
@@ -88,7 +102,7 @@ const GallerySection = () => {
             )}
 
             {/* Overlay com Edição, Título e Descrição */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none">
               <div className="absolute bottom-6 left-6 text-white max-w-2xl">
                 {/* Badge da Edição */}
                 {badgeEdicao && (

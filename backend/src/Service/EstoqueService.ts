@@ -1,19 +1,12 @@
 import { EstoqueCamiseta, Participante, CamisetaExtra } from "../models";
-import { TamanhoCamiseta, TipoCamiseta } from "../types/models";
-
-export interface EstoqueResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
-  detalhes?: string;
-}
+import { IApiResponse, TamanhoCamiseta, TipoCamiseta } from "../types/models";
 
 export class EstoqueService {
   /**
    * Obter estoque completo organizado
    * ✅ BASEADO NO CÓDIGO ANTIGO - EstoqueController.obterEstoque()
    */
-  public static async obterEstoqueCompleto(): Promise<EstoqueResult> {
+  public static async obterEstoqueCompleto(): Promise<IApiResponse> {
     try {
       console.log("📦 [EstoqueService] Buscando estoque completo...");
 
@@ -65,7 +58,7 @@ export class EstoqueService {
    * Obter resumo do estoque (estatísticas gerais)
    * ✅ EXATAMENTE COMO ERA NO CÓDIGO ANTIGO - EstoqueController.obterResumo()
    */
-  public static async obterResumoEstoque(): Promise<EstoqueResult> {
+  public static async obterResumoEstoque(): Promise<IApiResponse> {
     try {
       console.log("📊 [EstoqueService] Calculando resumo REAL do estoque...");
 
@@ -145,7 +138,7 @@ export class EstoqueService {
   public static async verificarDisponibilidade(
     tamanho: TamanhoCamiseta,
     tipo: TipoCamiseta
-  ): Promise<EstoqueResult> {
+  ): Promise<IApiResponse> {
     try {
       const item = await EstoqueCamiseta.findOne({
         where: { tamanho, tipo },
@@ -193,7 +186,7 @@ export class EstoqueService {
     tamanho: TamanhoCamiseta,
     tipo: TipoCamiseta,
     dadosAtualizacao: { quantidadeTotal?: number }
-  ): Promise<EstoqueResult> {
+  ): Promise<IApiResponse> {
     try {
       const { quantidadeTotal } = dadosAtualizacao;
 
@@ -260,7 +253,7 @@ export class EstoqueService {
    * Sincronizar todo o estoque (recalcular quantidades reservadas)
    * ✅ BASEADO NO CÓDIGO ANTIGO - EstoqueController.sincronizarEstoque()
    */
-  public static async sincronizarEstoque(): Promise<EstoqueResult> {
+  public static async sincronizarEstoque(): Promise<IApiResponse> {
     try {
       console.log(
         "🔄 [EstoqueService] Iniciando sincronização completa do estoque..."

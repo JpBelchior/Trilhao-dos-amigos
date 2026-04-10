@@ -1,18 +1,10 @@
 import jwt from "jsonwebtoken";
 import { Gerente } from "../models";
 import {
+  IApiResponse,
   ICriarGerenteDTO,
   ILoginGerenteDTO,
 } from "../types/models";
-
-
-
-export interface GerenteResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
-  detalhes?: string;
-}
 
 export class GerenteService {
   /**
@@ -20,7 +12,7 @@ export class GerenteService {
    */
   public static async fazerLogin(
     dados: ILoginGerenteDTO
-  ): Promise<GerenteResult> {
+  ): Promise<IApiResponse> {
     try {
       const { email, senha } = dados;
 
@@ -106,7 +98,7 @@ export class GerenteService {
    */
   public static async criarGerente(
     dados: ICriarGerenteDTO
-  ): Promise<GerenteResult> {
+  ): Promise<IApiResponse> {
     try {
       const { nome, email, senha } = dados;
 
@@ -158,7 +150,7 @@ export class GerenteService {
   /**
    * Obter perfil do gerente logado
    */
-  public static async obterPerfil(gerenteId: number): Promise<GerenteResult> {
+  public static async obterPerfil(gerenteId: number): Promise<IApiResponse> {
     try {
       const gerente = await Gerente.findByPk(gerenteId);
 
@@ -202,7 +194,7 @@ export class GerenteService {
       novaSenha?: string;
       confirmarSenha?: string;
     }
-  ): Promise<GerenteResult> {
+  ): Promise<IApiResponse> {
     try {
       const { nome, email, senhaAtual, novaSenha, confirmarSenha } = dados;
 
@@ -343,7 +335,7 @@ export class GerenteService {
   /**
    * Logout
    */
-  public static logout(): GerenteResult {
+  public static logout(): IApiResponse {
     // Como estamos usando JWT, o logout é feito no frontend removendo o token
     return {
       sucesso: true,

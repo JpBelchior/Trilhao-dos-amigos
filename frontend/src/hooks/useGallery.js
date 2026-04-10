@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { apiClient } from "../services/api";
 import { formatarEdicao, calcularEdicao, calcularAnoPorEdicao } from "./useEdicao";
 
-export function useGallery() {
+export function useGallery(isVisible = true) {
   const [fotos, setFotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -32,6 +32,7 @@ export function useGallery() {
 
   useEffect(() => {
     if (fotos.length <= 1) return;
+    if (!isVisible) return;
     const midiaAtual = fotos[currentPhoto];
     if (midiaAtual?.tipo === "video") return; // vídeo avança pelo onEnded
 
@@ -39,7 +40,7 @@ export function useGallery() {
       setCurrentPhoto((prev) => (prev + 1) % fotos.length);
     }, 10000);
     return () => clearInterval(intervalo);
-  }, [fotos.length, currentPhoto, fotos]);
+  }, [fotos.length, currentPhoto, fotos, isVisible]);
 
   const proximaFoto = () =>
     setCurrentPhoto((prev) => (prev + 1) % fotos.length);

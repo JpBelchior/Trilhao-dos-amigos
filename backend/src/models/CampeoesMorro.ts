@@ -92,7 +92,7 @@ CampeaoBarranco.init(
       allowNull: false,
       validate: {
         min: { args: [0], msg: "Altura deve ser positiva" },
-        max: { args: [100], msg: "Altura máxima é 999.99m" },
+        max: { args: [300], msg: "Altura máxima é 300m" },
       },
     },
 

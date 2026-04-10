@@ -2,33 +2,7 @@ import fs from "fs";
 import path from "path";
 import Foto, { CategoriaFoto, StatusFoto } from "../models/Foto";
 import { Op } from "sequelize";
-
-export interface UploadFotoResult {
-  sucesso: boolean;
-  dados?: any[];
-  erro?: string;
-  detalhes?: string;
-}
-
-export interface EditarFotoResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
-  detalhes?: string;
-}
-
-export interface DeletarFotoResult {
-  sucesso: boolean;
-  erro?: string;
-  detalhes?: string;
-}
-
-export interface ListarFotosResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
-  detalhes?: string;
-}
+import { IApiResponse } from "../types/models";
 
 export class FotoService {
   /**
@@ -64,7 +38,7 @@ export class FotoService {
   public static async processarUpload(
     dados: any,
     files: Express.Multer.File[]
-  ): Promise<UploadFotoResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(" [FotoService] Processando upload:", {
         files: files.length,
@@ -135,7 +109,7 @@ export class FotoService {
   public static async listarFotos(
     filtros: any = {},
     paginacao: { page?: number; limit?: number } = {}
-  ): Promise<ListarFotosResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log("📋 [FotoService] Listando fotos com filtros:", filtros);
 
@@ -219,7 +193,7 @@ export class FotoService {
    */
   public static async listarPorCategoria(
     categoria: CategoriaFoto
-  ): Promise<ListarFotosResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(" [FotoService] Listando fotos da categoria:", categoria);
 
@@ -280,7 +254,7 @@ export class FotoService {
   public static async editarFoto(
     id: number,
     dadosAtualizacao: any
-  ): Promise<EditarFotoResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(`📝 [FotoService] Editando foto ${id}`);
 
@@ -338,7 +312,7 @@ export class FotoService {
   /**
    * Deletar foto (arquivo + registro)
    */
-  public static async deletarFoto(id: number): Promise<DeletarFotoResult> {
+  public static async deletarFoto(id: number): Promise<IApiResponse> {
     try {
       console.log(`🗑️ [FotoService] Deletando foto ${id}`);
 
@@ -386,7 +360,7 @@ export class FotoService {
   public static async reordenarFoto(
     id: number,
     novaOrdem: number
-  ): Promise<EditarFotoResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(
         `🔄 [FotoService] Reordenando foto ${id} para ordem ${novaOrdem}`

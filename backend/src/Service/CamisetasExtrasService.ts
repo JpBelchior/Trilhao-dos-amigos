@@ -1,16 +1,10 @@
 import sequelize from "../config/db";
 import { Participante, CamisetaExtra, EstoqueCamiseta } from "../models";
-import { TamanhoCamiseta, TipoCamiseta, StatusEntrega } from "../types/models";
+import { IApiResponse, TamanhoCamiseta, TipoCamiseta, StatusEntrega } from "../types/models";
 
 interface AdicionarCamisetaExtraDTO {
   tamanho: TamanhoCamiseta;
   tipo: TipoCamiseta;
-}
-
-interface CamisetasExtrasResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
 }
 
 export class CamisetasExtrasService {
@@ -20,7 +14,7 @@ export class CamisetasExtrasService {
   public static async adicionarCamisetaExtra(
     participanteId: number,
     dadosCamiseta: AdicionarCamisetaExtraDTO
-  ): Promise<CamisetasExtrasResult> {
+  ): Promise<IApiResponse> {
     const transaction = await sequelize.transaction();
 
     try {
@@ -130,7 +124,7 @@ export class CamisetasExtrasService {
    */
   public static async removerCamisetaExtra(
     camisetaExtraId: number
-  ): Promise<CamisetasExtrasResult> {
+  ): Promise<IApiResponse> {
     const transaction = await sequelize.transaction();
 
     try {

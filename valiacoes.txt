@@ -22,3 +22,34 @@ router.post("/webhook", validarAssinaturaMP, PagamentoController.receberWebhook)
 Usando o mercadoPagoValidator.ts que já existe mas não está sendo aplicado na rota.
 
 O fluxo de valor em si está seguro — o preço é calculado no backend com PRECO_CAMISA = 50.0 e o PIX é gerado com o valor do banco de dados, não do frontend. O problema está no bypass completo do pagamento via o endpoint de simulação exposto.
+
+
+Service alterado	Endpoint para testar
+GerenteService	POST /api/gerente/login
+EstoqueService	GET /api/estoque
+LocalizacaoService	GET /api/localizacao/estados
+FotoService	GET /api/fotos
+CamisetasExtrasService	POST /api/camisetas-extras (precisa de auth)
+ParticipanteService	POST /api/participantes
+PagamentoService	POST /api/pagamento/criar-pix
+
+O que verificar em cada resposta:
+Toda resposta deve ter o envelope padrão do IApiResponse:
+
+
+{
+  "sucesso": true,
+  "dados": { ... },
+  "mensagem": "..."
+}
+ou em caso de erro:
+
+
+{
+  "sucesso": false,
+  "erro": "...",
+  "detalhes": "..."
+}
+Se qualquer resposta chegar fora desse formato, tem algo errado.
+
+Ferramenta mais fácil: abra o navegador em http://localhost:PORT/api/estoque e http://localhost:PORT/api/localizacao/estados — são GETs públicos que respondem imediatamente sem autenticação. Se chegarem com sucesso: true e dados, está tudo funcionando.

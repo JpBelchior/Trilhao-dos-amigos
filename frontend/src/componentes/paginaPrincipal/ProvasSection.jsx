@@ -6,9 +6,11 @@ import {
   Clock,
   Trophy,
   Target,
-  Star,
-  Zap,
+  Pin,
+  ArrowUpRight,
   PointerIcon,
+  Flag,
+  MoveHorizontal,
 } from "lucide-react";
 import TrilhaoMap from "./mapa";
 
@@ -69,7 +71,7 @@ const ProvasSection = () => {
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <div className="w-3 h-3 bg-green-400 rounded-full mr-4"></div>
+                   <div ><Flag className="mr-4 text-green-400" size={20} /></div>
                   <span>
                     <strong className="text-green-400">Largada:</strong> Centro Comunitário
                   </span>
@@ -84,7 +86,7 @@ const ProvasSection = () => {
               </div>
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                 <div className="w-3 h-3 bg-green-400 rounded-full mr-4"></div>
+                 <MoveHorizontal className="mr-4 text-green-400" size={20} />
                   <span>
                     <strong className="text-green-400">Distancia:</strong> 50 Km Off Road
                   </span>
@@ -103,7 +105,7 @@ const ProvasSection = () => {
               Percurso desafiador pela Serra da Mantiqueira,
               atravessando cachoeiras , muita mata e
               trechos estreitos e com muito barro que testam cada fibra do piloto. Uma jornada
-              por terrenos selvagens que separa aventureiros de lendas.
+              por terrenos traçoeiros que separa aventureiros de lendas.
             </p>
           </div>
 
@@ -150,14 +152,14 @@ const ProvasSection = () => {
               </div>
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <Zap className="mr-4 text-green-400" size={20} />
+                  <ArrowUpRight className="mr-4 text-green-400" size={20} />
                   <span>
-                    <strong className="text-green-400">Dificuldade:</strong>{" "}
-                    Extrema
+                    <strong className="text-green-400">Altura:</strong>{" "}
+                    300 m
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <Star className="mr-4 text-yellow-400" size={20} />
+                  <Pin className="mr-4 text-yellow-400" size={20} />
                   <span>
                     <strong className="text-yellow-400">Observação:</strong>{" "}
                     Ninguém atingiu o topo
@@ -169,11 +171,10 @@ const ProvasSection = () => {
             {/* Categorias Modernizadas */}
             <div className="space-y-6">
               <h4 className="font-black text-white text-2xl flex items-center">
-                <Trophy className="mr-3 text-yellow-400" size={28} />
-                CATEGORIAS DE COMBATE
+                CATEGORIAS:
               </h4>
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-r from-green-900/50 to-green-800/50 p-6 rounded-2xl border border-green-400/30 hover:border-green-400/60 transition-all">
+                <div className="bg-gradient-to-r from-green-900/50 to-green-800/50 p-6 rounded-2xl border border-green-400/30 transition-all">
                   <strong className="text-green-300 text-xl flex items-center mb-3">
                     MOTOS NACIONAIS
                   </strong>
@@ -181,7 +182,7 @@ const ProvasSection = () => {
                     Bros, Lander, Crosser, XTZ...
                   </p>
                 </div>
-                <div className="bg-gradient-to-r from-yellow-500/30 to-yellow-600 p-6 rounded-2xl border border-yellow-400/30 hover:border-yellow-200/60 transition-all">
+                <div className="bg-gradient-to-r from-yellow-500/30 to-yellow-600 p-6 rounded-2xl border border-yellow-400/30 transition-all">
                   <strong className="text-yellow-300 text-xl flex items-center mb-3">
                     MOTOS IMPORTADAS
                   </strong>

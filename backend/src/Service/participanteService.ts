@@ -5,6 +5,7 @@ import {
   sequelize,
 } from "../models";
 import {
+  IApiResponse,
   ICriarParticipanteDTO,
   StatusPagamento,
   StatusEntrega,
@@ -14,17 +15,8 @@ import {
 import { Sanitizer } from "../utils/sanitizer";
 import { Op } from "sequelize";
 
-export interface CriarParticipanteResult {
-  sucesso: boolean;
+export interface CriarParticipanteResult extends IApiResponse {
   participante?: any;
-  erro?: string;
-  detalhes?: string;
-}
-
-export interface ConfirmarParticipanteResult {
-  sucesso: boolean;
-  dados?: any;
-  erro?: string;
 }
 
 export class ParticipanteService {
@@ -329,7 +321,7 @@ export class ParticipanteService {
       external_reference: string;
       date_approved?: string;
     }
-  ): Promise<ConfirmarParticipanteResult> {
+  ): Promise<IApiResponse> {
     try {
       console.log(
         "✅ [ParticipanteService] Confirmando participante:",
