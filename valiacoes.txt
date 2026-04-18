@@ -53,3 +53,35 @@ ou em caso de erro:
 Se qualquer resposta chegar fora desse formato, tem algo errado.
 
 Ferramenta mais fácil: abra o navegador em http://localhost:PORT/api/estoque e http://localhost:PORT/api/localizacao/estados — são GETs públicos que respondem imediatamente sem autenticação. Se chegarem com sucesso: true e dados, está tudo funcionando.
+
+Os valores estão definidos em dois lugares no backend:
+
+1. Inscrição — participanteService.ts:27-28
+
+
+const valorBase = 100;    // R$ 100 base
+const valorPorExtra = 50; // R$ 50 por camiseta extra
+2. Camiseta avulsa — PedidoCamisetaAvulsaService.ts:16
+
+
+const PRECO_CAMISA = 50.0;
+
+
+8970315632
+10893783609
+11814011609
+877362621
+1807396622
+10793803616
+9308863648
+9311833673
+9372706604
+79872301620
+9998201683
+11434039676
+3572117666
+8472676609
+34021129812
+12079660616
+10756295602
+11064992633

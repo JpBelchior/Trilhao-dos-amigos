@@ -10,6 +10,7 @@ import {
   Trophy,
   Camera,
   Lock,
+  Layers,
 } from "lucide-react";
 import LoadingComponent from "../../componentes/Loading";
 import ErroComponent from "../../componentes/Erro";
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       setErro(null);
-      console.log("📊 [Dashboard] Carregando estatísticas...");
+      console.log(" [Dashboard] Carregando estatísticas...");
 
       // Carregar dados em paralelo
       const [participantesResponse, estoqueResponse, avulsosResponse] = await Promise.all([
@@ -77,7 +78,7 @@ const AdminDashboard = () => {
           camisetasDisponiveis: estoqueData.dados.totalDisponiveis || 0,
         });
 
-        console.log("✅ [Dashboard] Estatísticas carregadas:", {
+        console.log(" [Dashboard] Estatísticas carregadas:", {
           total: participantes.length,
           confirmados: confirmados.length,
           receita: receita,
@@ -86,7 +87,7 @@ const AdminDashboard = () => {
         throw new Error("Erro ao carregar dados do servidor");
       }
     } catch (error) {
-      console.error("❌ [Dashboard] Erro ao carregar estatísticas:", error);
+      console.error(" [Dashboard] Erro ao carregar estatísticas:", error);
       setErro(error.message);
     } finally {
       setLoading(false);
@@ -97,18 +98,6 @@ const AdminDashboard = () => {
       logout();
       navigate("/", { replace: true });
     }
-  };
-  const handleNavegar = (destino) => {
-    console.log("🔄 [Dashboard] Navegando para:", destino);
-
-    // ✅ Implementar navegação para perfil
-    if (destino === "Perfil") {
-      navigate("/admin/perfil");
-      return;
-    }
-
-    // Para outras páginas, mostrar alert temporário
-    alert(`Navegação para ${destino} será implementada no próximo passo!`);
   };
 
   if (loading) {
@@ -204,7 +193,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* 🎯 MENU DE AÇÕES USANDO ACTIONCARD */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <ActionCard
             icon={Users}
             title="Participantes"
@@ -248,6 +237,15 @@ const AdminDashboard = () => {
             color="green"
             badge="Álbum"
             onClick={() => navigate("/admin/fotos")}
+          />
+
+          <ActionCard
+            icon={Layers}
+            title="Lotes"
+            description="Configurar lotes de inscrição com períodos e preços diferenciados"
+            color="yellow"
+            badge="Preços por período"
+            onClick={() => navigate("/admin/lotes")}
           />
         </div>
 

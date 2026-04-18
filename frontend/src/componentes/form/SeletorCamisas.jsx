@@ -14,7 +14,9 @@ const SeletorCamisas = ({
   getDisponibilidade,
   TamanhoCamiseta,
   TipoCamiseta,
+  precoCamisa = 50,
 }) => {
+  const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const tamanhos = Object.values(TamanhoCamiseta);
   const dispSelecionada =
     camisaSelecionada.tamanho && camisaSelecionada.tipo
@@ -93,7 +95,7 @@ const SeletorCamisas = ({
         }`}
       >
         <Plus className="mr-2" size={20} />
-        Adicionar Camisa (+R$ 50,00)
+        Adicionar Camisa (+{fmt(precoCamisa)})
       </button>
 
       {/* Lista de camisas adicionadas */}
@@ -119,7 +121,7 @@ const SeletorCamisas = ({
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-green-400 font-bold">R$ 50,00</span>
+                <span className="text-green-400 font-bold">{fmt(precoCamisa)}</span>
                 <button
                   onClick={() => removerCamisa(index)}
                   className="text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded-lg transition-all"
@@ -136,7 +138,7 @@ const SeletorCamisas = ({
             <div className="flex justify-between items-center">
               <span className="text-white font-semibold">Subtotal:</span>
               <span className="text-yellow-400 font-bold text-lg">
-                R$ {(camisas.length * 50).toFixed(2)}
+                {fmt(camisas.length * precoCamisa)}
               </span>
             </div>
           </div>

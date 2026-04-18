@@ -215,3 +215,23 @@ export interface IGerenteResponse {
   createdAt?: Date;
   // Não incluir senha na resposta
 }
+
+// Interface para Lote de Inscrição
+export interface ILote {
+  id?: number;
+  numero: string;       // Identificador legível
+  dataInicio: string;   // "YYYY-MM-DD"
+  dataFim: string;      // "YYYY-MM-DD"
+  precoInscricao: number;
+  precoCamisa: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ICriarLoteDTO {
+  numero: string;
+  dataInicio: string;
+  dataFim: string;
+  precoInscricao: number;
+  precoCamisa: number;
+}

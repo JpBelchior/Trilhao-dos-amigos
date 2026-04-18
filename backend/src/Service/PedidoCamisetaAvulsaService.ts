@@ -7,13 +7,12 @@ import {
   CamisetaExtra,
 } from "../models";
 import { PagamentoService } from "./pagamentoService";
+import { LoteService } from "./LoteService";
 import {
   ICriarPedidoCamisetaAvulsaDTO,
   StatusPagamento,
   StatusEntrega,
 } from "../types/models";
-
-const PRECO_CAMISA = 50.0;
 
 export class PedidoCamisetaAvulsaService {
   // ========================================
@@ -44,7 +43,8 @@ export class PedidoCamisetaAvulsaService {
     });
 
     // 3. Calcular valor total no backend
-    const valorTotal = itens.reduce((soma, i) => soma + i.quantidade * PRECO_CAMISA, 0);
+    const { precoCamisa } = await LoteService.getPrecos();
+    const valorTotal = itens.reduce((soma, i) => soma + i.quantidade * precoCamisa, 0);
 
     // 4. Criar pedido (cabeçalho)
     const pedido = await PedidoCamisetaAvulsa.create({
@@ -69,7 +69,7 @@ export class PedidoCamisetaAvulsaService {
     }
 
     console.log(
-      `✅ [PedidoAvulso] Pedido #${pedido.id} criado com ${itens.length} item(ns)` +
+      ` [PedidoAvulso] Pedido #${pedido.id} criado com ${itens.length} item(ns)` +
         (participante ? ` — vinculado a ${participante.numeroInscricao}` : "")
     );
 
@@ -147,7 +147,7 @@ export class PedidoCamisetaAvulsaService {
     });
 
     if (!pedido) {
-      console.warn(`⚠️ [PedidoAvulso] Não encontrado para ref: ${externalReference}`);
+      console.warn(` [PedidoAvulso] Não encontrado para ref: ${externalReference}`);
       return { sucesso: false, erro: "Pedido não encontrado" };
     }
 
@@ -159,20 +159,21 @@ export class PedidoCamisetaAvulsaService {
 
     // CPF de participante: converter cada item em CamisetaExtra e deletar pedido
     if (pedido.participanteId) {
+      const { precoCamisa } = await LoteService.getPrecos();
       for (const item of itens) {
         for (let i = 0; i < item.quantidade; i++) {
           await CamisetaExtra.create({
             participanteId: pedido.participanteId!,
             tamanho: item.tamanho,
             tipo: item.tipo,
-            preco: PRECO_CAMISA,
+            preco: precoCamisa,
             statusEntrega: StatusEntrega.NAO_ENTREGUE,
           });
           // afterCreate do CamisetaExtra já atualiza valorInscricao e estoque
         }
       }
       await pedido.destroy(); // CASCADE deleta os itens também
-      console.log(`✅ [PedidoAvulso] Pedido #${pedido.id} convertido para CamisetaExtra`);
+      console.log(` [PedidoAvulso] Pedido #${pedido.id} convertido para CamisetaExtra`);
       return { sucesso: true, dados: { convertido: true } };
     }
 
@@ -187,7 +188,7 @@ export class PedidoCamisetaAvulsaService {
       if (estoque) await estoque.atualizarReservadas();
     }
 
-    console.log(`🎉 [PedidoAvulso] Pedido #${pedido.id} confirmado!`);
+    console.log(` [PedidoAvulso] Pedido #${pedido.id} confirmado!`);
     return { sucesso: true, dados: { pedido } };
   }
 
@@ -248,9 +249,7 @@ export class PedidoCamisetaAvulsaService {
     };
   }
 
-  // ========================================
   // CANCELAR PEDIDOS EXPIRADOS
-  // ========================================
 
   public static async cancelarPedidosExpirados(): Promise<void> {
     const limite = new Date();
@@ -266,7 +265,7 @@ export class PedidoCamisetaAvulsaService {
 
     if (pendentes.length === 0) return;
 
-    console.log(`🔍 [PedidoAvulso] ${pendentes.length} pedido(s) expirado(s) para cancelar`);
+    console.log(` [PedidoAvulso] ${pendentes.length} pedido(s) expirado(s) para cancelar`);
 
     for (const pedido of pendentes) {
       await pedido.update({ statusPagamento: StatusPagamento.CANCELADO });
@@ -280,7 +279,7 @@ export class PedidoCamisetaAvulsaService {
         if (estoque) await estoque.atualizarReservadas();
       }
 
-      console.log(`❌ [PedidoAvulso] Pedido #${pedido.id} cancelado por expiração`);
+      console.log(` [PedidoAvulso] Pedido #${pedido.id} cancelado por expiração`);
     }
   }
 }

@@ -1,8 +1,5 @@
 /**
  * 📊 Utilitários para cálculo de estatísticas de participantes
- * 
- * Centraliza toda lógica de processamento de dados de participantes
- * para evitar duplicação entre hooks.
  */
 
 /**

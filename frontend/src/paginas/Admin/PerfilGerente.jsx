@@ -128,13 +128,13 @@ const PerfilGerente = () => {
       dadosAlteracao.confirmarSenha = formData.confirmarSenha;
     }
 
-    console.log("📝 Dados para alteração:", dadosAlteracao);
+    console.log(" Dados para alteração:", dadosAlteracao);
 
     // Usar função do contexto para atualizar
     const resultado = await atualizarPerfil(dadosAlteracao);
 
     if (resultado.sucesso) {
-      setSucesso("✅ Perfil atualizado com sucesso!");
+      setSucesso(" Perfil atualizado com sucesso!");
 
       setFormData((prev) => ({
         ...prev,
@@ -154,7 +154,7 @@ const PerfilGerente = () => {
       throw new Error(resultado.erro || "Erro ao atualizar perfil");
     }
   } catch (error) {
-    console.error("❌ Erro ao atualizar perfil:", error);
+    console.error(" Erro ao atualizar perfil:", error);
     setErro(error.message || "Erro ao atualizar perfil");
   } finally {
     setLoading(false);

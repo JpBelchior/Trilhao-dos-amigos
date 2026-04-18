@@ -1,4 +1,3 @@
-// src/models/index.ts
 import sequelize from "../config/db";
 
 // Importar todos os modelos
@@ -11,6 +10,7 @@ import Foto from "./Foto";
 import Trajeto from "./Trajeto";
 import PedidoCamisetaAvulsa from "./PedidoCamisetaAvulsa";
 import ItemPedidoCamisetaAvulsa from "./ItemPedidoCamisetaAvulsa";
+import Lote from "./Lote";
 
 // ============ DEFINIR RELACIONAMENTOS ============
 
@@ -63,6 +63,7 @@ export {
   Trajeto,
   PedidoCamisetaAvulsa,
   ItemPedidoCamisetaAvulsa,
+  Lote,
 };
 
 export default {
@@ -76,4 +77,5 @@ export default {
   Trajeto,
   PedidoCamisetaAvulsa,
   ItemPedidoCamisetaAvulsa,
+  Lote,
 };

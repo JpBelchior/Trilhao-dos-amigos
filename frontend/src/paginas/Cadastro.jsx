@@ -29,6 +29,7 @@ const Cadastro = () => {
     validarStep,
     proximoStep,
     stepAnterior,
+    precos,
     TamanhoCamiseta,
     TipoCamiseta,
     CategoriaMoto,
@@ -174,6 +175,8 @@ const Cadastro = () => {
               removerCamisetaExtra={removerCamisetaExtra}
               TamanhoCamiseta={TamanhoCamiseta}
               TipoCamiseta={TipoCamiseta}
+              precoInscricao={precos.precoInscricao}
+              precoCamisa={precos.precoCamisa}
             />
           )}
 

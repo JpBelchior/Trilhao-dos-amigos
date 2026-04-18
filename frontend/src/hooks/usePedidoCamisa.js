@@ -57,21 +57,26 @@ export const usePedidoCamisa = () => {
     tipo: TipoCamiseta.MANGA_CURTA,
   });
   const [estoque, setEstoque] = useState({});
+  const [precoCamisa, setPrecoCamisa] = useState(50);
   const [loading, setLoading] = useState({ estoque: true, submetendo: false });
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    const carregarEstoque = async () => {
+    const carregarDados = async () => {
       try {
-        const data = await apiClient.get("/estoque");
-        if (data.sucesso) setEstoque(data.dados || {});
+        const [estoqueData, precosData] = await Promise.all([
+          apiClient.get("/estoque"),
+          fetch("http://localhost:8000/api/lotes/precos").then((r) => r.json()),
+        ]);
+        if (estoqueData.sucesso) setEstoque(estoqueData.dados || {});
+        if (precosData.sucesso) setPrecoCamisa(precosData.dados.precoCamisa);
       } catch (error) {
-        console.error("❌ [usePedidoCamisa] Erro ao carregar estoque:", error);
+        console.error("❌ [usePedidoCamisa] Erro ao carregar dados:", error);
       } finally {
         setLoading((prev) => ({ ...prev, estoque: false }));
       }
     };
-    carregarEstoque();
+    carregarDados();
   }, []);
 
   const atualizarDadosPessoais = (campo, valor) => {
@@ -171,7 +176,7 @@ export const usePedidoCamisa = () => {
     }
   };
 
-  const valorTotal = camisas.length * Valores.CAMISETA_EXTRA;
+  const valorTotal = camisas.length * precoCamisa;
 
   return {
     dadosPessoais,
@@ -182,6 +187,7 @@ export const usePedidoCamisa = () => {
     loading,
     erro,
     valorTotal,
+    precoCamisa,
     atualizarDadosPessoais,
     adicionarCamisa,
     removerCamisa,

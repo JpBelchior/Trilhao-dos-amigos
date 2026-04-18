@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from "./GerenteController";
 import { ParticipanteValidator } from "../validators/ParticipanteValidator";
 import { ParticipanteService } from "../Service/participanteService";
 import { ResponseUtil } from "../utils/responseUtil";
- import { formatarNome, formatarCidade } from "../utils/formatarNome";
+import { formatarNome} from "../utils/formatarNome";
 
 export class ParticipanteController {
   /**
@@ -21,7 +21,7 @@ export class ParticipanteController {
       const dadosParticipante: ICriarParticipanteDTO = req.body;
 
       console.log(
-        "🎯 [ParticipanteController] Criando participante:",
+        " [ParticipanteController] Criando participante:",
         dadosParticipante.nome
       );
 
@@ -57,7 +57,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao criar participante:",
+        " [ParticipanteController] Erro ao criar participante:",
         error
       );
       return ResponseUtil.erroInterno(
@@ -70,7 +70,6 @@ export class ParticipanteController {
 
   /**
    * PUT /api/participantes/:id - Editar participante (Admin)
-   * RESPONSABILIDADE: Apenas orquestração (SRP)
    */
   public static async editarParticipante(
     req: AuthenticatedRequest,
@@ -82,7 +81,7 @@ export class ParticipanteController {
       const gerente = req.gerente;
 
       console.log(
-        `📝 [ParticipanteController] Gerente ${gerente?.nome} editando participante ${id}`
+        ` [ParticipanteController] Gerente ${gerente?.nome} editando participante ${id}`
       );
 
       // 1. VALIDAR usando Validator
@@ -113,7 +112,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao editar participante:",
+        " [ParticipanteController] Erro ao editar participante:",
         error
       );
       return ResponseUtil.erroInterno(
@@ -136,7 +135,7 @@ export class ParticipanteController {
       const { numeroInscricao, pagamentoId } = req.body;
 
       console.log(
-        `💰 [ParticipanteController] Confirmando pagamento para participante ${id}`
+        ` [ParticipanteController] Confirmando pagamento para participante ${id}`
       );
 
       // 1. VALIDAR dados obrigatórios
@@ -170,7 +169,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao confirmar pagamento:",
+        " [ParticipanteController] Erro ao confirmar pagamento:",
         error
       );
       return ResponseUtil.erroInterno(
@@ -193,7 +192,7 @@ export class ParticipanteController {
       const gerente = req.gerente;
 
       console.log(
-        `🗑️ [ParticipanteController] Gerente ${gerente?.nome} excluindo participante ${id}`
+        ` [ParticipanteController] Gerente ${gerente?.nome} excluindo participante ${id}`
       );
 
       // CHAMAR Service com método MANUAL (permite qualquer status)
@@ -216,7 +215,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao excluir participante:",
+        " [ParticipanteController] Erro ao excluir participante:",
         error
       );
       return ResponseUtil.erroInterno(
@@ -246,7 +245,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao confirmar participante:",
+        " [ParticipanteController] Erro ao confirmar participante:",
         error
       );
       return {
@@ -360,7 +359,7 @@ export class ParticipanteController {
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao listar participantes:",
+        " [ParticipanteController] Erro ao listar participantes:",
         error
       );
       return ResponseUtil.erroInterno(
@@ -415,7 +414,7 @@ export class ParticipanteController {
       });
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro ao buscar participante:",
+        " [ParticipanteController] Erro ao buscar participante:",
         error
       );
       return ResponseUtil.erroInterno(
@@ -432,7 +431,7 @@ export class ParticipanteController {
   public static async executarVerificacaoAutomatica(): Promise<void> {
     try {
       console.log(
-        "🔍 [ParticipanteController] Executando verificação automática..."
+        " [ParticipanteController] Executando verificação automática..."
       );
       const limiteTempo = new Date();
       limiteTempo.setMinutes(limiteTempo.getMinutes() - 30);
@@ -447,23 +446,23 @@ export class ParticipanteController {
       });
 
       console.log(
-        `🔍 Encontrados ${participantesPendentes.length} participantes para verificar`
+        ` Encontrados ${participantesPendentes.length} participantes para verificar`
       );
 
       for (const participante of participantesPendentes) {
         console.log(
-          `⏰ Cancelando participante pendente: ${participante.numeroInscricao}`
+          ` Cancelando participante pendente: ${participante.numeroInscricao}`
         );
 
         await ParticipanteService.excluirParticipantePendente(participante.id);
       }
 
       console.log(
-        "✅ [ParticipanteController] Verificação automática concluída"
+        " [ParticipanteController] Verificação automática concluída"
       );
     } catch (error) {
       console.error(
-        "💥 [ParticipanteController] Erro na verificação automática:",
+        " [ParticipanteController] Erro na verificação automática:",
         error
       );
     }
@@ -480,7 +479,7 @@ public static async validarDados(
     const dadosParticipante: ICriarParticipanteDTO = req.body;
 
     console.log(
-      "🔍 [ParticipanteController] Validando dados:",
+      " [ParticipanteController] Validando dados:",
       dadosParticipante.email
     );
 
@@ -517,7 +516,7 @@ public static async validarDados(
         "Este CPF já está sendo usado por outro participante. Verifique seus dados ou entre em contato com o suporte."
       );
     }
-    console.log("✅ [ParticipanteController] Dados válidos!");
+    console.log(" [ParticipanteController] Dados válidos!");
     return ResponseUtil.sucesso(
       res,
       { valido: true },
@@ -525,7 +524,7 @@ public static async validarDados(
     );
   } catch (error) {
     console.error(
-      "💥 [ParticipanteController] Erro ao validar dados:",
+      " [ParticipanteController] Erro ao validar dados:",
       error
     );
     return ResponseUtil.erroInterno(

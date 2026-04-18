@@ -35,6 +35,7 @@ import GerenciarFotos from "./paginas/Admin/GerenciarFotos";
 import PagamentoConfirmado from "./paginas/PagamentoConfirmado";
 import AdminCampeoes from "./paginas/Admin/AdminCampeoes";
 import AdminRelatorios from "./paginas/Admin/AdminRelatorios";
+import AdminLotes from "./paginas/Admin/AdminLotes";
 import ScrollToTop from "./componentes/scrollToTop";
 import ComprarCamisa from "./paginas/ComprarCamisa";
 import PagamentoCamisa from "./paginas/PagamentoCamisa";
@@ -141,6 +142,15 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <AdminRelatorios />
+              </ProtectedRoute>
+            }
+          />
+          {/* Gerenciar Lotes */}
+          <Route
+            path="/admin/lotes"
+            element={
+              <ProtectedRoute>
+                <AdminLotes />
               </ProtectedRoute>
             }
           />

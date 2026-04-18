@@ -22,6 +22,7 @@ const ComprarCamisa = () => {
     loading,
     erro,
     valorTotal,
+    precoCamisa,
     atualizarDadosPessoais,
     adicionarCamisa,
     removerCamisa,
@@ -44,7 +45,7 @@ const ComprarCamisa = () => {
           <p className="text-gray-300 text-lg">
             Adquira a camisa oficial do Trilhão dos Amigos sem precisar se inscrever no evento.
           </p>
-          <p className="text-green-400 font-bold mt-2">R$ 50,00 por camisa — Retirada no evento</p>
+          <p className="text-green-400 font-bold mt-2">{precoCamisa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} por camisa — Retirada no evento</p>
         </div>
 
         <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
@@ -98,7 +99,7 @@ const ComprarCamisa = () => {
                 Escolha as Camisas
               </h2>
               <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
-                R$ 50,00 cada
+                {precoCamisa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} cada
               </span>
             </div>
 
@@ -115,6 +116,7 @@ const ComprarCamisa = () => {
               getDisponibilidade={getDisponibilidade}
               TamanhoCamiseta={TamanhoCamiseta}
               TipoCamiseta={TipoCamiseta}
+              precoCamisa={precoCamisa}
             />
           </div>
 

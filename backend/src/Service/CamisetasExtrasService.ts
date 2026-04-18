@@ -1,6 +1,7 @@
 import sequelize from "../config/db";
 import { Participante, CamisetaExtra, EstoqueCamiseta } from "../models";
 import { IApiResponse, TamanhoCamiseta, TipoCamiseta, StatusEntrega } from "../types/models";
+import { LoteService } from "./LoteService";
 
 interface AdicionarCamisetaExtraDTO {
   tamanho: TamanhoCamiseta;
@@ -62,12 +63,13 @@ export class CamisetasExtrasService {
       }
 
       // 3. Criar camiseta extra SEM hooks automáticos
+      const { precoCamisa } = await LoteService.getPrecos();
       const novaCamisetaExtra = await CamisetaExtra.create(
         {
           participanteId: participanteId,
           tamanho: dadosCamiseta.tamanho,
           tipo: dadosCamiseta.tipo,
-          preco: 50, // R$ 50 por camiseta extra
+          preco: precoCamisa,
           statusEntrega: StatusEntrega.NAO_ENTREGUE,
         },
         {
@@ -78,7 +80,7 @@ export class CamisetasExtrasService {
 
       // 4. MANUALMENTE: Atualizar valor da inscrição do participante
       await participante.increment("valorInscricao", {
-        by: 50,
+        by: precoCamisa,
         transaction,
       });
 
@@ -101,7 +103,7 @@ export class CamisetasExtrasService {
           camisetaExtra: novaCamisetaExtra,
           participante: {
             id: participante.id,
-            valorInscricao: participante.valorInscricao + 50,
+            valorInscricao: participante.valorInscricao + precoCamisa,
           },
         },
       };

@@ -42,12 +42,34 @@ const useCadastro = () => {
   });
 
   // =======================
+  // PREÇOS DO LOTE ATIVO
+  // =======================
+
+  const [precos, setPrecos] = useState({ precoInscricao: 100, precoCamisa: 50 });
+
+  // =======================
   // ESTOQUE
   // =======================
 
   useEffect(() => {
     carregarEstoque();
+    carregarPrecos();
   }, []);
+
+  const carregarPrecos = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/lotes/precos");
+      const data = await response.json();
+      if (data.sucesso) {
+        setPrecos({
+          precoInscricao: data.dados.precoInscricao,
+          precoCamisa: data.dados.precoCamisa,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar preços:", error);
+    }
+  };
 
   const carregarEstoque = async () => {
     try {
@@ -123,7 +145,7 @@ const useCadastro = () => {
   };
 
   const calcularValorTotal = () => {
-    return 100 + formData.camisetasExtras.length * 50;
+    return precos.precoInscricao + formData.camisetasExtras.length * precos.precoCamisa;
   };
 
   // =======================
@@ -279,6 +301,7 @@ const useCadastro = () => {
     formData,
     camisetaExtra,
     estoque,
+    precos,
 
     setCamisetaExtra,
     atualizarFormData,

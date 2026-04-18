@@ -40,12 +40,12 @@ export class IBGEService {
       this.cache[cacheKey] &&
       Date.now() - this.cache[cacheKey].timestamp < this.cacheDuration
     ) {
-      console.log("📍 Estados carregados do cache");
+      console.log(" Estados carregados do cache");
       return this.cache[cacheKey].data;
     }
 
     try {
-      console.log("🌐 Buscando estados na API do IBGE...");
+      console.log(" Buscando estados na API do IBGE...");
 
       const response = await fetch(`${this.baseURL}/estados?orderBy=nome`);
 
@@ -61,10 +61,10 @@ export class IBGEService {
         timestamp: Date.now(),
       };
 
-      console.log(`✅ ${estados.length} estados carregados da API do IBGE`);
+      console.log(` ${estados.length} estados carregados da API do IBGE`);
       return estados;
     } catch (error) {
-      console.error("❌ Erro ao buscar estados do IBGE:", error);
+      console.error(" Erro ao buscar estados do IBGE:", error);
 
       // Fallback com estados estáticos se API falhar
       const estadosEstaticos: EstadoIBGE[] = [
@@ -97,7 +97,7 @@ export class IBGEService {
         { id: 17, sigla: "TO", nome: "Tocantins" },
       ];
 
-      console.log("⚠️ Usando fallback com estados estáticos");
+      console.log("Usando fallback com estados estáticos");
       return estadosEstaticos;
     }
   }
@@ -113,12 +113,12 @@ export class IBGEService {
       this.cache[cacheKey] &&
       Date.now() - this.cache[cacheKey].timestamp < this.cacheDuration
     ) {
-      console.log(`📍 Municípios do ${siglaEstado} carregados do cache`);
+      console.log(` Municípios do ${siglaEstado} carregados do cache`);
       return this.cache[cacheKey].data;
     }
 
     try {
-      console.log(`🌐 Buscando municípios do ${siglaEstado} na API do IBGE...`);
+      console.log(`Buscando municípios do ${siglaEstado} na API do IBGE...`);
 
       const response = await fetch(
         `${
@@ -139,11 +139,11 @@ export class IBGEService {
       };
 
       console.log(
-        `✅ ${municipios.length} municípios do ${siglaEstado} carregados`
+        ` ${municipios.length} municípios do ${siglaEstado} carregados`
       );
       return municipios;
     } catch (error) {
-      console.error(`❌ Erro ao buscar municípios do ${siglaEstado}:`, error);
+      console.error(` Erro ao buscar municípios do ${siglaEstado}:`, error);
       return [];
     }
   }
@@ -156,7 +156,7 @@ export class IBGEService {
         (estado) => estado.sigla.toLowerCase() === sigla.toLowerCase()
       );
     } catch (error) {
-      console.error("❌ Erro ao validar estado:", error);
+      console.error(" Erro ao validar estado:", error);
       return false;
     }
   }
@@ -177,7 +177,7 @@ export class IBGEService {
           this.normalizarTexto(municipio.nome) === cidadeNormalizada
       );
     } catch (error) {
-      console.error("❌ Erro ao validar cidade:", error);
+      console.error(" Erro ao validar cidade:", error);
       return false;
     }
   }
@@ -223,7 +223,7 @@ export class IBGEService {
   // Limpar cache (útil para forçar atualização)
   public static limparCache(): void {
     this.cache = {};
-    console.log("🗑️ Cache do IBGE limpo");
+    console.log(" Cache do IBGE limpo");
   }
 
   // Função utilitária para normalizar texto (remover acentos, etc.)

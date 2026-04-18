@@ -13,6 +13,7 @@ import {
   TipoCamiseta,
 } from "../types/models";
 import { Sanitizer } from "../utils/sanitizer";
+import { LoteService } from "./LoteService";
 import { Op } from "sequelize";
 
 export interface CriarParticipanteResult extends IApiResponse {
@@ -23,11 +24,9 @@ export class ParticipanteService {
   /**
    * Calcular valor total da inscrição
    */
-  private static calcularValorInscricao(camisetasExtras: any[] = []): number {
-    const valorBase = 100; // R$ 100 base
-    const valorPorExtra = 50; // R$ 50 por camiseta extra
-
-    return valorBase + camisetasExtras.length * valorPorExtra;
+  private static async calcularValorInscricao(camisetasExtras: any[] = []): Promise<number> {
+    const { precoInscricao, precoCamisa } = await LoteService.getPrecos();
+    return precoInscricao + camisetasExtras.length * precoCamisa;
   }
 
   /**
@@ -221,11 +220,12 @@ export class ParticipanteService {
       const numeroInscricao = await this.gerarNumeroInscricao();
 
       // 5. Calcular valor total
-      const valorTotal = this.calcularValorInscricao(
+      const { precoCamisa } = await LoteService.getPrecos();
+      const valorTotal = await this.calcularValorInscricao(
         dados.camisetasExtras || []
       );
 
-      // 6. Criar participante 
+      // 6. Criar participante
       const dadosSanitizados = Sanitizer.sanitizeParticipanteData(dados);
 
       const participante = await Participante.create(
@@ -256,7 +256,7 @@ export class ParticipanteService {
           participanteId: participante.id,
           tamanho: extra.tamanho,
           tipo: extra.tipo,
-          preco: 50, // R$ 50 por camiseta extra
+          preco: precoCamisa,
           statusEntrega: StatusEntrega.NAO_ENTREGUE,
         }));
 

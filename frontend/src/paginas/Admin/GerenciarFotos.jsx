@@ -9,8 +9,6 @@ import {
   Save,
   X,
   Plus,
-  Grid,
-  List,
   Eye,
   EyeOff,
   AlertTriangle,
@@ -172,7 +170,6 @@ const GerenciarFotos = () => {
 
   const [editando, setEditando] = useState(null);
   const [dadosEdicao, setDadosEdicao] = useState({});
-  const [tipoVisao, setTipoVisao] = useState("grid");
   const [filtroCategoria, setFiltroCategoria] = useState("todas");
 
   const categorias = {
@@ -449,25 +446,11 @@ const GerenciarFotos = () => {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setTipoVisao("grid")}
-                className={`p-2 rounded-lg transition-all ${tipoVisao === "grid" ? "bg-green-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
-              >
-                <Grid size={20} />
-              </button>
-              <button
-                onClick={() => setTipoVisao("list")}
-                className={`p-2 rounded-lg transition-all ${tipoVisao === "list" ? "bg-green-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
-              >
-                <List size={20} />
-              </button>
-            </div>
           </div>
         </div>
 
         {/* Grid de mídias */}
-        <div className={tipoVisao === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {midiasFiltradas.map((foto) => (
             <MidiaCard
               key={foto.id}

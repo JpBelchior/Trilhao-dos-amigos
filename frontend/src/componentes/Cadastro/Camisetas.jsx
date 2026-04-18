@@ -12,7 +12,10 @@ const StepCamisetas = ({
   removerCamisetaExtra,
   TamanhoCamiseta,
   TipoCamiseta,
+  precoInscricao = 100,
+  precoCamisa = 50,
 }) => {
+  const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-center text-white mb-8">
@@ -104,7 +107,7 @@ const StepCamisetas = ({
           <div className="mt-4 bg-red-900/30 border border-red-400/50 rounded-xl p-4 flex items-center">
             <AlertCircle className="text-red-400 mr-3" size={20} />
             <span className="text-red-300">
-              ⚠️ Esta combinação não está disponível. Escolha outro tamanho ou
+               Esta combinação não está disponível. Escolha outro tamanho ou
               tipo.
             </span>
           </div>
@@ -117,7 +120,7 @@ const StepCamisetas = ({
             Camisetas Extras
           </h3>
           <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
-            R$ 50,00 cada
+            {fmt(precoCamisa)} cada
           </span>
         </div>
 
@@ -134,6 +137,7 @@ const StepCamisetas = ({
           getDisponibilidade={verificarDisponibilidade}
           TamanhoCamiseta={TamanhoCamiseta}
           TipoCamiseta={TipoCamiseta}
+          precoCamisa={precoCamisa}
         />
       </div>
 
@@ -149,12 +153,12 @@ const StepCamisetas = ({
       {/* RESUMO FINAL */}
       <div className="bg-gradient-to-r from-green-900/40 to-yellow-900/40 rounded-2xl p-6 border-2 border-green-400/50">
         <h4 className="text-lg font-bold text-white mb-3">
-          📋 Resumo do Pedido
+           Resumo do Pedido
         </h4>
         <div className="space-y-2 text-gray-300">
           <div className="flex justify-between">
             <span>Inscrição + 1 Camiseta Grátis:</span>
-            <span className="font-semibold">R$ 100,00</span>
+            <span className="font-semibold">{fmt(precoInscricao)}</span>
           </div>
           {formData.camisetasExtras.length > 0 && (
             <div className="flex justify-between">
@@ -164,7 +168,7 @@ const StepCamisetas = ({
                 {formData.camisetasExtras.length > 1 ? "s" : ""}:
               </span>
               <span className="font-semibold">
-                R$ {(formData.camisetasExtras.length * 50.0).toFixed(2)}
+                {fmt(formData.camisetasExtras.length * precoCamisa)}
               </span>
             </div>
           )}
@@ -172,8 +176,7 @@ const StepCamisetas = ({
             <div className="flex justify-between text-xl">
               <span className="font-bold text-white">TOTAL:</span>
               <span className="font-bold text-green-400">
-                R${" "}
-                {(100.0 + formData.camisetasExtras.length * 50.0).toFixed(2)}
+                {fmt(precoInscricao + formData.camisetasExtras.length * precoCamisa)}
               </span>
             </div>
           </div>

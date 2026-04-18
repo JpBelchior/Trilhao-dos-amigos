@@ -98,7 +98,7 @@ export class LocalizacaoService {
         },
       };
     } catch (error) {
-      console.error("❌ [LocalizacaoService] Erro ao buscar cidades:", error);
+      console.error(" [LocalizacaoService] Erro ao buscar cidades:", error);
       return {
         sucesso: false,
         erro: "Erro ao buscar cidades",
@@ -115,7 +115,7 @@ export class LocalizacaoService {
     cidade: string
   ): Promise<IApiResponse> {
     try {
-      console.log(`✅ [LocalizacaoService] Validando: ${cidade}/${estado}`);
+      console.log(` [LocalizacaoService] Validando: ${cidade}/${estado}`);
 
       // Validar estado
       const estadoValido = await IBGEService.validarEstado(estado);
@@ -148,7 +148,7 @@ export class LocalizacaoService {
       };
     } catch (error) {
       console.error(
-        "❌ [LocalizacaoService] Erro ao validar localização:",
+        "[LocalizacaoService] Erro ao validar localização:",
         error
       );
       return {

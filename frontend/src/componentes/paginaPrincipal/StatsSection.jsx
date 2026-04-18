@@ -1,5 +1,5 @@
 import React from "react";
-import { Users, Mountain, Trophy, Target, Gift } from "lucide-react";
+import { Users, Mountain, Trophy, Target } from "lucide-react";
 
 const StatsSection = () => {
   const stats = [
@@ -86,6 +86,7 @@ const StatsSection = () => {
             </div>
           </div>
         </div>
+
       </div>
     </section>
   );

@@ -11,6 +11,7 @@ import fotoRoutes from "./Fotos/fotos";
 import camisetasExtrasRoutes from "./CamisasExtras/camisetasExtrasRoutes";
 import trajetoRoutes from "./Trajeto/trajeto";
 import pedidoCamisetaAvulsaRoutes from "./PedidoCamisetaAvulsa/pedidoCamisetaAvulsaRoutes";
+import lotesRoutes from "./Lotes/lotesRoutes";
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.get("/", (req, res) => {
       fotos: "/api/fotos",
       camisetasExtras: "/api/camisetas-extras",
       trajeto: "/api/trajeto",
+      lotes: "/api/lotes",
     },
     timestamp: new Date().toISOString(),
   });
@@ -67,5 +69,8 @@ router.use("/trajeto", trajetoRoutes);
 
 // Rotas de pedidos de camisetas avulsas
 router.use("/pedido-camisa", pedidoCamisetaAvulsaRoutes);
+
+// Rotas de lotes
+router.use("/lotes", lotesRoutes);
 
 export default router;

@@ -1,17 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Trophy, ShoppingBag } from "lucide-react";
+import LoteBanner from "./LoteBanner";
 
 const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-32 bg-black relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-green-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <section className="py-32 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-green-950 to-black" />
 
       <div className="container mx-auto px-6 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
@@ -25,8 +23,10 @@ const CTASection = () => {
             na Serra da Mantiqueira!
           </p>
 
+          <LoteBanner />
+
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-6">
             <button
               className="group bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black px-8 py-3 rounded-3xl text-2xl transition-all transform hover:scale-110  hover:shadow-yellow-400/25 flex items-center"
               onClick={() => navigate("/cadastro")}
