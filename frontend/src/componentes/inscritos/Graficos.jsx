@@ -181,7 +181,7 @@ const GraficosParticipantes = ({ participantes = [] }) => {
       {/* Grid de Gráficos */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Gráfico de Motos */}
-        <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-yellow-400/30">
+        <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-6 border border-green-400/30">
           <h3 className="text-xl font-bold text-center text-white mb-4">
             Categoria das Motos
           </h3>

@@ -47,23 +47,25 @@ const ProvasSection = () => {
         {/* Cards das Provas Modernos */}
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Prova 1 - Trilha */}
-          <div className="group bg-gradient-to-r from-green-900/40 to-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/20">
+          <div className="group bg-gradient-to-r from-green-900/40 to-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all transform hover:scale-105 ">
             <div className="flex items-center mb-8">
               <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black rounded-2xl p-6 mr-8 transform group-hover:scale-110 transition-all">
                 <Bike size={48} />
               </div>
-              <div>
+                <div>
                 <div className="flex items-center mb-2">
-                  <span className="bg-green-600 text-white px-4 py-1 rounded-full text-sm font-bold mr-3">
+                  <span className="bg-yellow-400 text-black px-4 py-1 rounded-full text-sm font-bold mr-3">
                     PROVA 1
                   </span>
                   <span className="text-yellow-400 text-sm font-semibold">
                     9:30H
                   </span>
                 </div>
-                <h3 className="text-4xl font-black text-white">TRILHA</h3>
-                <p className="text-green-400 text-xl font-semibold">
-                50km de Adrenalina
+                <h3 className="text-4xl font-black text-white">
+                  TRILHÃO
+                </h3>
+                <p className="text-yellow-400 text-xl font-semibold">
+                 50 Km de Adrenalina
                 </p>
               </div>
             </div>
@@ -71,9 +73,9 @@ const ProvasSection = () => {
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                   <div ><Flag className="mr-4 text-green-400" size={20} /></div>
+                   <div ><Flag className="mr-4 text-yellow-400" size={20} /></div>
                   <span>
-                    <strong className="text-green-400">Largada:</strong> Centro Comunitário
+                    <strong className="text-yellow-400">Largada:</strong> Centro Comunitário
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
@@ -86,9 +88,9 @@ const ProvasSection = () => {
               </div>
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                 <MoveHorizontal className="mr-4 text-green-400" size={20} />
+                 <MoveHorizontal className="mr-4 text-yellow-400" size={20} />
                   <span>
-                    <strong className="text-green-400">Distancia:</strong> 50 Km Off Road
+                    <strong className="text-yellow-400">Distancia:</strong> 50 Km Off Road
                   </span>
                 </div>
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
@@ -100,27 +102,31 @@ const ProvasSection = () => {
                 </div>
               </div>
             </div>
-
+            <div className="space-y-6">
+              <h4 className=" font-semibold text-gray-200 text-xl flex items-center">
+               DESCRIÇÃO:
+              </h4>
             <p className="text-gray-300 leading-relaxed text-lg bg-black/20 rounded-xl p-6">
               Percurso desafiador pela Serra da Mantiqueira,
               atravessando cachoeiras , muita mata e
               trechos estreitos e com muito barro que testam cada fibra do piloto. Uma jornada
               por terrenos traçoeiros que separa aventureiros de lendas.
             </p>
+            </div>
           </div>
 
           {/* Prova 2 - Subida */}
-          <div className="group bg-gradient-to-r from-yellow-900/40 to-black/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30 hover:border-yellow-400/60 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/20">
+          <div className="group bg-gradient-to-r from-green-900/40 to-black/40 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all transform hover:scale-105 ">
             <div className="flex items-center mb-8">
-              <div className="bg-gradient-to-br from-green-400 to-green-600 text-black rounded-2xl p-6 mr-8 transform group-hover:scale-110 transition-all">
+               <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black rounded-2xl p-6 mr-8 transform group-hover:scale-110 transition-all">
                 <Mountain size={48} />
               </div>
               <div>
                 <div className="flex items-center mb-2">
-                  <span className="bg-yellow-600 text-black px-4 py-1 rounded-full text-sm font-bold mr-3">
+                  <span className="bg-yellow-400 text-black px-4 py-1 rounded-full text-sm font-bold mr-3">
                     PROVA 2
                   </span>
-                  <span className="text-green-400 text-sm font-semibold">
+                  <span className="text-yellow-400 text-sm font-semibold">
                     15:30H
                   </span>
                 </div>
@@ -136,9 +142,9 @@ const ProvasSection = () => {
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <Trophy className="mr-4 text-green-400" size={20} />
+                  <Trophy className="mr-4 text-yellow-400" size={20} />
                   <span>
-                    <strong className="text-green-400">Prêmio:</strong> R$
+                    <strong className="text-yellow-400">Prêmio:</strong> R$
                     1.500,00
                   </span>
                 </div>
@@ -152,9 +158,9 @@ const ProvasSection = () => {
               </div>
               <div className="space-y-4">
                 <div className="flex items-center text-white bg-black/30 rounded-xl p-4">
-                  <ArrowUpRight className="mr-4 text-green-400" size={20} />
+                  <ArrowUpRight className="mr-4 text-yellow-400" size={20} />
                   <span>
-                    <strong className="text-green-400">Altura:</strong>{" "}
+                    <strong className="text-yellow-400">Altura:</strong>{" "}
                     300 m
                   </span>
                 </div>
@@ -170,26 +176,26 @@ const ProvasSection = () => {
 
             {/* Categorias Modernizadas */}
             <div className="space-y-6">
-              <h4 className="font-black text-white text-2xl flex items-center">
+              <h4 className=" font-semibold text-gray-200 text-xl flex items-center">
                 CATEGORIAS:
               </h4>
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-r from-green-900/50 to-green-800/50 p-6 rounded-2xl border border-green-400/30 transition-all">
-                  <strong className="text-green-300 text-xl flex items-center mb-3">
+                <p className="text-gray-300 leading-relaxed text-lg bg-black/20 rounded-xl p-6">
+                  <strong className="text-yellow-300 text-xl flex items-center mb-3">
                     MOTOS NACIONAIS
                   </strong>
                   <p className="text-gray-200">
                     Bros, Lander, Crosser, XTZ...
                   </p>
-                </div>
-                <div className="bg-gradient-to-r from-yellow-500/30 to-yellow-600 p-6 rounded-2xl border border-yellow-400/30 transition-all">
+                </p>
+                <p className="text-gray-300 leading-relaxed text-lg bg-black/20 rounded-xl p-6">
                   <strong className="text-yellow-300 text-xl flex items-center mb-3">
                     MOTOS IMPORTADAS
                   </strong>
                   <p className="text-gray-200">
                     Honda, Yamaha, KTM, Husqvarna... 
                   </p>
-                </div>
+                </p>
               </div>
             </div>
           </div>

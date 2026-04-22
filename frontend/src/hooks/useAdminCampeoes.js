@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFiltros } from "./useFiltros";
 import { calcularEstatisticasCampeoes } from "../utils/estatisticas";
+import { carregarComLoading } from "../utils/carregarComLoading";
 
 /**
  * 🏆 Hook customizado para gerenciamento de campeões
@@ -79,32 +80,18 @@ export const useAdminCampeoes = () => {
   /**
    * 📥 Carregar todos os campeões
    */
-  const carregarCampeoes = async () => {
-    try {
-      setLoading(true);
-      setErro(null);
-
-      console.log("🏆 [AdminCampeoes] Carregando campeões...");
-
+  const carregarCampeoes = () =>
+    carregarComLoading(setLoading, setErro, async () => {
       const response = await fetchAuth("http://localhost:8000/api/campeoes");
       const data = await response.json();
-
       if (data.sucesso) {
         const listaCampeoes = data.dados.campeoes || [];
         setCampeoes(listaCampeoes);
-        calcularEstatisticas(listaCampeoes);
-
-        console.log(`✅ [AdminCampeoes] ${listaCampeoes.length} campeões carregados`);
+        setEstatisticas(calcularEstatisticasCampeoes(listaCampeoes));
       } else {
         throw new Error(data.erro || "Erro ao carregar campeões");
       }
-    } catch (error) {
-      console.error("❌ [AdminCampeoes] Erro ao carregar campeões:", error);
-      setErro(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
 
   /**
    * ➕ Criar novo campeão
@@ -216,12 +203,6 @@ export const useAdminCampeoes = () => {
   };
 
 
-  /**
-   * 📊 Calcular estatísticas dos campeões
-   */
-   const calcularEstatisticas = (listaCampeoes) => {
-    setEstatisticas(calcularEstatisticasCampeoes(listaCampeoes));
-  };
 
 
 

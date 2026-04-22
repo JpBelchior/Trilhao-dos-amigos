@@ -1,6 +1,6 @@
 // src/controllers/LoteController.ts
 import { Request, Response } from "express";
-import { LoteService, StatusLote } from "../Service/LoteService";
+import { LoteService, StatusLote, DATA_LIMITE_COMPETICAO } from "../Service/LoteService";
 import { ICriarLoteDTO } from "../types/models";
 
 export class LoteController {
@@ -134,6 +134,14 @@ export class LoteController {
         return;
       }
 
+      if (String(dataFim) > DATA_LIMITE_COMPETICAO) {
+        res.status(400).json({
+          sucesso: false,
+          erro: `A data de fim não pode ultrapassar o dia da competição (${DATA_LIMITE_COMPETICAO.split("-").reverse().join("/")})`,
+        });
+        return;
+      }
+
       const conflitoCriacao = await LoteService.buscarSobreposicao(String(dataInicio), String(dataFim));
       if (conflitoCriacao) {
         const inicioFmt = conflitoCriacao.dataInicio.split("-").reverse().join("/");
@@ -211,6 +219,14 @@ export class LoteController {
           res.status(400).json({
             sucesso: false,
             erro: "Data de fim deve ser igual ou posterior à data de início",
+          });
+          return;
+        }
+
+        if (novaFim > DATA_LIMITE_COMPETICAO) {
+          res.status(400).json({
+            sucesso: false,
+            erro: `A data de fim não pode ultrapassar o dia da competição (${DATA_LIMITE_COMPETICAO.split("-").reverse().join("/")})`,
           });
           return;
         }

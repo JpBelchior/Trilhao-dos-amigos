@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { DATA_LIMITE_COMPETICAO, DATA_LIMITE_COMPETICAO_DISPLAY } from "../../constants";
 import { X, Layers, Save, AlertCircle, Loader2, Calendar, DollarSign } from "lucide-react";
 
 const ModalLote = ({ isOpen, lote, onClose, criarLote, editarLote, operacaoLoading }) => {
@@ -53,6 +54,10 @@ const ModalLote = ({ isOpen, lote, onClose, criarLote, editarLote, operacaoLoadi
       setErro("Data de fim deve ser igual ou posterior à data de início");
       return false;
     }
+    if (formData.dataFim > DATA_LIMITE_COMPETICAO) {
+      setErro(`A data de fim não pode ultrapassar ${DATA_LIMITE_COMPETICAO_DISPLAY} (dia da competição)`);
+      return false;
+    }
     if (formData.precoInscricao === "" || Number(formData.precoInscricao) < 0) {
       setErro("Preço de inscrição inválido");
       return false;
@@ -104,7 +109,7 @@ const ModalLote = ({ isOpen, lote, onClose, criarLote, editarLote, operacaoLoadi
               {modoEdicao ? `Editar Lote ${lote.numero}` : "Novo Lote"}
             </h2>
             <p className="text-gray-300 text-sm mt-1">
-              {modoEdicao ? "Altere os dados do lote" : "Preencha os dados do novo lote"}
+              {modoEdicao ? "Altere os dados do lote." : "Preencha os dados do novo lote."} <br/> Data limite: {DATA_LIMITE_COMPETICAO_DISPLAY}
             </p>
           </div>
           <button
@@ -162,6 +167,7 @@ const ModalLote = ({ isOpen, lote, onClose, criarLote, editarLote, operacaoLoadi
               <input
                 type="date"
                 value={formData.dataFim}
+                max={DATA_LIMITE_COMPETICAO}
                 onChange={(e) => handleChange("dataFim", e.target.value)}
                 className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:border-yellow-400 focus:outline-none"
                 disabled={loading}

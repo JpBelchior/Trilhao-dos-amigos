@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { 
-  TamanhoCamiseta, 
-  TipoCamiseta, 
-  CategoriaMoto 
+import {
+  TamanhoCamiseta,
+  TipoCamiseta,
+  CategoriaMoto,
+  DATA_LIMITE_COMPETICAO,
 } from "../constants";
 
 const useCadastro = () => {
@@ -11,6 +12,9 @@ const useCadastro = () => {
   // =======================
 
   const [loading, setLoading] = useState(false);
+  const [inscricoesEncerradas] = useState(
+    () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) > DATA_LIMITE_COMPETICAO
+  );
   const [step, setStep] = useState(1);
   const [estoque, setEstoque] = useState({});
 
@@ -297,6 +301,7 @@ const useCadastro = () => {
 
   return {
     loading,
+    inscricoesEncerradas,
     step,
     formData,
     camisetaExtra,

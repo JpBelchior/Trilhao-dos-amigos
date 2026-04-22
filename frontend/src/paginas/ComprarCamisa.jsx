@@ -37,8 +37,7 @@ const ComprarCamisa = () => {
       <div className="container mx-auto px-6 max-w-2xl">
 
         {/* Header */}
-        <div className="text-center mb-10">
-          <ShoppingBag className="text-yellow-400 mx-auto mb-4" size={56} />
+        <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-black text-white mb-3">
             Comprar <span className="text-yellow-400">Camisa</span>
           </h1>

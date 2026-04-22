@@ -6,6 +6,8 @@ import { ICriarLoteDTO } from "../types/models";
 const FALLBACK_PRECO_INSCRICAO = 100;
 const FALLBACK_PRECO_CAMISA = 50;
 
+export const DATA_LIMITE_COMPETICAO = "2026-06-28";
+
 export interface LotePrecos {
   precoInscricao: number;
   precoCamisa: number;
@@ -16,6 +18,10 @@ export interface LotePrecos {
 export type StatusLote = "ATIVO" | "FUTURO" | "ENCERRADO";
 
 export class LoteService {
+  static isInscricoesAbertas(): boolean {
+    return this.getHojeBrasilia() <= DATA_LIMITE_COMPETICAO;
+  }
+
   /**
    * Retorna a data atual no fuso horário de Brasília no formato YYYY-MM-DD
    */

@@ -7,6 +7,7 @@ import useCadastro from "../hooks/UseCadastro";
 
 import StepDadosIniciais from "../componentes/Cadastro/DadosIniciais";
 import StepCamisetas from "../componentes/Cadastro/Camisetas";
+import { DATA_LIMITE_COMPETICAO_DISPLAY } from "../constants";
 
 const Cadastro = () => {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ const Cadastro = () => {
 
     if (resultado.sucesso) {
       console.log(
-        "✅ Participante criado como PENDENTE, redirecionando para pagamento"
+        " Participante criado como PENDENTE, redirecionando para pagamento"
       );
 
       // Redirecionar para página de pagamento
@@ -91,7 +92,8 @@ const Cadastro = () => {
           <h1 className="text-5xl font-black text-white mb-4">
             INSCREVA-SE NO <span className="text-yellow-400">TRILHÃO</span>
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto"></div>
+          <span className="text-white font-medium mb-3"> Data limite das inscrições: {DATA_LIMITE_COMPETICAO_DISPLAY}</span>
+          <div className="w-24 h-1 mt-2 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto"></div>
         </div>
 
         {/* Progress Bar */}

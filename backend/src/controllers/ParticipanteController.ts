@@ -6,6 +6,7 @@ import { AuthenticatedRequest } from "./GerenteController";
 
 import { ParticipanteValidator } from "../validators/ParticipanteValidator";
 import { ParticipanteService } from "../Service/participanteService";
+import { LoteService, DATA_LIMITE_COMPETICAO } from "../Service/LoteService";
 import { ResponseUtil } from "../utils/responseUtil";
 import { formatarNome} from "../utils/formatarNome";
 
@@ -476,6 +477,14 @@ public static async validarDados(
   res: Response
 ): Promise<void> {
   try {
+    if (!LoteService.isInscricoesAbertas()) {
+      return ResponseUtil.erroValidacao(
+        res,
+        "Inscrições encerradas",
+        `As inscrições foram encerradas no dia da competição (${DATA_LIMITE_COMPETICAO.split("-").reverse().join("/")})`
+      );
+    }
+
     const dadosParticipante: ICriarParticipanteDTO = req.body;
 
     console.log(

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFiltros } from "./useFiltros";
 import { calcularEstatisticasAdmin } from "../utils/estatisticas";
+import { carregarComLoading } from "../utils/carregarComLoading";
 /**
  * 👥 Hook customizado para gerenciamento administrativo de participantes
  * 
@@ -82,41 +83,18 @@ export const useAdminParticipantes = () => {
   /**
    * 📥 Carregar todos os participantes
    */
-  const carregarParticipantes = async () => {
-    try {
-      setLoading(true);
-      setErro(null);
-
-      console.log("👥 [AdminParticipantes] Carregando participantes...");
-
+  const carregarParticipantes = () =>
+    carregarComLoading(setLoading, setErro, async () => {
       const response = await fetchAuth("http://localhost:8000/api/participantes");
       const data = await response.json();
-
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];
-
         setParticipantes(participantesData);
-        calcularEstatisticas(participantesData);
-
-        console.log("✅ [AdminParticipantes] Participantes carregados:", {
-          total: participantesData.length,
-          confirmados: participantesData.filter(
-            (p) => p.statusPagamento === "confirmado"
-          ).length,
-          pendentes: participantesData.filter(
-            (p) => p.statusPagamento === "pendente"
-          ).length,
-        });
+        setEstatisticas(calcularEstatisticasAdmin(participantesData));
       } else {
         throw new Error(data.erro || "Erro ao carregar participantes");
       }
-    } catch (error) {
-      console.error("❌ [AdminParticipantes] Erro ao carregar:", error);
-      setErro(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
 
   /**
    * ✅ Confirmar pagamento manualmente
@@ -294,12 +272,6 @@ export const useAdminParticipantes = () => {
   };
 
 
-  /**
-   * 📊 Calcular estatísticas dos participantes
-   */
-    const calcularEstatisticas = (dados) => {
-    setEstatisticas(calcularEstatisticasAdmin(dados));
-  };
 
 
   /**

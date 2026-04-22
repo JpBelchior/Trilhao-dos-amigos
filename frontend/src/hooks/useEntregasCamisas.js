@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuthApi } from "./useAuthApi";
+import { useFiltros } from "./useFiltros";
 import { TipoCamisetaLabel as TipoCamiseta } from "../constants";
 
 /**
@@ -31,9 +32,36 @@ export const useEntregasCamisas = () => {
   // ESTADOS DE UI
   // ========================================
   const [expandido, setExpandido] = useState(false);
-  const [filtroNome, setFiltroNome] = useState("");
   const [loadingButtons, setLoadingButtons] = useState({});
 
+
+  // ========================================
+  // FILTROS
+  // ========================================
+  const {
+    dadosFiltrados: participantesFiltrados,
+    filtros: filtrosParticipantes,
+    atualizarFiltro: atualizarFiltroParticipantes,
+  } = useFiltros(
+    participantesReservados,
+    { nome: { tipo: "texto", campo: "nome", camposAdicionais: ["numeroInscricao"] } },
+    { habilitarPaginacao: false }
+  );
+
+  const {
+    dadosFiltrados: pedidosAvulsosFiltrados,
+    atualizarFiltro: atualizarFiltroAvulsos,
+  } = useFiltros(
+    pedidosAvulsos,
+    { nome: { tipo: "texto", campo: "nome" } },
+    { habilitarPaginacao: false }
+  );
+
+  const filtroNome = filtrosParticipantes.nome || "";
+  const setFiltroNome = (valor) => {
+    atualizarFiltroParticipantes("nome", valor);
+    atualizarFiltroAvulsos("nome", valor);
+  };
 
   // ========================================
   // CARREGAR DADOS AO MONTAR
@@ -215,28 +243,6 @@ export const useEntregasCamisas = () => {
       camisetas, // Array unificado
     };
   };
-
-  /**
-   * 🔍 Filtrar participantes por nome ou número de inscrição
-   */
-  const participantesFiltrados = useMemo(() => {
-    if (!filtroNome.trim()) return participantesReservados;
-    const termo = filtroNome.toLowerCase().trim();
-    return participantesReservados.filter((participante) => {
-      const nome = participante.nome?.toLowerCase() || "";
-      const numeroInscricao = participante.numeroInscricao?.toString() || "";
-      return nome.includes(termo) || numeroInscricao.includes(termo);
-    });
-  }, [participantesReservados, filtroNome]);
-
-  /**
-   * 🔍 Filtrar pedidos avulsos pelo mesmo filtro
-   */
-  const pedidosAvulsosFiltrados = useMemo(() => {
-    if (!filtroNome.trim()) return pedidosAvulsos;
-    const termo = filtroNome.toLowerCase().trim();
-    return pedidosAvulsos.filter((p) => p.nome?.toLowerCase().includes(termo));
-  }, [pedidosAvulsos, filtroNome]);
 
   /**
    * 📊 Calcular estatísticas de entregas (participantes + avulsos)

@@ -17,6 +17,7 @@ const Provas = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
         </div>
       </div>
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
 
       {/* Seção das Provas - Trilha e Morro do Desafio */}
       <ProvasSection />

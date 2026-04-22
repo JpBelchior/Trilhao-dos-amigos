@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Flame, Clock, Tag, ShirtIcon } from "lucide-react";
-
+import { Flame, Clock, Tag, ShirtIcon, Flag } from "lucide-react";
 const API_URL = "http://localhost:8000/api";
 
 const LoteBanner = () => {
@@ -34,7 +33,7 @@ const LoteBanner = () => {
                 <Flame className="text-yellow-400" size={28} />
               </div>
               <p className="text-white text-lg font-black">
-                Aproveite enquanto ainda dá tempo!
+                Aproveite enquanto ainda há tempo!
               </p>
             </div>
           </div>

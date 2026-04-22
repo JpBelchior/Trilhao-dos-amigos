@@ -162,48 +162,6 @@ const GallerySection = () => {
             </div>
           )}
         </div>
-
-        {/* Thumbnails */}
-        {fotos.length > 1 && (
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {fotos.slice(0, 8).map((foto, index) => (
-              <button
-                key={foto.id}
-                onClick={() => setCurrentPhoto(index)}
-                className={`aspect-square rounded-lg overflow-hidden border-2 transition-all transform hover:scale-105 ${
-                  index === currentPhoto
-                    ? "border-yellow-400 shadow-lg shadow-yellow-400/25"
-                    : "border-transparent hover:border-gray-400"
-                }`}
-                aria-label={`Ver ${foto.titulo}`}
-              >
-                {foto.tipo === "video" ? (
-                  <video
-                    src={construirUrlFoto(foto)}
-                    className="w-full h-full object-cover"
-                    preload="metadata"
-                  />
-                ) : (
-                  <SimpleImage
-                    src={construirUrlFoto(foto)}
-                    alt={foto.titulo}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                )}
-              </button>
-            ))}
-
-            {/* Mais fotos */}
-            {fotos.length > 8 && (
-              <div className="aspect-square rounded-lg bg-gray-800 border-2 border-gray-600 flex items-center justify-center">
-                <span className="text-gray-400 text-sm font-bold">
-                  +{fotos.length - 8}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </section>
   );

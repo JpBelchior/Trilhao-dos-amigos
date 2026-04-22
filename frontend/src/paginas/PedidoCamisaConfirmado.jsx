@@ -19,7 +19,7 @@ const PedidoCamisaConfirmado = () => {
 
         <div className="text-center mb-6">
           <CheckCircle2 className="text-green-400 mx-auto mb-4" size={80} />
-          <h2 className="text-4xl font-bold text-white mb-2">Pedido Confirmado! 🎉</h2>
+          <h2 className="text-4xl font-bold text-white mb-2">Pedido Confirmado! </h2>
           <p className="text-green-400 font-semibold text-lg">
             Seu pagamento foi aprovado com sucesso!
           </p>

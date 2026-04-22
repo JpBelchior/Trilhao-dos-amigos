@@ -35,50 +35,54 @@ const Estatisticas = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-900 py-20">
-      <div className="container mx-auto px-6">
-        
-        {/* ========== HEADER ========== */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-black text-white mb-4">
-            <BarChart3 className="inline mr-4 text-yellow-400" size={40} />
-            ESTATÍSTICAS DO <span className="text-yellow-400">TRILHÃO</span>
-          </h1>
-          <p className="text-gray-400 text-xl">
-            {edicaoLoading
-              ? "Carregando..."
-              : `Vamos conferir as curiosidades e números da edição de ${edicaoAtual?.ano}!`}
-          </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
+    <div className=" bg-black">
+      {/* ========== SEÇÃO HEADER ========== */}
+      <div className="bg-gradient-to-br from-green-900/30 to-black py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-black text-white mb-4">
+              ESTATÍSTICAS DO <span className="text-yellow-400">TRILHÃO</span>
+            </h1>
+            <p className="text-gray-400 text-xl">
+              {edicaoLoading
+                ? "Carregando..."
+                : `Vamos conferir as curiosidades e números da edição de ${edicaoAtual?.ano}!`}
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto mt-6"></div>
+          </div>
         </div>
+      </div>
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent "></div>
 
-        {/* ========== SEÇÃO DE ESTATÍSTICAS ========== */}
+      {/* ========== SEÇÃO DE ESTATÍSTICAS ========== */}
+      <div className="bg-black py-20">
+        <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto mb-12">
           
           {/* ========== ESTATÍSTICAS BÁSICAS ========== */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">
             
             {/* Card: Total */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
-              <div className="text-4xl font-black text-green-400 mb-2">
+            <div className=" rounded-2xl p-6 border border-green-400/30 text-center">
+              <div className="text-4xl font-black text-yellow-400 mb-2">
                 {estatisticas.total}
               </div>
               <div className="text-gray-300">Total de Participantes</div>
             </div>
 
             {/* Card: Nacionais */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
-              <div className="text-4xl font-black text-green-400 mb-2">
+            <div className=" rounded-2xl p-6 border border-green-400/30 text-center">
+              <div className="text-4xl font-black text-yellow-400 mb-2">
                 {estatisticas.nacionais}
               </div>
               <div className="text-gray-300">Motos Nacionais</div>
-              <div className="text-green-400 text-sm">
+              <div className="text-yellow-400 text-sm">
                 ({estatisticas.percentualNacionais}%)
               </div>
             </div>
 
             {/* Card: Importadas */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-yellow-400/30 text-center">
+            <div className=" rounded-2xl p-6 border border-green-400/30 text-center">
               <div className="text-4xl font-black text-yellow-400 mb-2">
                 {estatisticas.importadas}
               </div>
@@ -89,16 +93,16 @@ const Estatisticas = () => {
             </div>
 
             {/* Card: Cidades */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
-              <div className="text-4xl font-black text-green-400 mb-2">
+            <div className=" rounded-2xl p-6 border border-green-400/30 text-center">
+              <div className="text-4xl font-black text-yellow-400 mb-2">
                 {estatisticas.totalCidades}
               </div>
               <div className="text-gray-300">Cidades Distintas</div>
             </div>
 
             {/* Card: Estados */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-green-400/30 text-center">
-              <div className="text-4xl font-black text-green-400 mb-2">
+            <div className=" rounded-2xl p-6 border border-green-400/30 text-center">
+              <div className="text-4xl font-black text-yellow-400 mb-2">
                 {estatisticas.totalEstados}
               </div>
               <div className="text-gray-300">Estados Distintos</div>
@@ -114,7 +118,7 @@ const Estatisticas = () => {
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             
             {/* Cidade Campeã */}
-            <div className="bg-gradient-to-r from-yellow-900/40 to-black/60 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30">
+             <div className="rounded-3xl p-8 border border-green-400/30">
               <h3 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
                 Cidade com Mais Participantes
               </h3>
@@ -130,15 +134,15 @@ const Estatisticas = () => {
             </div>
 
             {/* Estado Campeão */}
-            <div className="bg-gradient-to-r from-green-900/40 to-black/60 backdrop-blur-lg rounded-3xl p-8 border border-green-400/30">
-              <h3 className="text-2xl font-bold text-green-400 mb-4 text-center">
+            <div className=" rounded-3xl p-8 border border-green-400/30">
+              <h3 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
                 Estado Com Mais Participantes
               </h3>
               <div className="text-center">
                 <div className="text-3xl font-black text-white mb-2">
                   {estatisticas.estadoMaisParticipantes?.nome || "N/A"}
                 </div>
-                <div className="text-green-400 text-lg">
+                <div className="text-yellow-400 text-lg">
                   {estatisticas.estadoMaisParticipantes?.quantidade || 0}{" "}
                   participantes
                 </div>
@@ -147,7 +151,7 @@ const Estatisticas = () => {
           </div>
 
           {/* ========== TOP MOTOS ========== */}
-          <div className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 border border-yellow-400/30 mb-12">
+          <div className="g rounded-3xl p-8 border border-green-400/30 mb-12">
             <h3 className="text-2xl font-bold text-yellow-400 mb-6 text-center">
               MOTOS MAIS POPULARES
             </h3>
@@ -168,6 +172,7 @@ const Estatisticas = () => {
               ))}
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

@@ -94,6 +94,12 @@ export const Valores = {
 };
 
 // ========================================
+// COMPETIÇÃO
+// ========================================
+export const DATA_LIMITE_COMPETICAO = "2026-06-28";
+export const DATA_LIMITE_COMPETICAO_DISPLAY = "28/06/2026";
+
+// ========================================
 // CONFIGURAÇÕES DE PAGINAÇÃO
 // ========================================
 export const Paginacao = {
@@ -105,6 +111,8 @@ export const Paginacao = {
 // EXPORT DEFAULT (todas as constantes)
 // ========================================
 export default {
+  DATA_LIMITE_COMPETICAO,
+  DATA_LIMITE_COMPETICAO_DISPLAY,
   TamanhoCamiseta,
   TamanhosCamisetaArray,
   TipoCamiseta,

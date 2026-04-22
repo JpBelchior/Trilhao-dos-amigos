@@ -13,7 +13,7 @@ import {
   TipoCamiseta,
 } from "../types/models";
 import { Sanitizer } from "../utils/sanitizer";
-import { LoteService } from "./LoteService";
+import { LoteService, DATA_LIMITE_COMPETICAO } from "./LoteService";
 import { Op } from "sequelize";
 
 export interface CriarParticipanteResult extends IApiResponse {
@@ -173,6 +173,14 @@ export class ParticipanteService {
   public static async criarParticipante(
     dados: ICriarParticipanteDTO
   ): Promise<CriarParticipanteResult> {
+    if (!LoteService.isInscricoesAbertas()) {
+      return {
+        sucesso: false,
+        erro: "Inscrições encerradas",
+        detalhes: `As inscrições foram encerradas no dia da competição (${DATA_LIMITE_COMPETICAO.split("-").reverse().join("/")})`,
+      };
+    }
+
     const transaction = await sequelize.transaction();
 
     try {
