@@ -74,3 +74,4 @@ Desktop.ini
 *.sublime-project
 *.sublime-workspace
 
+/.env.hostinger
