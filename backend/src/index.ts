@@ -132,7 +132,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.warn(`⚠️ [CORS] Origem bloqueada: ${origin}`);
+      console.warn(` [CORS] Origem bloqueada: ${origin}`);
       callback(new Error('Origem não permitida pelo CORS'));
     }
   },
@@ -192,7 +192,7 @@ app.get("/reimportar-gpx", async (req, res) => {
 
 app.get("/seed", async (req, res) => {
   try {
-    console.log("\n🌱 ========================================");
+    console.log("\n ========================================");
     console.log("   INICIANDO SEEDS DE DESENVOLVIMENTO");
     console.log("========================================\n");
 
@@ -209,21 +209,20 @@ app.get("/seed", async (req, res) => {
     await popularCampeoes();         // 3. Campeões
     await popularParticipantes();    // 4. Participantes
 
-    // 🆕 ADICIONAR RESPOSTA DE SUCESSO
     res.json({
       sucesso: true,
       mensagem: "Seeds executadas com sucesso!",
       seeds: {
-        gpx: "✅ Trajeto importado",
-        estoque: "✅ Estoque populado",
-        campeoes: "✅ Campeões criados",
-        participantes: "✅ Participantes criados"
+        gpx: "Trajeto importado",
+        estoque: " Estoque populado",
+        campeoes: " Campeões criados",
+        participantes: " Participantes criados"
       },
       timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
-    console.error("\n❌ Erro ao executar seeds:", error);
+    console.error("\n Erro ao executar seeds:", error);
     
     res.status(500).json({
       sucesso: false,
@@ -238,12 +237,12 @@ app.get("/seed", async (req, res) => {
 const startServer = async () => {
   try {
     // Testar conexão com banco
-    console.log("🔌 Testando conexão com banco de dados...");
+    console.log(" Testando conexão com banco de dados...");
     const dbConnected = await testConnection();
 
     if (!dbConnected) {
       console.error(
-        "❌ Falha na conexão com banco. Verifique as configurações."
+        " Falha na conexão com banco. Verifique as configurações."
       );
       process.exit(1);
     }
@@ -252,27 +251,27 @@ const startServer = async () => {
     if (process.env.NODE_ENV === "development") {
       console.log("🔄 Sincronizando banco de dados...");
       console.log(
-        "📋 Modelos carregados:",
+        " Modelos carregados:",
         Object.keys(require("./models/index").default)
       );
       await syncDatabase();
-      console.log("✅ Sincronização concluída!");
+      console.log(" Sincronização concluída!");
     }
 
     // Iniciar servidor
     app.listen(PORT, () => {
-      console.log("🚀 Servidor rodando na porta", PORT);
-      console.log("📍 Acesse: http://localhost:" + PORT);
-      console.log("🧪 Teste do banco: http://localhost:" + PORT + "/test-db");
-      console.log(`📸 Uploads: http://localhost:${PORT}/uploads`);
-      console.log("🌱 Popule dados: http://localhost:" + PORT + "/seed");
+      console.log(" Servidor rodando na porta", PORT);
+      console.log(" Acesse: http://localhost:" + PORT);
+      console.log(" Teste do banco: http://localhost:" + PORT + "/test-db");
+      console.log(` Uploads: http://localhost:${PORT}/uploads`);
+      console.log(" Popule dados: http://localhost:" + PORT + "/seed");
 
       console.log(
-        "🔍 Configurando verificação automática de participantes cancelados..."
+        " Configurando verificação automática de participantes cancelados..."
       );
 
       setTimeout(async () => {
-        console.log("🔍 Executando primeira verificação de cancelados...");
+        console.log(" Executando primeira verificação de cancelados...");
         try {
           const { ParticipanteController } = await import(
             "./controllers/ParticipanteController"
@@ -284,7 +283,7 @@ const startServer = async () => {
           );
           await PedidoCamisetaAvulsaService.cancelarPedidosExpirados();
         } catch (error) {
-          console.error("❌ Erro na primeira verificação:", error);
+          console.error(" Erro na primeira verificação:", error);
         }
       }, 60 * 1000); // 1 minuto
 
@@ -300,22 +299,22 @@ const startServer = async () => {
           );
           await PedidoCamisetaAvulsaService.cancelarPedidosExpirados();
         } catch (error) {
-          console.error("❌ Erro na verificação automática:", error);
+          console.error(" Erro na verificação automática:", error);
         }
       }, 15 * 60 * 1000);
 
       console.log(
-        "✅ Verificação automática configurada para executar a cada 15 minutos"
+        " Verificação automática configurada para executar a cada 15 minutos"
       );
     });
   } catch (error) {
-    console.error("❌ Erro ao iniciar servidor:", error);
+    console.error(" Erro ao iniciar servidor:", error);
     process.exit(1);
   }
 
   app.get("/setup-gerente", async (req, res) => {
     try {
-      console.log("🔧 [Setup] Verificando se já existe gerente...");
+      console.log(" Verificando se já existe gerente...");
 
       const { Gerente } = await import("./models");
 
@@ -364,9 +363,9 @@ const startServer = async () => {
           "Acesse o painel administrativo e altere suas credenciais",
       });
 
-      console.log("✅ [Setup] Gerente padrão criado com sucesso!");
+      console.log(" Gerente padrão criado com sucesso!");
     } catch (error) {
-      console.error("❌ [Setup] Erro ao criar gerente:", error);
+      console.error(" Erro ao criar gerente:", error);
 
       res.status(500).json({
         success: false,

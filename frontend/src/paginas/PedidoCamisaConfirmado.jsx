@@ -23,6 +23,9 @@ const PedidoCamisaConfirmado = () => {
           <p className="text-green-400 font-semibold text-lg">
             Seu pagamento foi aprovado com sucesso!
           </p>
+          <p className="text-gray-300 text-sm mt-2">
+            O comprovante do pagamento foi enviado para o seu email <span className="text-yellow-400 font-semibold">{pedido.email}</span>.
+          </p>
         </div>
 
         <div className="bg-green-900/20 rounded-2xl p-6 border border-green-400/30 mb-6">
@@ -58,18 +61,6 @@ const PedidoCamisaConfirmado = () => {
             </div>
           </div>
         </div>
-
-        <div className="bg-yellow-900/20 rounded-2xl p-5 border border-yellow-400/30 mb-6">
-          <h4 className="text-yellow-400 font-bold mb-2">📍 Retirada</h4>
-          <p className="text-gray-300 text-sm">
-            Sua camisa será entregue no dia do evento.
-            Apresente este número de pedido na retirada:{" "}
-            <span className="text-yellow-400 font-bold">
-              {numeroPagamento || pedido.id}
-            </span>
-          </p>
-        </div>
-
         <button
           onClick={() => navigate("/")}
           className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center text-lg"

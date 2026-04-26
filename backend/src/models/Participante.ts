@@ -36,7 +36,7 @@ class Participante
   public dataInscricao!: Date;
   public observacoes?: string;
 
-  // ✅ CAMPOS DE ENTREGA
+
   public statusEntregaCamiseta!: StatusEntrega;
   public dataEntregaCamiseta?: Date;
   public entreguePor?: string;
@@ -58,7 +58,7 @@ Participante.init(
     numeroInscricao: {
       type: DataTypes.STRING(20),
       allowNull: true, // Temporariamente permitir null para o hook funcionar
-      unique: true,
+      unique: { name: "numero_inscricao", msg: "Número de inscrição já existe" },
     },
 
     nome: {
@@ -172,7 +172,7 @@ Participante.init(
       defaultValue: DataTypes.NOW,
     },
 
-    // ✅ CAMPOS DE ENTREGA
+  
     statusEntregaCamiseta: {
       type: DataTypes.ENUM(...Object.values(StatusEntrega)),
       allowNull: false,
@@ -205,7 +205,7 @@ Participante.init(
     // Hooks - executam automaticamente
     hooks: {
       beforeCreate: async (participante: Participante) => {
-        // ✅ CORREÇÃO: Gerar número único baseado no último número + 1
+
         let numeroTentativas = 0;
         const maxTentativas = 10;
         const ano = new Date().getFullYear();
@@ -247,16 +247,16 @@ Participante.init(
             if (!jaExiste) {
               participante.numeroInscricao = novoNumero;
               console.log(
-                "🎫 Número de inscrição gerado:",
+                " Número de inscrição gerado:",
                 participante.numeroInscricao
               );
               break;
             } else {
-              console.log("⚠️ Número já existe, tentando próximo:", novoNumero);
+              console.log(" Número já existe, tentando próximo:", novoNumero);
               numeroTentativas++;
             }
           } catch (error) {
-            console.error("❌ Erro ao gerar número de inscrição:", error);
+            console.error(" Erro ao gerar número de inscrição:", error);
             numeroTentativas++;
           }
         }
@@ -266,7 +266,7 @@ Participante.init(
           const timestamp = Date.now().toString().slice(-6);
           participante.numeroInscricao = `TRI${ano}${timestamp}`;
           console.log(
-            "🆘 Usando número de emergência:",
+            " Usando número de emergência:",
             participante.numeroInscricao
           );
         }

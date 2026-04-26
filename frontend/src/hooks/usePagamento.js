@@ -237,16 +237,6 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
       return;
     }
 
-    // Confirmação antes de simular
-    const confirmar = window.confirm(
-      "⚠️ SIMULAÇÃO DE PAGAMENTO\n\n" +
-      "Isso vai marcar o pagamento como APROVADO sem passar pelo Mercado Pago.\n\n" +
-      "Usar apenas em DESENVOLVIMENTO/TESTE!\n\n" +
-      "Deseja continuar?"
-    );
-
-    if (!confirmar) return;
-
     setLoading((prev) => ({ ...prev, verificandoStatus: true }));
 
     try {
@@ -258,7 +248,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
         date_approved: new Date().toISOString(),
       };
 
-      console.log("📤 [usePagamento] Payload enviado:", payload);
+      console.log(" [usePagamento] Payload enviado:", payload);
 
       const response = await fetch(
         `http://localhost:8000/api/pagamento/status/${dadosPix.pagamentoId}`,

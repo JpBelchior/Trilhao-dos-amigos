@@ -8,6 +8,7 @@ import {
 } from "../models";
 import { PagamentoService } from "./pagamentoService";
 import { LoteService } from "./LoteService";
+import { EmailService } from "./EmailService";
 import {
   ICriarPedidoCamisetaAvulsaDTO,
   StatusPagamento,
@@ -187,6 +188,17 @@ export class PedidoCamisetaAvulsaService {
       });
       if (estoque) await estoque.atualizarReservadas();
     }
+
+    // Enviar comprovante por email em background
+    EmailService.enviarComprovantePedidoAvulso(
+      {
+        nome: pedido.nome,
+        email: pedido.email,
+        codigoReferencia: pedido.codigoReferencia,
+        valorTotal: Number(pedido.valorTotal),
+      },
+      itens.map((i) => ({ tamanho: i.tamanho, tipo: i.tipo, quantidade: i.quantidade }))
+    ).catch((err) => console.error(" [PedidoAvulso] Falha ao enviar email:", err));
 
     console.log(` [PedidoAvulso] Pedido #${pedido.id} confirmado!`);
     return { sucesso: true, dados: { pedido } };

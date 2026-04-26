@@ -28,6 +28,9 @@ const PagamentoConfirmado = () => {
           <p className="text-green-400 font-semibold text-lg">
             Sua inscrição foi aprovada com sucesso!
           </p>
+          <p className="text-gray-300 text-sm mt-2">
+            O comprovante do pagamento foi enviado para o seu email <span className="text-yellow-400 font-semibold">{dadosParticipante.email}</span>.
+          </p>
         </div>
 
         {/* Dados do Participante */}

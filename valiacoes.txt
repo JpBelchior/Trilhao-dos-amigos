@@ -1,87 +1,44 @@
-2. MÉDIO — Webhook sem verificação de assinatura
-Arquivo: backend/src/routes/Pagamento/pagamento.ts:15
+O que foi implementado
+2 arquivos criados:
 
-O POST /api/pagamento/webhook não valida a assinatura x-signature do Mercado Pago (existe um mercadoPagoValidator.ts mas ele não é usado nessa rota). Um atacante pode forjar uma chamada de webhook com um data.id de qualquer pagamento pendente e confirmar sem pagar.
+EmailService.ts — integração com a API do Resend, dois métodos: enviarComprovante e enviarComprovantePedidoAvulso
+emailTemplates.ts — templates HTML bonitos com todos os dados da inscrição/pedido
+2 arquivos modificados:
 
-Como corrigir
-Fix 1 — Remover o endpoint de simulação em produção (ou proteger com autenticação de admin):
+participanteService.ts — envia email após confirmar o participante
+PedidoCamisetaAvulsaService.ts — envia email após confirmar pedido avulso
+Para começar a testar agora
+Crie uma conta gratuita em resend.com
+Vá em API Keys e gere uma chave
+Substitua no .env:
 
-
-// pagamento.ts
-if (process.env.NODE_ENV !== 'production') {
-  router.put("/status/:id", PagamentoController.simularStatusPagamento);
-}
-// OU, se quiser manter para testes manuais, proteja com auth:
-router.put("/status/:id", verificarAutenticacao, PagamentoController.simularStatusPagamento);
-
-Fix 2 — Validar assinatura no webhook:
-
-
-// pagamento.ts
-router.post("/webhook", validarAssinaturaMP, PagamentoController.receberWebhook);
-Usando o mercadoPagoValidator.ts que já existe mas não está sendo aplicado na rota.
-
-O fluxo de valor em si está seguro — o preço é calculado no backend com PRECO_CAMISA = 50.0 e o PIX é gerado com o valor do banco de dados, não do frontend. O problema está no bypass completo do pagamento via o endpoint de simulação exposto.
+RESEND_API_KEY=re_sua_chave_real
+Para testes iniciais, deixe EMAIL_FROM=onboarding@resend.dev — o Resend só entrega no seu próprio email cadastrado na conta enquanto não verificar um domínio
+Use o endpoint PUT /api/pagamento/status/:id para simular a aprovação e ver o email chegar
 
 
-Service alterado	Endpoint para testar
-GerenteService	POST /api/gerente/login
-EstoqueService	GET /api/estoque
-LocalizacaoService	GET /api/localizacao/estados
-FotoService	GET /api/fotos
-CamisetasExtrasService	POST /api/camisetas-extras (precisa de auth)
-ParticipanteService	POST /api/participantes
-PagamentoService	POST /api/pagamento/criar-pix
+Para enviar para qualquer email, você precisa verificar um domínio no Resend. Passo a passo:
 
-O que verificar em cada resposta:
-Toda resposta deve ter o envelope padrão do IApiResponse:
+1. Ter um domínio próprio
+Você vai precisar de um domínio (ex: trilhaodosamigos.com.br). Se ainda não tem, compra junto com o plano Business da Hostinger — vem grátis por 1 ano.
 
+2. Verificar o domínio no Resend
 
-{
-  "sucesso": true,
-  "dados": { ... },
-  "mensagem": "..."
-}
-ou em caso de erro:
+Acesse resend.com → Login → Domains → Add Domain
+Digite seu domínio (ex: trilhaodosamigos.com.br)
+O Resend vai te dar registros DNS para adicionar
+3. Adicionar os registros DNS na Hostinger
+
+Acesse o painel da Hostinger → DNS Zone do seu domínio
+Adicione os registros que o Resend mostrou (geralmente 3 registros TXT e um MX)
+Aguarde até 24h para propagar (normalmente é bem mais rápido)
+4. Atualizar o .env
+Após o Resend confirmar que o domínio está verificado, troque:
 
 
-{
-  "sucesso": false,
-  "erro": "...",
-  "detalhes": "..."
-}
-Se qualquer resposta chegar fora desse formato, tem algo errado.
+EMAIL_FROM=noreply@trilhaodosamigos.com.br
+5. Reiniciar o servidor
 
-Ferramenta mais fácil: abra o navegador em http://localhost:PORT/api/estoque e http://localhost:PORT/api/localizacao/estados — são GETs públicos que respondem imediatamente sem autenticação. Se chegarem com sucesso: true e dados, está tudo funcionando.
+Pronto — a partir daí os emails chegam no endereço real de cada participante.
 
-Os valores estão definidos em dois lugares no backend:
-
-1. Inscrição — participanteService.ts:27-28
-
-
-const valorBase = 100;    // R$ 100 base
-const valorPorExtra = 50; // R$ 50 por camiseta extra
-2. Camiseta avulsa — PedidoCamisetaAvulsaService.ts:16
-
-
-const PRECO_CAMISA = 50.0;
-
-
-8970315632
-10893783609
-11814011609
-877362621
-1807396622
-10793803616
-9308863648
-9311833673
-9372706604
-79872301620
-9998201683
-11434039676
-3572117666
-8472676609
-34021129812
-12079660616
-10756295602
-11064992633
+Por enquanto, sem domínio verificado, a única forma de testar é cadastrando participantes com o email trilhaodosamigos2026@gmail.com — aí o Resend aceita entregar normalmente.

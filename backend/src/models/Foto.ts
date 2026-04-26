@@ -145,7 +145,7 @@ Foto.init(
     nomeArquivo: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      unique: true,
+      unique: { name: "nome_arquivo_unique", msg: "Nome de arquivo já existe" },
       comment: "Nome único do arquivo no servidor (ex: foto_1234567890.jpg)",
     },
 

@@ -44,6 +44,7 @@ const ComprarCamisa = () => {
           <p className="text-gray-300 text-lg">
             Adquira a camisa oficial do Trilhão dos Amigos sem precisar se inscrever no evento.
           </p>
+          <div className="w-24 h-1 mt-2 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto"></div>
           <p className="text-green-400 font-bold mt-2">{precoCamisa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} por camisa — Retirada no evento</p>
         </div>
 

@@ -14,6 +14,7 @@ import {
 } from "../types/models";
 import { Sanitizer } from "../utils/sanitizer";
 import { LoteService, DATA_LIMITE_COMPETICAO } from "./LoteService";
+import { EmailService } from "./EmailService";
 import { Op } from "sequelize";
 
 export interface CriarParticipanteResult extends IApiResponse {
@@ -376,6 +377,14 @@ export class ParticipanteService {
         numeroInscricao: participante.numeroInscricao,
         nome: participante.nome,
       });
+
+      // Enviar comprovante por email em background
+      const extras = await CamisetaExtra.findAll({ where: { participanteId: participante.id } });
+      EmailService.enviarComprovante(
+        participante as any,
+        extras.map((e: any) => ({ tamanho: e.tamanho, tipo: e.tipo, preco: Number(e.preco) })),
+        pagamentoInfo
+      ).catch((err) => console.error("💥 [ParticipanteService] Falha ao enviar email:", err));
 
       return {
         sucesso: true,
