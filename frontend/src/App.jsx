@@ -36,7 +36,7 @@ import PagamentoConfirmado from "./paginas/PagamentoConfirmado";
 import AdminCampeoes from "./paginas/Admin/AdminCampeoes";
 import AdminRelatorios from "./paginas/Admin/AdminRelatorios";
 import AdminLotes from "./paginas/Admin/AdminLotes";
-import ScrollToTop from "./componentes/scrollToTop";
+import ScrollToTop from "./componentes/ScrollToTop";
 import ComprarCamisa from "./paginas/ComprarCamisa";
 import PagamentoCamisa from "./paginas/PagamentoCamisa";
 import PedidoCamisaConfirmado from "./paginas/PedidoCamisaConfirmado";
