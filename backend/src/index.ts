@@ -116,11 +116,13 @@ const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Lista de origens permitidas
     const allowedOrigins = [
-      'http://localhost:5173',      // Frontend em desenvolvimento (Vite)
-      'http://localhost:3000',      // Frontend em desenvolvimento (React padrão)
-      'http://127.0.0.1:3001',      // Alternativa localhost
-      process.env.FRONTEND_URL,     // URL de produção (configurável no .env)
-    ].filter(Boolean); // Remove undefined
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:3001',
+      'https://trilhaodosamigos.com',
+      'https://www.trilhaodosamigos.com',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean);
 
     // Permitir requisições sem origin (ex: Postman, apps mobile)
     if (!origin) {
@@ -169,7 +171,16 @@ app.use(express.urlencoded({ extended: true }));
 // Rotas da API
 app.use("/api", apiRoutes);
 
-// Rota de teste
+// Servir frontend em produção
+if (process.env.NODE_ENV === "production") {
+  const frontendDist = path.join(__dirname, "../../frontend/dist");
+  app.use(express.static(frontendDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
+
+// Rota de teste (só em desenvolvimento)
 app.get("/", (req, res) => {
   res.json({
     message: "Backend Trilhão dos Amigos funcionando!",
@@ -247,16 +258,10 @@ const startServer = async () => {
       process.exit(1);
     }
 
-    // Sincronizar banco (criar tabelas) - apenas em desenvolvimento
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔄 Sincronizando banco de dados...");
-      console.log(
-        " Modelos carregados:",
-        Object.keys(require("./models/index").default)
-      );
-      await syncDatabase();
-      console.log(" Sincronização concluída!");
-    }
+    // Sincronizar banco (criar tabelas se não existirem)
+    console.log("🔄 Sincronizando banco de dados...");
+    await syncDatabase();
+    console.log(" Sincronização concluída!");
 
     // Iniciar servidor
     app.listen(PORT, () => {

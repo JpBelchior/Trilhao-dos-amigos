@@ -38,9 +38,9 @@ const Footer = () => {
               lg:gap-8
             "
           >
-            <span>📍 Itamonte - MG</span>
-            <span>📞 (35) 9999-9999</span>
-            <span>📧 contato@trilhao.com.br</span>
+            <span> Itamonte - MG</span>
+            <span> (35) 9999-9999</span>
+            <span>contato@trilhaodosamigos.com.br</span>
           </div>
 
           {/* Direitos */}
