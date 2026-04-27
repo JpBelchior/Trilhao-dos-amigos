@@ -37,64 +37,8 @@ if (!fs.existsSync(fotosDir)) {
 // ========================================
 app.use(
   helmet({
-    // Content Security Policy - Define quais recursos podem ser carregados
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"], // Apenas recursos do próprio domínio por padrão
-        scriptSrc: ["'self'"], // Scripts apenas do próprio domínio
-        styleSrc: ["'self'", "'unsafe-inline'"], // Estilos (permite inline para Tailwind)
-        imgSrc: ["'self'", "data:", "https:", "blob:"], // Imagens de qualquer HTTPS + data URIs
-        fontSrc: ["'self'", "data:"], // Fontes
-        connectSrc: ["'self'", "https://api.mercadopago.com"], // APIs permitidas
-        frameSrc: ["'none'"], // Não permite iframes
-        objectSrc: ["'none'"], // Não permite <object>, <embed>, <applet>
-        upgradeInsecureRequests: [], // Força HTTPS em produção
-      },
-    },
-
-    // Cross-Origin Resource Policy - Permite compartilhar recursos entre origens
-    crossOriginResourcePolicy: { 
-      policy: "cross-origin" 
-    },
-
-    // Cross-Origin Embedder Policy - Desabilitado para permitir uploads
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     crossOriginEmbedderPolicy: false,
-
-    // Cross-Origin Opener Policy - Isolamento de contexto de navegação
-    crossOriginOpenerPolicy: { 
-      policy: "same-origin-allow-popups" 
-    },
-
-    // Frame Guard - Previne clickjacking
-    frameguard: {
-      action: "deny"
-    },
-
-    // Hide Powered By - Remove header X-Powered-By
-    hidePoweredBy: true,
-
-    // HSTS - Força HTTPS (apenas em produção)
-    hsts: process.env.NODE_ENV === 'production' ? {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true,
-    } : false,
-
-    // No Sniff - Previne MIME type sniffing
-    noSniff: true,
-
-    // Origin Agent Cluster - Isola documentos de mesma origem
-    originAgentCluster: true,
-
-    // Permitted Cross Domain Policies - Restringe Adobe Flash/PDF
-    permittedCrossDomainPolicies: {
-      permittedPolicies: "none"
-    },
-
-    // Referrer Policy - Controla informação enviada no header Referer
-    referrerPolicy: {
-      policy: "strict-origin-when-cross-origin"
-    },
   })
 );
 
