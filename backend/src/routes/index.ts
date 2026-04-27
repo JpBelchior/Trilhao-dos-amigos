@@ -4,7 +4,7 @@ import estoqueRoutes from "./Estoque/estoque";
 import participanteRoutes from "./Participante/participantes";
 import pagamentoRoutes from "./Pagamento/pagamento";
 import localizacaoRoutes from "./Localizacao/localizacao";
-import gerenteRoutes from "./Gerente/gerente";
+import gerenteRoutes from "./Gerente/Gerente";
 import campeoesRoutes from "./Campeoes/campeoes";
 import entregaRoutes from "./Entregas/entregas";
 import fotoRoutes from "./Fotos/fotos";
