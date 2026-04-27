@@ -65,14 +65,9 @@ app.use(
       policy: "same-origin-allow-popups" 
     },
 
-    // DNS Prefetch Control - Controla DNS prefetching
-    dnsPrefetchControl: { 
-      allow: false 
-    },
-
     // Frame Guard - Previne clickjacking
-    frameguard: { 
-      action: "deny" // Não permite que o site seja embutido em iframes
+    frameguard: {
+      action: "deny"
     },
 
     // Hide Powered By - Remove header X-Powered-By
@@ -80,13 +75,10 @@ app.use(
 
     // HSTS - Força HTTPS (apenas em produção)
     hsts: process.env.NODE_ENV === 'production' ? {
-      maxAge: 31536000, // 1 ano em segundos
-      includeSubDomains: true, // Aplica a subdomínios também
-      preload: true, // Permite inclusão na lista de pré-carregamento dos browsers
-    } : false, // Desabilitado em desenvolvimento
-
-    // IE No Open - Previne IE de executar downloads não confiáveis
-    ieNoOpen: true,
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    } : false,
 
     // No Sniff - Previne MIME type sniffing
     noSniff: true,
@@ -95,17 +87,14 @@ app.use(
     originAgentCluster: true,
 
     // Permitted Cross Domain Policies - Restringe Adobe Flash/PDF
-    permittedCrossDomainPolicies: { 
-      permittedPolicies: "none" 
+    permittedCrossDomainPolicies: {
+      permittedPolicies: "none"
     },
 
     // Referrer Policy - Controla informação enviada no header Referer
-    referrerPolicy: { 
-      policy: "strict-origin-when-cross-origin" 
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin"
     },
-
-    // X-XSS-Protection - Proteção contra XSS (legado, mas ainda útil)
-    xssFilter: true,
   })
 );
 
