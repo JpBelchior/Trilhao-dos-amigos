@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { obterEdicaoAtual } from "../../utils/CalcularEdição";
+import { obterEdicaoAtual } from "../../utils/CalcularEdicao";
 
 const router = Router();
 

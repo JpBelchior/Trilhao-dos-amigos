@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CampeaoBarranco } from "../models";
 import { CategoriaMoto } from "../types/models";
-import { calcularEdicao } from "../utils/CalcularEdição";
+import { calcularEdicao } from "../utils/CalcularEdicao";
 import { Op } from "sequelize";
 
 export class CampeoesController {
