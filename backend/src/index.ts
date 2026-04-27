@@ -118,7 +118,7 @@ app.use("/api", apiRoutes);
 
 // Servir frontend em produção
 if (process.env.NODE_ENV === "production") {
-  const frontendDist = path.join(__dirname, "../../frontend/dist");
+  const frontendDist = path.join(process.cwd(), "public");
   app.use(express.static(frontendDist));
   app.get("/{*path}", (_req, res) => {
     res.sendFile(path.join(frontendDist, "index.html"));
