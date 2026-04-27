@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+﻿import React, { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 // Hook personalizado para usar o contexto
 export const useAuth = () => {
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
         // Verificar se o token ainda é válido no backend
         const response = await fetch(
-          "http://localhost:8000/api/gerente/verificar-token",
+          "/api/gerente/verificar-token",
           {
             headers: {
               Authorization: `Bearer ${tokenSalvo}`,
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, senha) => {
     try {
       console.log("🔐 [AuthContext] Iniciando login para:", email);
-      const response = await fetch("http://localhost:8000/api/gerente/login", {
+      const response = await fetch("/api/gerente/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
       console.log("🔄 [AuthContext] Atualizando perfil...", dadosAtualizacao);
 
       const response = await fetchAuth(
-        "http://localhost:8000/api/gerente/perfil",
+        "/api/gerente/perfil",
         {
           method: "PUT",
           body: JSON.stringify(dadosAtualizacao),

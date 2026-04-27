@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { calcularEstatisticasAdmin } from "../utils/estatisticas";
 import { carregarComLoading } from "../utils/carregarComLoading";
@@ -26,7 +26,7 @@ export const useAdminRelatorios = () => {
 
   const carregarParticipantes = () =>
     carregarComLoading(setLoading, setErro, async () => {
-      const response = await fetchAuth("http://localhost:8000/api/participantes");
+      const response = await fetchAuth("/api/participantes");
       const data = await response.json();
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];

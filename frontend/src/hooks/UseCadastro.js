@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   TamanhoCamiseta,
   TipoCamiseta,
@@ -62,7 +62,7 @@ const useCadastro = () => {
 
   const carregarPrecos = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/lotes/precos");
+      const response = await fetch("/api/lotes/precos");
       const data = await response.json();
       if (data.sucesso) {
         setPrecos({
@@ -77,7 +77,7 @@ const useCadastro = () => {
 
   const carregarEstoque = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/estoque");
+      const response = await fetch("/api/estoque");
       const data = await response.json();
 
       if (data.sucesso) {
@@ -161,7 +161,7 @@ const useCadastro = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/participantes/validar",
+        "/api/participantes/validar",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -271,7 +271,7 @@ const useCadastro = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/participantes",
+        "/api/participantes",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

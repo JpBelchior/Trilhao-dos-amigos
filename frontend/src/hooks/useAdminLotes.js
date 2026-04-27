@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "/api";
 
 export const useAdminLotes = () => {
   const { fetchAuth } = useAuth();

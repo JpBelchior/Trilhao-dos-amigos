@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -185,8 +185,8 @@ const GerenciarFotos = () => {
 
       const url =
         filtroCategoria === "todas"
-          ? "http://localhost:8000/api/fotos"
-          : `http://localhost:8000/api/fotos?categoria=${filtroCategoria}`;
+          ? "/api/fotos"
+          : `/api/fotos?categoria=${filtroCategoria}`;
 
       const response = await fetchAuth(url);
       const data = await response.json();
@@ -215,7 +215,7 @@ const GerenciarFotos = () => {
 
   const getMediaUrl = (foto) => {
     if (foto.urlFoto?.startsWith("/uploads/")) {
-      return `http://localhost:8000${foto.urlFoto}`;
+      return foto.urlFoto;
     }
     return foto.urlFoto || "/api/placeholder/300/200";
   };
@@ -263,7 +263,7 @@ const GerenciarFotos = () => {
         formData.append(key, key === "ano" ? value.toString() : value);
       });
 
-      const response = await fetchAuth("http://localhost:8000/api/fotos/upload", {
+      const response = await fetchAuth("/api/fotos/upload", {
         method: "POST",
         body: formData,
       });
@@ -300,7 +300,7 @@ const GerenciarFotos = () => {
     if (!window.confirm("Tem certeza que deseja deletar?")) return;
 
     try {
-      const response = await fetchAuth(`http://localhost:8000/api/fotos/${id}`, {
+      const response = await fetchAuth(`/api/fotos/${id}`, {
         method: "DELETE",
       });
       const data = await response.json();
@@ -330,7 +330,7 @@ const GerenciarFotos = () => {
 
   const salvarEdicao = async (id) => {
     try {
-      const response = await fetchAuth(`http://localhost:8000/api/fotos/${id}`, {
+      const response = await fetchAuth(`/api/fotos/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosEdicao),

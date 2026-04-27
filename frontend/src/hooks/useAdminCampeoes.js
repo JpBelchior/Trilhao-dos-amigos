@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFiltros } from "./useFiltros";
 import { calcularEstatisticasCampeoes } from "../utils/estatisticas";
@@ -82,7 +82,7 @@ export const useAdminCampeoes = () => {
    */
   const carregarCampeoes = () =>
     carregarComLoading(setLoading, setErro, async () => {
-      const response = await fetchAuth("http://localhost:8000/api/campeoes");
+      const response = await fetchAuth("/api/campeoes");
       const data = await response.json();
       if (data.sucesso) {
         const listaCampeoes = data.dados.campeoes || [];
@@ -102,7 +102,7 @@ export const useAdminCampeoes = () => {
 
       console.log("➕ [AdminCampeoes] Criando campeão:", dadosCampeao);
 
-      const response = await fetchAuth("http://localhost:8000/api/campeoes", {
+      const response = await fetchAuth("/api/campeoes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +136,7 @@ export const useAdminCampeoes = () => {
       console.log(`✏️ [AdminCampeoes] Editando campeão ${campeaoId}`);
 
       const response = await fetchAuth(
-        `http://localhost:8000/api/campeoes/${campeaoId}`,
+        `/api/campeoes/${campeaoId}`,
         {
           method: "PUT",
           headers: {
@@ -178,7 +178,7 @@ export const useAdminCampeoes = () => {
       console.log(`🗑️ [AdminCampeoes] Excluindo campeão ${campeaoId}`);
 
       const response = await fetchAuth(
-        `http://localhost:8000/api/campeoes/${campeaoId}`,
+        `/api/campeoes/${campeaoId}`,
         {
           method: "DELETE",
         }

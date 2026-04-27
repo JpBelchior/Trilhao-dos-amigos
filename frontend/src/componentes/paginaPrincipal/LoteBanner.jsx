@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Flame, Clock, Tag, ShirtIcon, Flag } from "lucide-react";
-const API_URL = "http://localhost:8000/api";
+const API_URL = "/api";
 
 const LoteBanner = () => {
   const [precos, setPrecos] = useState(null);

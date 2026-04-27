@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+﻿import React, { useRef, useEffect, useState } from "react";
 
 const TrilhaoMap = () => {
   const mapRef = useRef(null);
@@ -11,7 +11,7 @@ const TrilhaoMap = () => {
       try {
         console.log(" Buscando trajeto GPX do backend...");
         
-        const response = await fetch("http://localhost:8000/api/trajeto/atual");
+        const response = await fetch("/api/trajeto/atual");
         const data = await response.json();
 
         if (data.sucesso && data.dados) {

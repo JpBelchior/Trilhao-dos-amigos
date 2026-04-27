@@ -52,7 +52,7 @@ export function useGallery(isVisible = true) {
 
   const construirUrlFoto = (foto) => {
     if (foto?.urlFoto?.startsWith("/uploads/")) {
-      return `http://localhost:8000${foto.urlFoto}`;
+      return foto.urlFoto;
     }
     return foto?.urlFoto || "/api/placeholder/800/500";
   };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from '../services/api'; 
 
@@ -147,7 +147,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
       console.log("🔍 [usePagamento] Verificando status do pagamento...");
 
       const response = await fetch(
-        `http://localhost:8000/api/pagamento/status/${dadosPix.pagamentoId}`
+        `/api/pagamento/status/${dadosPix.pagamentoId}`
       );
 
       const data = await response.json();
@@ -177,7 +177,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/pagamento/status/${dadosPix.pagamentoId}`
+        `/api/pagamento/status/${dadosPix.pagamentoId}`
       );
 
       const data = await response.json();
@@ -251,7 +251,7 @@ export const usePagamento = (dadosInscricao, valorTotal) => {
       console.log(" [usePagamento] Payload enviado:", payload);
 
       const response = await fetch(
-        `http://localhost:8000/api/pagamento/status/${dadosPix.pagamentoId}`,
+        `/api/pagamento/status/${dadosPix.pagamentoId}`,
         {
           method: "PUT",
           headers: {

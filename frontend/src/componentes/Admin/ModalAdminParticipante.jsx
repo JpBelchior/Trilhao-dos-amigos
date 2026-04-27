@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   X,
   Save,
@@ -75,7 +75,7 @@ const ModalAdminParticipante = ({
   const carregarEstoque = async () => {
     try {
       console.log(" [Estoque] Carregando estoque...");
-      const response = await fetch("http://localhost:8000/api/estoque");
+      const response = await fetch("/api/estoque");
       const data = await response.json();
 
       if (data.sucesso) {
@@ -230,7 +230,7 @@ const ModalAdminParticipante = ({
     for (const camisetaId of camisetasRemovidas) {
       try {
         const response = await fetchAuth(
-          `http://localhost:8000/api/camisetas-extras/${camisetaId}`,
+          `/api/camisetas-extras/${camisetaId}`,
           { method: "DELETE" }
         );
 
@@ -255,7 +255,7 @@ const ModalAdminParticipante = ({
     for (const camiseta of camisetasAdicionadas) {
       try {
         const response = await fetchAuth(
-          `http://localhost:8000/api/camisetas-extras/participantes/${participante.id}/camiseta-extra`,
+          `/api/camisetas-extras/participantes/${participante.id}/camiseta-extra`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -316,7 +316,7 @@ const ModalAdminParticipante = ({
         });
 
         const response = await fetchAuth(
-          `http://localhost:8000/api/participantes/${participante.id}`,
+          `/api/participantes/${participante.id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFiltros } from "./useFiltros";
 import { calcularEstatisticasAdmin } from "../utils/estatisticas";
@@ -85,7 +85,7 @@ export const useAdminParticipantes = () => {
    */
   const carregarParticipantes = () =>
     carregarComLoading(setLoading, setErro, async () => {
-      const response = await fetchAuth("http://localhost:8000/api/participantes");
+      const response = await fetchAuth("/api/participantes");
       const data = await response.json();
       if (data.sucesso) {
         const participantesData = data.dados.participantes || [];
@@ -116,7 +116,7 @@ export const useAdminParticipantes = () => {
       }
 
       const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participanteId}/pagamento`,
+        `/api/participantes/${participanteId}/pagamento`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -162,7 +162,7 @@ export const useAdminParticipantes = () => {
       console.log("🚫 [AdminParticipantes] Cancelando participante:", participanteId);
 
       const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participanteId}/status`,
+        `/api/participantes/${participanteId}/status`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -207,7 +207,7 @@ export const useAdminParticipantes = () => {
       );
 
       const response = await fetchAuth(
-        `http://localhost:8000/api/participantes/${participanteId}`,
+        `/api/participantes/${participanteId}`,
         {
           method: "DELETE",
         }
@@ -241,7 +241,7 @@ export const useAdminParticipantes = () => {
       console.log("➕ [AdminParticipantes] Criando participante:", dadosParticipante);
 
       const response = await fetchAuth(
-        "http://localhost:8000/api/participantes",
+        "/api/participantes",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

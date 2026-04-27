@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 import { TamanhoCamiseta, TipoCamiseta, Valores } from "../constants";
@@ -66,7 +66,7 @@ export const usePedidoCamisa = () => {
       try {
         const [estoqueData, precosData] = await Promise.all([
           apiClient.get("/estoque"),
-          fetch("http://localhost:8000/api/lotes/precos").then((r) => r.json()),
+          fetch("/api/lotes/precos").then((r) => r.json()),
         ]);
         if (estoqueData.sucesso) setEstoque(estoqueData.dados || {});
         if (precosData.sucesso) setPrecoCamisa(precosData.dados.precoCamisa);

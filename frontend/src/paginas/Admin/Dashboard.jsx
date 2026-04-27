@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -41,9 +41,9 @@ const AdminDashboard = () => {
 
       // Carregar dados em paralelo
       const [participantesResponse, estoqueResponse, avulsosResponse] = await Promise.all([
-        fetchAuth("http://localhost:8000/api/participantes"),
-        fetchAuth("http://localhost:8000/api/estoque/resumo"),
-        fetchAuth("http://localhost:8000/api/pedido-camisa/admin/lista"),
+        fetchAuth("/api/participantes"),
+        fetchAuth("/api/estoque/resumo"),
+        fetchAuth("/api/pedido-camisa/admin/lista"),
       ]);
 
       const participantesData = await participantesResponse.json();
