@@ -12,8 +12,20 @@ import { apiLimiter } from "./middleware/rateLimiter";
 // Importar modelos para garantir que sejam carregados
 import "./models";
 
+// Capturar erros não tratados
+process.on("uncaughtException", (err) => {
+  console.error("[FATAL] uncaughtException:", err.message, err.stack);
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[FATAL] unhandledRejection:", reason);
+  process.exit(1);
+});
+
 // Carregar variáveis de ambiente
 dotenv.config();
+
+console.log("[BOOT] Variáveis carregadas. DB_HOST:", process.env.DB_HOST, "DB_NAME:", process.env.DB_NAME, "NODE_ENV:", process.env.NODE_ENV);
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -180,14 +192,12 @@ app.get("/seed", async (req, res) => {
 // Inicializar servidor
 const startServer = async () => {
   try {
-    // Testar conexão com banco
-    console.log(" Testando conexão com banco de dados...");
+    console.log("[BOOT] startServer() iniciado");
+    console.log("[BOOT] Testando conexão com banco de dados...");
     const dbConnected = await testConnection();
 
     if (!dbConnected) {
-      console.error(
-        " Falha na conexão com banco. Verifique as configurações."
-      );
+      console.error("[BOOT] FALHA na conexão com banco. Encerrando.");
       process.exit(1);
     }
 
